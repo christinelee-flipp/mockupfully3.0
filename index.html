@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockupfully — Campaigns</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --red: #D1233E;
+    --dark: #282832;
+    --mid: #777794;
+    --light: #EBEBF5;
+    --white: #FFFFFF;
+    --radius: 10px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: #f4f4f8;
+    color: var(--dark);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: white;
+    border-bottom: 1px solid var(--light);
+    padding: 0 32px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-dot {
+    width: 10px; height: 10px;
+    background: var(--red);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .logo-text {
+    font-weight: 800;
+    font-size: 15px;
+    color: var(--dark);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .header-divider {
+    width: 1px; height: 20px;
+    background: var(--light);
+    margin: 0 12px;
+  }
+  .header-page {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--mid);
+  }
+  .btn-new-campaign {
+    height: 36px;
+    padding: 0 18px;
+    background: var(--red);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-new-campaign:hover { opacity: 0.9; }
+
+  /* ── TOOLBAR ── */
+  .toolbar {
+    padding: 20px 32px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .search-wrap {
+    position: relative;
+  }
+  .search-wrap input {
+    height: 38px;
+    width: 260px;
+    border: 1.5px solid var(--light);
+    border-radius: 8px;
+    padding: 0 14px 0 36px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dark);
+    background: white;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .search-wrap input:focus { border-color: var(--red); }
+  .search-wrap input::placeholder { color: #b0b0c0; font-weight: 400; }
+  .search-icon {
+    position: absolute;
+    left: 12px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--mid);
+    pointer-events: none;
+  }
+  .filter-select {
+    height: 38px;
+    border: 1.5px solid var(--light);
+    border-radius: 8px;
+    padding: 0 32px 0 12px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dark);
+    background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23777794' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 12px center;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+    cursor: pointer;
+  }
+  .campaign-count {
+    font-size: 13px;
+    color: var(--mid);
+    font-weight: 600;
+  }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    padding: 16px 32px 40px;
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    min-width: 900px;
+  }
+  thead th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--mid);
+    border-bottom: 1px solid var(--light);
+    background: #fafafa;
+    white-space: nowrap;
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--light);
+    transition: background 0.1s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #fafafa; }
+  tbody td {
+    padding: 14px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dark);
+    vertical-align: middle;
+  }
+
+  /* Colour swatch */
+  .swatch-row {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+  .swatch {
+    width: 16px; height: 16px;
+    border-radius: 4px;
+    border: 1px solid rgba(0,0,0,0.08);
+    flex-shrink: 0;
+  }
+
+  /* Country badge */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    background: var(--light);
+    color: var(--mid);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .badge.carousel { background: #e8f4fd; color: #2980b9; }
+  .badge.single { background: #f0faf3; color: #27ae60; }
+
+  /* Logo preview */
+  .logo-thumb {
+    width: 48px; height: 24px;
+    object-fit: contain;
+    border-radius: 4px;
+    background: var(--light);
+    display: block;
+  }
+
+  /* Date */
+  .date-cell { color: var(--mid); font-size: 12px; font-weight: 600; }
+
+  /* Actions */
+  .actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .btn-action {
+    height: 30px;
+    padding: 0 10px;
+    border-radius: 6px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    border: none;
+    white-space: nowrap;
+    transition: opacity 0.1s;
+  }
+  .btn-action:hover { opacity: 0.8; }
+  .btn-open    { background: var(--red); color: white; }
+  .btn-copy    { background: var(--light); color: var(--dark); }
+  .btn-clone   { background: var(--light); color: var(--dark); }
+  .btn-edit    { background: var(--light); color: var(--dark); }
+  .btn-delete  { background: #fdecea; color: #c0392b; }
+
+  /* Empty / loading states */
+  .state-row td {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--mid);
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .spinner {
+    display: inline-block;
+    width: 20px; height: 20px;
+    border: 2px solid var(--light);
+    border-top-color: var(--red);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin-bottom: 10px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--dark);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    transition: transform 0.25s ease;
+    z-index: 999;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── CONFIRM DIALOG ── */
+  .overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+  .overlay.show { display: flex; }
+  .dialog {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+  }
+  .dialog h3 { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+  .dialog p { font-size: 14px; color: var(--mid); margin-bottom: 24px; }
+  .dialog-actions { display: flex; gap: 10px; justify-content: flex-end; }
+  .btn-cancel {
+    height: 38px; padding: 0 18px;
+    background: var(--light); color: var(--dark);
+    border: none; border-radius: 8px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800; font-size: 13px;
+    cursor: pointer;
+  }
+  .btn-confirm-delete {
+    height: 38px; padding: 0 18px;
+    background: #c0392b; color: white;
+    border: none; border-radius: 8px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800; font-size: 13px;
+    cursor: pointer;
+  }
+
+  @media (max-width: 600px) {
+    .header { padding: 0 16px; }
+    .toolbar { padding: 16px 16px 0; }
+    .table-wrap { padding: 12px 16px 40px; }
+    .search-wrap input { width: 180px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo-dot"></div>
+    <span class="logo-text">Mockupfully</span>
+    <div class="header-divider"></div>
+    <span class="header-page">Campaigns</span>
+  </div>
+  <a class="btn-new-campaign" href="form.html">+ New Campaign</a>
+</div>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div class="toolbar-left">
+    <div class="search-wrap">
+      <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#777794" stroke-width="2"/><path d="M16.5 16.5L21 21" stroke="#777794" stroke-width="2" stroke-linecap="round"/></svg>
+      <input type="text" id="search-input" placeholder="Search campaigns…" oninput="filterTable()">
+    </div>
+    <select class="filter-select" id="country-filter" onchange="filterTable()">
+      <option value="">All Countries</option>
+      <option value="IT">🇮🇹 Italy</option>
+      <option value="AU">🇦🇺 Australia</option>
+      <option value="CA">🇨🇦 Canada</option>
+      <option value="US">🇺🇸 USA</option>
+      <option value="FR">🇫🇷 France</option>
+      <option value="DE">🇩🇪 Germany</option>
+      <option value="ES">🇪🇸 Spain</option>
+      <option value="AT">🇦🇹 Austria</option>
+      <option value="NL">🇳🇱 Netherlands</option>
+      <option value="PL">🇵🇱 Poland</option>
+      <option value="PT">🇵🇹 Portugal</option>
+      <option value="RO">🇷🇴 Romania</option>
+      <option value="BG">🇧🇬 Bulgaria</option>
+      <option value="HU">🇭🇺 Hungary</option>
+    </select>
+    <select class="filter-select" id="type-filter" onchange="filterTable()">
+      <option value="">All Types</option>
+      <option value="Carousel">Carousel</option>
+      <option value="Single">Single Image</option>
+    </select>
+  </div>
+  <span class="campaign-count" id="campaign-count"></span>
+</div>
+
+<!-- TABLE -->
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Campaign</th>
+        <th>Country</th>
+        <th>Type</th>
+        <th>Colours</th>
+        <th>Logo</th>
+        <th>Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="table-body">
+      <tr class="state-row">
+        <td colspan="7">
+          <div class="spinner"></div><br>Loading campaigns…
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- DELETE CONFIRM DIALOG -->
+<div class="overlay" id="delete-overlay">
+  <div class="dialog">
+    <h3>Delete Campaign?</h3>
+    <p id="delete-campaign-name">This cannot be undone.</p>
+    <div class="dialog-actions">
+      <button class="btn-cancel" onclick="closeDeleteDialog()">Cancel</button>
+      <button class="btn-confirm-delete" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const WEBHOOKS = {
+  getAll:  'https://hook.eu1.make.com/sjko28kao16ig4vk16qhr451nrj3pafx',
+  getOne:  'https://hook.eu1.make.com/t8chw3izci8e942ralq55ruddsg9v780',
+  edit:    'https://hook.eu1.make.com/rote1wy14gpb445obc5ncwswis8ifnau',
+  delete:  'https://hook.eu1.make.com/8f1tqlpnps2esj7azt7hmso6jk8f6q3b',
+  submit:  'https://hook.eu1.make.com/xhukd81uz71slpmhvr884s9fqwxy18kd',
+};
+const PROTOTYPE = 'domination-prototype.html';
+const FORM = 'form.html';
+
+let allCampaigns = [];
+let deleteTarget = null;
+
+// ── LOAD ──────────────────────────────────────────────────────────
+async function loadCampaigns() {
+  try {
+    const res = await fetch(WEBHOOKS.getAll);
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = []; }
+
+    // Normalise: webhook might return array or {campaigns:[...]} etc.
+    if (Array.isArray(data)) {
+      allCampaigns = data;
+    } else if (data && Array.isArray(data.campaigns)) {
+      allCampaigns = data.campaigns;
+    } else if (data && typeof data === 'object') {
+      // Single object — wrap it
+      allCampaigns = [data];
+    } else {
+      allCampaigns = [];
+    }
+
+    renderTable(allCampaigns);
+  } catch (err) {
+    document.getElementById('table-body').innerHTML = `
+      <tr class="state-row"><td colspan="7">Failed to load campaigns. <button onclick="loadCampaigns()" style="color:var(--red);background:none;border:none;cursor:pointer;font-weight:800;">Retry</button></td></tr>`;
+  }
+}
+
+// ── BUILD PROTOTYPE URL ───────────────────────────────────────────
+function buildURL(c) {
+  const params = new URLSearchParams();
+  // Sheet stores country as 'location', prototype expects 'country'
+  if (c.location) params.set('country', c.location);
+  const keys = ['templateType','claimText','buttonText',
+    'globalBkgColor','globalTextColor','buttonBkgColor','buttonTextColor',
+    'paginationBkgColor','paginationActiveColor','clientLogoURL','ghostoverURL',
+    'Img01URL','Img02URL','Img03URL','Img04URL','Img05URL','Img06URL'];
+  keys.forEach(k => { if (c[k]) params.set(k, c[k]); });
+  return `${PROTOTYPE}?${params.toString()}`;
+}
+
+// ── FORMAT DATE ───────────────────────────────────────────────────
+function fmtDate(str) {
+  if (!str) return '—';
+  const d = new Date(str);
+  if (isNaN(d)) return str;
+  return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+// ── COUNTRY FLAG ─────────────────────────────────────────────────
+const FLAGS = {IT:'🇮🇹',AU:'🇦🇺',CA:'🇨🇦',US:'🇺🇸',FR:'🇫🇷',DE:'🇩🇪',
+               ES:'🇪🇸',AT:'🇦🇹',NL:'🇳🇱',PL:'🇵🇱',PT:'🇵🇹',RO:'🇷🇴',BG:'🇧🇬',HU:'🇭🇺'};
+
+// ── RENDER ───────────────────────────────────────────────────────
+function renderTable(campaigns) {
+  const tbody = document.getElementById('table-body');
+  document.getElementById('campaign-count').textContent =
+    campaigns.length === 1 ? '1 campaign' : `${campaigns.length} campaigns`;
+
+  if (!campaigns.length) {
+    tbody.innerHTML = `<tr class="state-row"><td colspan="7">No campaigns found.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = campaigns.map((c, i) => {
+    const protoURL = buildURL(c);
+    const flag = FLAGS[c.location] || '';
+    const typeClass = c.templateType === 'Carousel' ? 'carousel' : 'single';
+    const swatches = [c.globalBkgColor, c.buttonBkgColor, c.paginationActiveColor]
+      .filter(Boolean)
+      .map(col => `<div class="swatch" style="background:${col}" title="${col}"></div>`)
+      .join('');
+
+    return `
+      <tr data-index="${i}">
+        <td>
+          <div style="font-weight:800;font-size:13px;">${esc(c.campaignName || '—')}</div>
+          <div style="font-size:11px;color:var(--mid);margin-top:2px;">${esc(c.campaignID || '')}</div>
+        </td>
+        <td><span class="badge">${flag} ${c.location || '—'}</span></td>
+        <td><span class="badge ${typeClass}">${c.templateType || '—'}</span></td>
+        <td><div class="swatch-row">${swatches}</div></td>
+        <td>
+          ${c.clientLogoURL
+            ? `<img class="logo-thumb" src="${esc(c.clientLogoURL)}" alt="" onerror="this.style.opacity='0'">`
+            : '<span style="color:var(--mid);font-size:12px;">—</span>'}
+        </td>
+        <td class="date-cell">${fmtDate(c.submittedAt)}</td>
+        <td>
+          <div class="actions">
+            <button class="btn-action btn-open"    onclick="openProto(${i})">Preview</button>
+            <button class="btn-action btn-copy"    onclick="copyURL(${i})">Copy URL</button>
+            <button class="btn-action btn-clone"   onclick="cloneCampaign(${i})">Clone</button>
+            <button class="btn-action btn-edit"    onclick="editCampaign(${i})">Edit</button>
+            <button class="btn-action btn-delete"  onclick="askDelete(${i})">Delete</button>
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+function esc(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── FILTER ───────────────────────────────────────────────────────
+function filterTable() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const country = document.getElementById('country-filter').value;
+  const type = document.getElementById('type-filter').value;
+
+  const filtered = allCampaigns.filter(c => {
+    const matchQ = !q ||
+      (c.campaignName || '').toLowerCase().includes(q) ||
+      (c.campaignID || '').toLowerCase().includes(q);
+    const matchCountry = !country || c.location === country;
+    const matchType = !type || c.templateType === type;
+    return matchQ && matchCountry && matchType;
+  });
+
+  renderTable(filtered);
+}
+
+// ── ACTIONS ──────────────────────────────────────────────────────
+function openProto(i) {
+  window.open(buildURL(allCampaigns[i]), '_blank');
+}
+
+function copyURL(i) {
+  const url = buildURL(allCampaigns[i]);
+  navigator.clipboard.writeText(url).then(() => showToast('URL copied to clipboard ✓'));
+}
+
+async function cloneCampaign(i) {
+  const original = allCampaigns[i];
+  const clone = { ...original };
+
+  // New ID + name
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const ts = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+  clone.campaignID = `domination-${ts}`;
+  clone.campaignName = `${original.campaignName} (Copy)`;
+  clone.submittedAt = new Date().toISOString();
+
+  showToast('Cloning campaign…');
+
+  try {
+    const res = await fetch(WEBHOOKS.submit, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(clone)
+    });
+    if (!res.ok) throw new Error(res.status);
+    showToast(`Cloned as "${clone.campaignName}" ✓`);
+    setTimeout(loadCampaigns, 1200);
+  } catch (err) {
+    showToast('Clone failed — try again');
+  }
+}
+
+function editCampaign(i) {
+  const c = allCampaigns[i];
+  // Pass campaignID to form.html via URL so it can pre-fill
+  const params = new URLSearchParams({ edit: c.campaignID });
+  window.location.href = `${FORM}?${params.toString()}`;
+}
+
+function askDelete(i) {
+  deleteTarget = i;
+  const c = allCampaigns[i];
+  document.getElementById('delete-campaign-name').textContent =
+    `"${c.campaignName}" will be permanently removed from the sheet.`;
+  document.getElementById('delete-overlay').classList.add('show');
+}
+
+function closeDeleteDialog() {
+  document.getElementById('delete-overlay').classList.remove('show');
+  deleteTarget = null;
+}
+
+async function confirmDelete() {
+  if (deleteTarget === null) return;
+  const c = allCampaigns[deleteTarget];
+  closeDeleteDialog();
+  showToast('Deleting…');
+
+  try {
+    const res = await fetch(WEBHOOKS.delete, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ campaignID: c.campaignID })
+    });
+    if (!res.ok) throw new Error(res.status);
+    showToast(`"${c.campaignName}" deleted ✓`);
+    setTimeout(loadCampaigns, 1000);
+  } catch (err) {
+    showToast('Delete failed — try again');
+  }
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────
+loadCampaigns();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=375, initial-scale=1.0">
+<title>Domination Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    background: #888;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+    font-family: 'Nunito', sans-serif;
+  }
+
+  .phone {
+    width: 375px;
+    min-height: 812px;
+    background: white;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* STATUS BAR */
+  .status-bar {
+    height: 47px;
+    background: white;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 0;
+    flex-shrink: 0;
+  }
+  .status-bar .time {
+    font-family: 'SF Pro Text', 'Nunito', sans-serif;
+    font-weight: 600;
+    font-size: 17px;
+    letter-spacing: -0.41px;
+    color: #010101;
+    position: relative;
+    z-index: 1;
+  }
+  .status-bar .notch {
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 164px; height: 32px;
+    background: black;
+    border-radius: 0 0 20px 20px;
+    z-index: 0;
+  }
+  .status-bar .indicators {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+    z-index: 1;
+  }
+  .signal { display: flex; align-items: flex-end; gap: 1.5px; height: 12px; }
+  .signal span { background: #010101; border-radius: 1px; width: 3px; }
+  .signal span:nth-child(1) { height: 4px; }
+  .signal span:nth-child(2) { height: 6px; }
+  .signal span:nth-child(3) { height: 9px; }
+  .signal span:nth-child(4) { height: 12px; }
+  .battery-icon {
+    width: 25px; height: 12px;
+    border: 1.5px solid #010101;
+    border-radius: 3px;
+    position: relative;
+  }
+  .battery-icon::after {
+    content: '';
+    position: absolute;
+    right: -5px; top: 2px;
+    width: 3px; height: 6px;
+    background: #010101;
+    border-radius: 0 1px 1px 0;
+  }
+  .battery-fill {
+    position: absolute;
+    top: 1px; left: 1px; bottom: 1px;
+    width: 70%;
+    background: #010101;
+    border-radius: 1px;
+  }
+
+  /* TOP BAR */
+  .top-bar {
+    height: 41px; /* 88 - 47 for status bar */
+    background: white;
+    box-shadow: 0 1px 0 0 #EBEBF5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .location-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    color: #282832;
+    font-weight: 400;
+  }
+  .location-row strong { font-weight: 800; }
+  .location-chevron {
+    width: 0; height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid #D1233E;
+    margin-left: 2px;
+  }
+
+  /* SEARCH BAR */
+  .search-bar {
+    height: 52px;
+    background: white;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+  }
+  .search-inner {
+    flex: 1;
+    height: 36px;
+    background: #EBEBF5;
+    border-radius: 36px;
+    display: flex;
+    align-items: center;
+    padding: 0 16px 0 40px;
+    position: relative;
+  }
+  .search-icon {
+    position: absolute;
+    left: 12px; top: 50%;
+    transform: translateY(-50%);
+    width: 15px; height: 15px;
+    border: 2px solid #777794;
+    border-radius: 50%;
+  }
+  .search-icon::after {
+    content: '';
+    position: absolute;
+    bottom: -5px; right: -4px;
+    width: 6px; height: 2px;
+    background: #777794;
+    transform: rotate(45deg);
+    border-radius: 1px;
+  }
+  .search-placeholder {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    color: #777794;
+  }
+
+  /* TAB BAR — 41px, 13px text, matching new Figma */
+  .tab-bar {
+    height: 41px;
+    background: white;
+    box-shadow: 0 1px 0 0 #EBEBF5;
+    display: flex;
+    align-items: center;
+    padding: 7px 15px;
+    overflow-x: hidden;
+    flex-shrink: 0;
+    gap: 0;
+  }
+  .tab-pill {
+    height: 27px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 8px;
+    border-radius: 16px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    text-transform: uppercase;
+    color: #777794;
+    flex-shrink: 0;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .tab-pill.active {
+    background: #D1233E;
+    color: white;
+  }
+
+  /* AD UNIT — exactly 509px from Figma */
+  .ad-unit {
+    width: 375px;
+    height: 509px;
+    background-color: var(--global-bkg-color, #EBEBF5);
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .ad-inner {
+    position: absolute;
+    top: 24px; left: 24px;
+    width: 327px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow: visible; /* carousel bleeds past this — ad-unit clips at 375px edge */
+  }
+
+  /* Logo area — 30px tall, full 327px wide */
+  .client-logo-area {
+    width: 327px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .client-logo-area img {
+    max-width: 327px;
+    max-height: 30px;
+    width: auto; height: auto;
+    object-fit: contain;
+  }
+  .client-logo-placeholder {
+    width: 100%; height: 100%;
+    background: rgba(255,255,255,0.25);
+    border-radius: 4px;
+  }
+
+  /* Claim text */
+  .claim-text {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 16px;
+    color: var(--global-text-color, #282832);
+    text-align: center;
+    width: 327px;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  .single-image-wrap {
+    width: 327px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .single-image-wrap .cta-button {
+    width: 327px;
+  }
+  .single-image-area {
+    width: 327px;
+    height: 327px;
+    background: transparent;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .single-image-area img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+  }
+
+  /* Carousel — Figma: slides 328px wide, 8px gap, track starts at left:24px.
+     The ad unit's overflow:hidden clips at 375px edge, creating the natural peek.
+     No overflow:hidden on viewport — the ad unit does the clipping. */
+  .carousel-wrap {
+    width: 328px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .carousel-viewport {
+    width: 328px;
+    overflow: visible;
+    position: relative;
+    flex-shrink: 0;
+    cursor: grab;
+  }
+  .carousel-viewport:active { cursor: grabbing; }
+  .carousel-track {
+    display: flex;
+    gap: 8px;
+    transition: transform 0.3s ease;
+    will-change: transform;
+  }
+  .carousel-slide {
+    flex-shrink: 0;
+    width: 328px;
+  }
+  .slide-image {
+    width: 328px;
+    height: 328px;
+    background: transparent;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .slide-image img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* Pagination dots */
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    height: 8px;
+    flex-shrink: 0;
+    width: 328px;
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--pagination-bkg-color, #777794);
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .dot.active {
+    background: var(--pagination-active-color, #D1233E);
+  }
+
+  /* CTA Button */
+  .cta-button {
+    width: 328px; /* carousel button matches slide width */
+    height: 45px;
+    background-color: var(--button-bkg-color, #000000);
+    border-radius: 8px;
+    box-shadow: 0 1px 6px 0 rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    border: none;
+    outline: none;
+  }
+  .cta-button span {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--button-text-color, #FFFFFF);
+    text-transform: uppercase;
+  }
+
+  /* BRAND STRIP — 96px scrollable */
+  .brand-strip {
+    height: 96px;
+    background: white;
+    box-shadow: 0 1px 1px 0 #EBEBF5;
+    flex-shrink: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .brand-strip::-webkit-scrollbar { display: none; }
+  .brand-strip-inner {
+    display: flex;
+    align-items: flex-start;
+    padding: 8px;
+    gap: 0;
+    width: max-content;
+    min-width: 375px;
+  }
+  .brand-card {
+    width: 58px;
+    height: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .brand-bubble-wrap {
+    width: 58px;
+    height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .brand-bubble {
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    background: #f5f5f5;
+    overflow: hidden;
+    border: 1.5px solid #EBEBF5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .brand-bubble img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+  }
+  .brand-name {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 400;
+    font-size: 10px;
+    color: #282832;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 56px;
+    line-height: 14px;
+    height: 14px;
+    margin-top: 2px;
+  }
+
+  /* BOTTOM NAV — 80px */
+  .bottom-nav {
+    height: 80px;
+    background: white;
+    box-shadow: 0 -1px 0 0 #EBEBF5;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-around;
+    padding: 4px 0 0;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .nav-tab {
+    width: 63px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 0;
+    cursor: pointer;
+  }
+  .nav-icon {
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nav-icon svg { width: 24px; height: 24px; }
+  .nav-label {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 10px;
+    color: #777794;
+    text-transform: uppercase;
+    text-align: center;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 14px;
+    height: 14px;
+  }
+  .nav-tab.active .nav-label { color: #D1233E; }
+  .home-indicator {
+    position: absolute;
+    bottom: 9px; left: 50%;
+    transform: translateX(-50%);
+    width: 134px; height: 5px;
+    background: black;
+    border-radius: 100px;
+  }
+
+  /* GHOSTOVER */
+  .ghostover {
+    position: absolute;
+    inset: 0;
+    z-index: 100;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .ghostover.visible { display: flex; }
+  .ghostover-bg {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.75);
+  }
+  .ghostover-content {
+    position: relative; z-index: 1;
+    width: 327px;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .ghostover-close {
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 32px; height: 32px;
+    background: rgba(0,0,0,0.55);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; z-index: 2;
+    color: white; font-size: 18px; line-height: 1;
+    border: none; outline: none;
+    font-family: sans-serif;
+  }
+  .ghostover-img { width: 100%; display: block; }
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <span class="time" id="clock">9:41</span>
+    <div class="notch"></div>
+    <div class="indicators">
+      <div class="signal">
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+        <path d="M8 9.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3z" fill="#010101"/>
+        <path d="M4.1 7.1C5.1 6.1 6.5 5.5 8 5.5s2.9.6 3.9 1.6" stroke="#010101" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        <path d="M1.3 4.3C3 2.6 5.4 1.5 8 1.5s5 1.1 6.7 2.8" stroke="#010101" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+      </svg>
+      <div class="battery-icon"><div class="battery-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- LOCATION ROW (part of top-bar) -->
+  <div class="top-bar">
+    <div class="location-row">
+      <span id="location-label">Ti trovi a</span>&nbsp;<strong id="location-city">Bologna - 40138</strong>
+      <div class="location-chevron"></div>
+    </div>
+  </div>
+
+  <!-- SEARCH BAR -->
+  <div class="search-bar">
+    <div class="search-inner">
+      <div class="search-icon"></div>
+      <span class="search-placeholder" id="search-placeholder">Cerca prodotti o negozi</span>
+    </div>
+  </div>
+
+  <!-- TAB BAR -->
+  <div class="tab-bar" id="tab-bar">
+    <div class="tab-pill active">IN EVIDENZA</div>
+    <div class="tab-pill">Iper e Super</div>
+    <div class="tab-pill">Discount</div>
+    <div class="tab-pill">Elettronica</div>
+    <div class="tab-pill">Cura Casa e Corpo</div>
+    <div class="tab-pill">Bricolage</div>
+  </div>
+
+  <!-- AD UNIT -->
+  <div class="ad-unit" id="ad-unit">
+    <div class="ad-inner">
+
+      <!-- Logo -->
+      <div class="client-logo-area" id="logo-area">
+        <div class="client-logo-placeholder" id="logo-placeholder"></div>
+      </div>
+
+      <!-- Claim -->
+      <div class="claim-text" id="claim-text">presenta</div>
+
+      <!-- Single image mode -->
+      <div class="single-image-wrap" id="single-image-wrap" style="display:none">
+        <div class="single-image-area">
+          <img id="single-img" src="" alt="">
+        </div>
+        <button class="cta-button" id="cta-single">
+          <span id="btn-text-single">Click Here</span>
+        </button>
+      </div>
+
+      <!-- Carousel mode -->
+      <div class="carousel-wrap" id="carousel-wrap" style="display:none">
+        <div class="carousel-viewport" id="carousel-viewport">
+          <div class="carousel-track" id="carousel-track"></div>
+        </div>
+        <div class="pagination" id="pagination"></div>
+        <button class="cta-button" id="cta-carousel">
+          <span id="btn-text-carousel">Click Here</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- BRAND STRIP -->
+  <div class="brand-strip">
+    <div class="brand-strip-inner" id="brand-strip-inner"></div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <div class="nav-tab active">
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z" fill="#D1233E"/>
+          <path d="M9 21V12h6v9" stroke="white" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <span class="nav-label" id="nav-home" style="color:#D1233E">Home</span>
+    </div>
+    <div class="nav-tab">
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none">
+          <rect x="2" y="5" width="20" height="14" rx="2" stroke="#777794" stroke-width="1.8"/>
+          <path d="M7 10h10M7 14h6" stroke="#777794" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="nav-label" id="nav-cards">Carte</span>
+    </div>
+    <div class="nav-tab">
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke="#777794" stroke-width="1.8" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="nav-label" id="nav-fav">Preferiti</span>
+    </div>
+    <div class="nav-tab">
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none">
+          <rect x="5" y="3" width="14" height="18" rx="2" stroke="#777794" stroke-width="1.8"/>
+          <path d="M8 8h8M8 12h8M8 16h4" stroke="#777794" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="nav-label" id="nav-list">La mia lista</span>
+    </div>
+    <div class="nav-tab">
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M4 6h16M4 12h16M4 18h16" stroke="#777794" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="nav-label" id="nav-menu">Menu</span>
+    </div>
+    <div class="home-indicator"></div>
+  </div>
+
+  <!-- GHOSTOVER -->
+  <div class="ghostover" id="ghostover">
+    <div class="ghostover-bg" onclick="closeGhostover()"></div>
+    <div class="ghostover-content">
+      <button class="ghostover-close" onclick="closeGhostover()">✕</button>
+      <img class="ghostover-img" id="ghostover-img" src="" alt="">
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── COUNTRY DATA ────────────────────────────────────────────────────
+const COUNTRIES = {
+  IT: {
+    locationLabel: 'Ti trovi a',
+    location: 'Bologna - 40138',
+    search: 'Cerca prodotti o negozi',
+    tabs: ['IN EVIDENZA','Iper e Super','Discount','Elettronica','Cura Casa e Corpo','Bricolage'],
+    nav: ['Home','Carte','Preferiti','La mia lista','Menu'],
+    brands: ['Conad','Esselunga','Lidl','Aldi','Eurospin','MD','Decathlon','MediaWorld','Trony','Unieuro']
+  },
+  AU: {
+    locationLabel: 'You are in',
+    location: 'Sydney - 2000',
+    search: 'Search products or stores',
+    tabs: ['FEATURED','Supermarkets','Discount','Electronics','Home & Body','Hardware'],
+    nav: ['Home','Cards','Favourites','My List','Menu'],
+    brands: ['Woolworths','Coles','Aldi','IGA','Kmart','BigW','Harvey Norman','JB Hi-Fi']
+  },
+  CA: {
+    locationLabel: 'You are in',
+    location: 'Toronto - M5V',
+    search: 'Search products or stores',
+    tabs: ['FEATURED','Grocery','Discount','Electronics','Home & Body','Hardware'],
+    nav: ['Home','Cards','Favourites','My List','Menu'],
+    brands: ['Loblaws','Metro','IGA','No Frills','Costco','Canadian Tire','Best Buy']
+  },
+  US: {
+    locationLabel: 'You are in',
+    location: 'New York - 10001',
+    search: 'Search products or stores',
+    tabs: ['FEATURED','Grocery','Discount','Electronics','Home & Body','Hardware'],
+    nav: ['Home','Cards','Favorites','My List','Menu'],
+    brands: ['Walmart','Target','Kroger','Costco','Aldi','Whole Foods','Best Buy']
+  },
+  FR: {
+    locationLabel: 'Vous êtes à',
+    location: 'Paris - 75001',
+    search: 'Rechercher produits ou magasins',
+    tabs: ['À LA UNE','Supermarchés','Discount','Électronique','Maison & Corps','Bricolage'],
+    nav: ['Accueil','Cartes','Favoris','Ma liste','Menu'],
+    brands: ['Carrefour','Leclerc','Lidl','Aldi','Intermarché','Super U','Fnac']
+  },
+  DE: {
+    locationLabel: 'Sie sind in',
+    location: 'Berlin - 10115',
+    search: 'Produkte oder Geschäfte suchen',
+    tabs: ['HIGHLIGHTS','Supermärkte','Discounter','Elektronik','Haus & Körper','Baumarkt'],
+    nav: ['Home','Karten','Favoriten','Meine Liste','Menü'],
+    brands: ['Aldi','Lidl','Rewe','Edeka','Netto','Penny','MediaMarkt','Saturn']
+  },
+  ES: {
+    locationLabel: 'Estás en',
+    location: 'Madrid - 28001',
+    search: 'Buscar productos o tiendas',
+    tabs: ['DESTACADOS','Supermercados','Descuento','Electrónica','Hogar & Cuerpo','Bricolaje'],
+    nav: ['Inicio','Tarjetas','Favoritos','Mi lista','Menú'],
+    brands: ['Mercadona','Lidl','Aldi','Carrefour','DIA','El Corte Inglés','MediaMarkt']
+  },
+  AT: {
+    locationLabel: 'Sie sind in',
+    location: 'Wien - 1010',
+    search: 'Produkte oder Geschäfte suchen',
+    tabs: ['HIGHLIGHTS','Supermärkte','Discounter','Elektronik','Haus & Körper','Baumarkt'],
+    nav: ['Home','Karten','Favoriten','Meine Liste','Menü'],
+    brands: ['Spar','Billa','Hofer','Lidl','Merkur','Saturn','MediaMarkt']
+  },
+  NL: {
+    locationLabel: 'Je bent in',
+    location: 'Amsterdam - 1012',
+    search: 'Zoek producten of winkels',
+    tabs: ['UITGELICHT','Supermarkten','Discount','Elektronica','Thuis & Lichaam','Bouwmarkt'],
+    nav: ['Home','Kaarten','Favorieten','Mijn lijst','Menu'],
+    brands: ['Albert Heijn','Jumbo','Lidl','Aldi','Plus','Dirk','MediaMarkt']
+  },
+  PL: {
+    locationLabel: 'Jesteś w',
+    location: 'Warszawa - 00-001',
+    search: 'Szukaj produktów lub sklepów',
+    tabs: ['POLECANE','Supermarkety','Dyskonty','Elektronika','Dom & Ciało','Majsterkowanie'],
+    nav: ['Strona gł.','Karty','Ulubione','Moja lista','Menu'],
+    brands: ['Biedronka','Lidl','Aldi','Carrefour','Tesco','Kaufland','MediaMarkt']
+  },
+  PT: {
+    locationLabel: 'Você está em',
+    location: 'Lisboa - 1000',
+    search: 'Pesquisar produtos ou lojas',
+    tabs: ['EM DESTAQUE','Supermercados','Desconto','Eletrónica','Casa & Corpo','Bricolage'],
+    nav: ['Início','Cartões','Favoritos','Minha lista','Menu'],
+    brands: ['Continente','Pingo Doce','Lidl','Aldi','Intermarché','El Corte Inglés']
+  },
+  RO: {
+    locationLabel: 'Ești în',
+    location: 'București - 010011',
+    search: 'Caută produse sau magazine',
+    tabs: ['EVIDENȚIAT','Supermarketuri','Discount','Electronică','Casă & Corp','Bricolaj'],
+    nav: ['Acasă','Carduri','Favorite','Lista mea','Meniu'],
+    brands: ['Kaufland','Lidl','Aldi','Carrefour','Mega Image','Profi']
+  },
+  BG: {
+    locationLabel: 'Вие сте в',
+    location: 'София - 1000',
+    search: 'Търси продукти или магазини',
+    tabs: ['ПРЕПОРЪЧАНИ','Супермаркети','Дискаунт','Електроника','Дом & Тяло','Направи сам'],
+    nav: ['Начало','Карти','Любими','Моят списък','Меню'],
+    brands: ['Kaufland','Lidl','Billa','Carrefour','Fantastico','Piccadilly']
+  },
+  HU: {
+    locationLabel: 'Ön itt van:',
+    location: 'Budapest - 1051',
+    search: 'Termékek vagy üzletek keresése',
+    tabs: ['KIEMELT','Szupermarketek','Diszkont','Elektronika','Otthon & Test','Barkács'],
+    nav: ['Főoldal','Kártyák','Kedvencek','Listám','Menü'],
+    brands: ['Tesco','Lidl','Aldi','Spar','Penny Market','Auchan','MediaMarkt']
+  }
+};
+
+// ─── PARAMS ──────────────────────────────────────────────────────────
+function getParams() {
+  const p = new URLSearchParams(window.location.search);
+  return {
+    country:               (p.get('country') || 'IT').toUpperCase(),
+    templateType:          p.get('templateType') || 'Single',
+    claimText:             p.get('claimText') || 'presenta',
+    buttonText:            p.get('buttonText') || 'Click Here',
+    globalBkgColor:        p.get('globalBkgColor') || '#EBEBF5',
+    globalTextColor:       p.get('globalTextColor') || '#282832',
+    buttonBkgColor:        p.get('buttonBkgColor') || '#000000',
+    buttonTextColor:       p.get('buttonTextColor') || '#FFFFFF',
+    paginationBkgColor:    p.get('paginationBkgColor') || '#777794',
+    paginationActiveColor: p.get('paginationActiveColor') || '#D1233E',
+    clientLogoURL:         p.get('clientLogoURL') || '',
+    ghostoverURL:          p.get('ghostoverURL') || '',
+    Img01URL:              p.get('Img01URL') || '',
+    Img02URL:              p.get('Img02URL') || '',
+    Img03URL:              p.get('Img03URL') || '',
+    Img04URL:              p.get('Img04URL') || '',
+    Img05URL:              p.get('Img05URL') || '',
+    Img06URL:              p.get('Img06URL') || '',
+  };
+}
+
+// ─── CLOCK ───────────────────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('clock').textContent = h + ':' + m;
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+// ─── CAROUSEL ────────────────────────────────────────────────────────
+let currentSlide = 0;
+let totalSlides = 0;
+let isDragging = false;
+let startX = 0;
+let dragOffset = 0;
+const SLIDE_WIDTH = 336; // 328px slide + 8px gap
+
+function getTranslateX() { return -currentSlide * SLIDE_WIDTH; }
+
+function applyTransform(extra) {
+  const track = document.getElementById('carousel-track');
+  if (!track) return;
+  track.style.transform = `translateX(${getTranslateX() + (extra || 0)}px)`;
+}
+
+function snapToSlide() {
+  const track = document.getElementById('carousel-track');
+  if (track) track.style.transition = 'transform 0.3s ease';
+  applyTransform(0);
+  updateDots();
+}
+
+function updateDots() {
+  document.querySelectorAll('.dot').forEach((d, i) => {
+    d.classList.toggle('active', i === currentSlide);
+  });
+}
+
+function buildPagination(count) {
+  const pg = document.getElementById('pagination');
+  if (!pg) return;
+  pg.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    pg.appendChild(d);
+  }
+}
+
+function initCarouselDrag() {
+  const vp = document.getElementById('carousel-viewport');
+  if (!vp) return;
+
+  // Touch
+  vp.addEventListener('touchstart', e => {
+    isDragging = true;
+    startX = e.touches[0].clientX;
+    dragOffset = 0;
+    const track = document.getElementById('carousel-track');
+    if (track) track.style.transition = 'none';
+  }, { passive: true });
+
+  vp.addEventListener('touchmove', e => {
+    if (!isDragging) return;
+    dragOffset = e.touches[0].clientX - startX;
+    applyTransform(dragOffset);
+  }, { passive: true });
+
+  vp.addEventListener('touchend', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    if (dragOffset < -50 && currentSlide < totalSlides - 1) currentSlide++;
+    else if (dragOffset > 50 && currentSlide > 0) currentSlide--;
+    snapToSlide();
+  });
+
+  // Mouse
+  vp.addEventListener('mousedown', e => {
+    isDragging = true;
+    startX = e.clientX;
+    dragOffset = 0;
+    const track = document.getElementById('carousel-track');
+    if (track) track.style.transition = 'none';
+    e.preventDefault();
+  });
+  window.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    dragOffset = e.clientX - startX;
+    applyTransform(dragOffset);
+  });
+  window.addEventListener('mouseup', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    if (dragOffset < -50 && currentSlide < totalSlides - 1) currentSlide++;
+    else if (dragOffset > 50 && currentSlide > 0) currentSlide--;
+    snapToSlide();
+  });
+}
+
+// ─── GHOSTOVER ───────────────────────────────────────────────────────
+function closeGhostover() {
+  document.getElementById('ghostover').classList.remove('visible');
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────
+function init() {
+  const p = getParams();
+  const C = COUNTRIES[p.country] || COUNTRIES.IT;
+  const phone = document.getElementById('phone');
+
+  // CSS vars
+  phone.style.setProperty('--global-bkg-color', p.globalBkgColor);
+  phone.style.setProperty('--global-text-color', p.globalTextColor);
+  phone.style.setProperty('--button-bkg-color', p.buttonBkgColor);
+  phone.style.setProperty('--button-text-color', p.buttonTextColor);
+  phone.style.setProperty('--pagination-bkg-color', p.paginationBkgColor);
+  phone.style.setProperty('--pagination-active-color', p.paginationActiveColor);
+
+  // Location
+  document.getElementById('location-label').textContent = C.locationLabel;
+  document.getElementById('location-city').textContent = C.location;
+  document.getElementById('search-placeholder').textContent = C.search;
+
+  // Tabs
+  const tabBar = document.getElementById('tab-bar');
+  tabBar.innerHTML = '';
+  C.tabs.forEach((t, i) => {
+    const el = document.createElement('div');
+    el.className = 'tab-pill' + (i === 0 ? ' active' : '');
+    el.textContent = t;
+    tabBar.appendChild(el);
+  });
+
+  // Nav
+  const navIds = ['nav-home','nav-cards','nav-fav','nav-list','nav-menu'];
+  C.nav.forEach((label, i) => {
+    const el = document.getElementById(navIds[i]);
+    if (el) el.textContent = label;
+  });
+
+  // Claim text
+  document.getElementById('claim-text').textContent = p.claimText;
+
+  // Button text
+  document.getElementById('btn-text-single').textContent = p.buttonText;
+  document.getElementById('btn-text-carousel').textContent = p.buttonText;
+
+  // Logo
+  const logoArea = document.getElementById('logo-area');
+  const logoPlaceholder = document.getElementById('logo-placeholder');
+  if (p.clientLogoURL) {
+    logoPlaceholder.style.display = 'none';
+    const img = document.createElement('img');
+    img.src = p.clientLogoURL;
+    img.alt = 'Logo';
+    img.onerror = () => {
+      img.style.display = 'none';
+      logoPlaceholder.style.display = 'block';
+    };
+    logoArea.appendChild(img);
+  }
+
+  // Images
+  const imgs = [p.Img01URL, p.Img02URL, p.Img03URL, p.Img04URL, p.Img05URL, p.Img06URL]
+    .filter(u => u && u.trim().length > 0);
+
+  const isCarousel = p.templateType.toLowerCase() === 'carousel' && imgs.length > 1;
+
+  if (isCarousel) {
+    document.getElementById('carousel-wrap').style.display = 'flex';
+    document.getElementById('single-image-wrap').style.display = 'none';
+
+    const track = document.getElementById('carousel-track');
+    track.innerHTML = '';
+    totalSlides = imgs.length;
+    currentSlide = 0;
+
+    imgs.forEach((url, i) => {
+      const slide = document.createElement('div');
+      slide.className = 'carousel-slide';
+      const div = document.createElement('div');
+      div.className = 'slide-image';
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = 'Slide ' + (i + 1);
+      img.draggable = false;
+      img.onerror = () => { img.style.opacity = '0'; };
+      div.appendChild(img);
+      slide.appendChild(div);
+      track.appendChild(slide);
+    });
+
+    buildPagination(imgs.length);
+    initCarouselDrag();
+    applyTransform(0);
+
+  } else {
+    document.getElementById('single-image-wrap').style.display = 'flex';
+    document.getElementById('carousel-wrap').style.display = 'none';
+
+    const singleImg = document.getElementById('single-img');
+    if (imgs[0]) {
+      singleImg.src = imgs[0];
+      singleImg.onerror = () => { singleImg.style.opacity = '0'; };
+    }
+  }
+
+  // Brand strip — text initials bubbles as fallback
+  const strip = document.getElementById('brand-strip-inner');
+  strip.innerHTML = '';
+  C.brands.forEach(name => {
+    const card = document.createElement('div');
+    card.className = 'brand-card';
+    const initials = name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+    card.innerHTML = `
+      <div class="brand-bubble-wrap">
+        <div class="brand-bubble" style="background:#f0f0f0;">
+          <span style="font-family:Nunito,sans-serif;font-weight:800;font-size:13px;color:#282832;">${initials}</span>
+        </div>
+      </div>
+      <span class="brand-name">${name}</span>
+    `;
+    strip.appendChild(card);
+  });
+
+  // Ghostover
+  if (p.ghostoverURL) {
+    setTimeout(() => {
+      const g = document.getElementById('ghostover');
+      const img = document.getElementById('ghostover-img');
+      img.src = p.ghostoverURL;
+      g.classList.add('visible');
+    }, 800);
+  }
+}
+
+init();
+</script>
+</body>
+</html>
