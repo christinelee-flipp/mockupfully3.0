@@ -210,6 +210,71 @@
     opacity: 0.3;
   }
 
+  /* Image field label + mode toggle row */
+  .img-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .img-mode-toggle {
+    display: flex;
+    border: 1.5px solid var(--light);
+    border-radius: 6px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .mode-btn {
+    height: 22px;
+    padding: 0 8px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    border: none;
+    background: transparent;
+    color: var(--mid);
+    cursor: pointer;
+    line-height: 1;
+  }
+  .mode-btn.active { background: var(--dark); color: white; }
+
+  /* URL/Upload mode wrappers inside .url-with-preview */
+  .url-mode-wrap, .upload-mode-wrap { flex: 1; }
+  .url-mode-wrap input[type="url"] { width: 100%; }
+
+  /* Upload area */
+  .upload-area {
+    height: 42px;
+    border: 1.5px solid var(--light);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 8px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .upload-area:hover { border-color: var(--mid); }
+  .upload-filename {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--mid);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+  }
+  .upload-status {
+    font-size: 11px;
+    font-weight: 800;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .upload-status.uploading { color: var(--mid); }
+  .upload-status.done  { color: #27ae60; }
+  .upload-status.error { color: var(--red); }
+
   /* Form footer */
   .form-footer {
     padding: 24px 32px;
@@ -577,12 +642,12 @@ function prefillForm(c) {
 
   // Rebuild image fields for correct template type, then fill images
   buildImageFields();
-  ['Img01URL','Img02URL','Img03URL'].forEach((key, i) => {
+  ['Img01URL','Img02URL','Img03URL','Img04URL','Img05URL','Img06URL'].forEach((key, i) => {
     if (c[key]) {
       const input = document.getElementById(key);
       if (input) {
         input.value = c[key];
-        const img = document.getElementById(`img-img${i+1}`);
+        const img  = document.getElementById(`img-img${i+1}`);
         const icon = document.querySelector(`#preview-img${i+1} .placeholder-icon`);
         if (img) updateImgPreview(input, img, icon);
       }
@@ -609,31 +674,123 @@ function prefillForm(c) {
 }
 
 // ─── IMAGE FIELDS ─────────────────────────────────────────────────
+const PLACEHOLDER_SVG = `<svg class="placeholder-icon" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" stroke="#777794" stroke-width="1.5"/><circle cx="8.5" cy="8.5" r="1.5" fill="#777794"/><path d="M3 15l5-4 4 3 3-2 6 5" stroke="#777794" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+const UPLOAD_ICON = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke="#777794" stroke-width="1.8" stroke-linecap="round"/><polyline points="17 8 12 3 7 8" stroke="#777794" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="3" x2="12" y2="15" stroke="#777794" stroke-width="1.8" stroke-linecap="round"/></svg>`;
+
 function buildImageFields() {
-  const type = document.getElementById('templateType').value;
-  const count = type === 'Carousel' ? 3 : 1;
+  const type  = document.getElementById('templateType').value;
+  const count = type === 'Carousel' ? 6 : 1;
   const container = document.getElementById('img-fields');
   container.innerHTML = '';
 
   for (let i = 1; i <= count; i++) {
+    const pad     = String(i).padStart(2, '0');
+    const fieldId = `Img${pad}URL`;
+    const isRequired = i === 1;
+
     const field = document.createElement('div');
     field.className = 'field';
     field.innerHTML = `
-      <label>Image ${i} URL${i === 1 ? ' <span class="required">*</span>' : ' <span class="hint">(optional)</span>'}</label>
+      <div class="img-label-row">
+        <label>Image ${i}${isRequired ? ' <span class="required">*</span>' : ' <span class="hint">(optional)</span>'}</label>
+        <div class="img-mode-toggle">
+          <button type="button" class="mode-btn active" data-mode="url" data-field="${fieldId}">URL</button>
+          <button type="button" class="mode-btn" data-mode="upload" data-field="${fieldId}">Upload</button>
+        </div>
+      </div>
       <div class="url-with-preview">
-        <input type="url" id="Img0${i}URL" placeholder="https://...">
+        <div class="url-mode-wrap" id="url-wrap-${fieldId}">
+          <input type="url" id="${fieldId}" placeholder="https://...">
+        </div>
+        <div class="upload-mode-wrap" id="upload-wrap-${fieldId}" style="display:none">
+          <div class="upload-area" id="upload-area-${fieldId}">
+            <input type="file" id="file-${fieldId}" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none">
+            ${UPLOAD_ICON}
+            <span class="upload-filename" id="upload-filename-${fieldId}">Choose file…</span>
+            <span class="upload-status" id="upload-status-${fieldId}"></span>
+          </div>
+        </div>
         <div class="img-preview" id="preview-img${i}">
           <img id="img-img${i}" src="" alt="">
-          <svg class="placeholder-icon" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" stroke="#777794" stroke-width="1.5"/><circle cx="8.5" cy="8.5" r="1.5" fill="#777794"/><path d="M3 15l5-4 4 3 3-2 6 5" stroke="#777794" stroke-width="1.5" stroke-linecap="round"/></svg>
+          ${PLACEHOLDER_SVG}
         </div>
       </div>
     `;
     container.appendChild(field);
-    // Bind preview
-    const input = field.querySelector('input');
-    const img = field.querySelector('img');
-    const icon = field.querySelector('.placeholder-icon');
-    input.addEventListener('input', () => updateImgPreview(input, img, icon));
+
+    // URL input → live preview
+    const urlInput  = field.querySelector(`#${fieldId}`);
+    const previewImg  = field.querySelector(`#img-img${i}`);
+    const previewIcon = field.querySelector('.placeholder-icon');
+    urlInput.addEventListener('input', () => updateImgPreview(urlInput, previewImg, previewIcon));
+
+    // Mode toggle buttons
+    field.querySelectorAll('.mode-btn').forEach(btn =>
+      btn.addEventListener('click', () => switchImgMode(fieldId, btn.dataset.mode, i))
+    );
+
+    // Upload area click → trigger hidden file input
+    const uploadArea = field.querySelector(`#upload-area-${fieldId}`);
+    const fileInput  = field.querySelector(`#file-${fieldId}`);
+    uploadArea.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => handleFileUpload(fileInput, fieldId, i));
+  }
+}
+
+// ─── IMAGE MODE TOGGLE ─────────────────────────────────────────────
+function switchImgMode(fieldId, mode, idx) {
+  const urlWrap    = document.getElementById(`url-wrap-${fieldId}`);
+  const uploadWrap = document.getElementById(`upload-wrap-${fieldId}`);
+  document.querySelectorAll(`.mode-btn[data-field="${fieldId}"]`).forEach(b =>
+    b.classList.toggle('active', b.dataset.mode === mode)
+  );
+  urlWrap.style.display    = mode === 'url'    ? '' : 'none';
+  uploadWrap.style.display = mode === 'upload' ? '' : 'none';
+}
+
+// ─── FILE UPLOAD ───────────────────────────────────────────────────
+async function handleFileUpload(fileInput, fieldId, idx) {
+  const file = fileInput.files[0];
+  if (!file) return;
+
+  const filenameEl  = document.getElementById(`upload-filename-${fieldId}`);
+  const statusEl    = document.getElementById(`upload-status-${fieldId}`);
+  const urlInput    = document.getElementById(fieldId);
+  const previewImg  = document.getElementById(`img-img${idx}`);
+  const previewIcon = document.querySelector(`#preview-img${idx} .placeholder-icon`);
+
+  // Show filename and instant local preview
+  filenameEl.textContent = file.name;
+  const objectURL = URL.createObjectURL(file);
+  previewImg.src = objectURL;
+  previewImg.style.display = 'block';
+  if (previewIcon) previewIcon.style.display = 'none';
+
+  statusEl.textContent = 'Uploading…';
+  statusEl.className = 'upload-status uploading';
+
+  const formData = new FormData();
+  formData.append('image', file);
+
+  try {
+    const res  = await fetch('api/upload.php', { method: 'POST', body: formData });
+    const json = await res.json();
+    if (json.success) {
+      urlInput.value = json.url;
+      previewImg.src = json.url;
+      statusEl.textContent = '✓';
+      statusEl.className = 'upload-status done';
+    } else {
+      urlInput.value = '';
+      statusEl.textContent = json.error || 'Upload failed';
+      statusEl.className = 'upload-status error';
+    }
+  } catch {
+    urlInput.value = '';
+    statusEl.textContent = 'Upload failed';
+    statusEl.className = 'upload-status error';
+  } finally {
+    URL.revokeObjectURL(objectURL);
   }
 }
 
@@ -700,6 +857,7 @@ async function init() {
         'buttonbkgcolor': 'buttonBkgColor', 'buttontextcolor': 'buttonTextColor',
         'paginationbkgcolor': 'paginationBkgColor', 'paginationactivecolor': 'paginationActiveColor',
         'img01url': 'Img01URL', 'img02url': 'Img02URL', 'img03url': 'Img03URL',
+        'img04url': 'Img04URL', 'img05url': 'Img05URL', 'img06url': 'Img06URL',
         'ghostoverurl': 'ghostoverURL', 'location': 'country'
       };
       Object.keys(data).forEach(k => {
@@ -795,7 +953,7 @@ function generateCampaignID() {
 function collectData() {
   const get = id => (document.getElementById(id)?.value || '').trim();
   const type = get('templateType');
-  const imgCount = type === 'Carousel' ? 3 : 1;
+  const imgCount = type === 'Carousel' ? 6 : 1;
   const imgs = {};
   for (let i = 1; i <= imgCount; i++) {
     imgs[`Img0${i}URL`] = get(`Img0${i}URL`);
@@ -828,7 +986,7 @@ function buildPrototypeURL(data) {
   const keys = ['country','templateType','claimText','buttonText',
     'globalBkgColor','globalTextColor','buttonBkgColor','buttonTextColor',
     'paginationBkgColor','paginationActiveColor','clientLogoURL','ghostoverURL',
-    'Img01URL','Img02URL','Img03URL'];
+    'Img01URL','Img02URL','Img03URL','Img04URL','Img05URL','Img06URL'];
   keys.forEach(k => { if (data[k]) params.set(k, data[k]); });
   return `${PROTOTYPE}?${params.toString()}`;
 }
