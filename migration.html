@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockupfully — Data Migration</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --red: #D1233E;
+    --dark: #282832;
+    --mid: #777794;
+    --light: #EBEBF5;
+    --radius: 10px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: #f4f4f8;
+    color: var(--dark);
+    min-height: 100vh;
+    padding: 40px 20px 80px;
+  }
+
+  .warning-banner {
+    max-width: 680px;
+    margin: 0 auto 24px;
+    background: #fff3cd;
+    border: 2px solid #f5a623;
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #7a4f00;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    line-height: 1.5;
+  }
+  .warning-banner .icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+
+  .page-header {
+    max-width: 680px;
+    margin: 0 auto 28px;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .logo-dot {
+    width: 10px; height: 10px;
+    background: var(--red);
+    border-radius: 50%;
+  }
+  .logo-text {
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .page-header h1 { font-size: 26px; font-weight: 800; }
+  .page-header p  { margin-top: 6px; font-size: 14px; color: var(--mid); }
+
+  .card {
+    max-width: 680px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 32px;
+  }
+
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--dark);
+    margin-bottom: 8px;
+  }
+  label .hint {
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--mid);
+    margin-left: 4px;
+  }
+
+  textarea {
+    width: 100%;
+    height: 260px;
+    border: 1.5px solid var(--light);
+    border-radius: var(--radius);
+    padding: 14px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: var(--dark);
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.15s;
+    line-height: 1.5;
+  }
+  textarea:focus { border-color: var(--red); }
+  textarea::placeholder { color: #b0b0c0; font-family: 'Nunito', sans-serif; font-size: 13px; }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+  }
+  .btn-submit {
+    height: 46px;
+    padding: 0 28px;
+    background: var(--red);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .btn-submit:hover { opacity: 0.9; }
+  .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .btn-clear {
+    height: 46px;
+    padding: 0 20px;
+    background: var(--light);
+    color: var(--mid);
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+  }
+
+  /* Result panel */
+  .result {
+    display: none;
+    margin-top: 24px;
+    border-top: 1px solid var(--light);
+    padding-top: 24px;
+  }
+  .result.visible { display: block; }
+
+  .result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .stat-box {
+    background: var(--light);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    text-align: center;
+  }
+  .stat-box .stat-num {
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-box .stat-label {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--mid);
+  }
+  .stat-box.imported .stat-num { color: #27ae60; }
+  .stat-box.skipped  .stat-num { color: var(--mid); }
+
+  .error-list {
+    background: #fdecea;
+    border-radius: var(--radius);
+    padding: 14px 18px;
+  }
+  .error-list-title {
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #c0392b;
+    margin-bottom: 10px;
+  }
+  .error-list ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .error-list li {
+    font-size: 13px;
+    font-weight: 600;
+    color: #c0392b;
+    padding-left: 14px;
+    position: relative;
+  }
+  .error-list li::before {
+    content: '×';
+    position: absolute;
+    left: 0;
+    font-weight: 800;
+  }
+
+  .result-msg {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--mid);
+  }
+  .result-msg.success { color: #27ae60; }
+  .result-msg.error   { color: var(--red); }
+
+  a.back-link {
+    display: inline-block;
+    margin-top: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--mid);
+    text-decoration: none;
+  }
+  a.back-link:hover { color: var(--dark); }
+</style>
+</head>
+<body>
+
+<div class="warning-banner">
+  <span class="icon">⚠</span>
+  <span>This page is for one-time data migration only. <strong>Delete migration.html and api/migrate.php from the server after use.</strong></span>
+</div>
+
+<div class="page-header">
+  <div class="logo">
+    <div class="logo-dot"></div>
+    <span class="logo-text">Mockupfully</span>
+  </div>
+  <h1>Data Migration</h1>
+  <p>Paste a JSON array of campaigns exported from Google Sheets. Each campaign will be saved as a JSON file. Existing campaigns will not be overwritten.</p>
+</div>
+
+<div class="card">
+  <label for="json-input">
+    Campaign JSON array
+    <span class="hint">— paste the full array, e.g. [{"campaignID": "domination-...", ...}, ...]</span>
+  </label>
+  <textarea id="json-input" placeholder='[
+  {
+    "campaignID": "domination-20260101120000",
+    "campaignName": "Example Campaign",
+    "location": "CA",
+    ...
+  }
+]'></textarea>
+
+  <div class="actions">
+    <button class="btn-submit" id="btn-submit" onclick="runMigration()">Import Campaigns</button>
+    <button class="btn-clear" onclick="clearForm()">Clear</button>
+  </div>
+
+  <div class="result" id="result">
+    <div class="result-grid">
+      <div class="stat-box imported">
+        <div class="stat-num" id="stat-imported">0</div>
+        <div class="stat-label">Imported</div>
+      </div>
+      <div class="stat-box skipped">
+        <div class="stat-num" id="stat-skipped">0</div>
+        <div class="stat-label">Skipped (already exist)</div>
+      </div>
+    </div>
+    <div class="error-list" id="error-list" style="display:none">
+      <div class="error-list-title">Errors</div>
+      <ul id="error-items"></ul>
+    </div>
+    <p class="result-msg" id="result-msg"></p>
+  </div>
+
+  <a class="back-link" href="index.html">← Back to dashboard</a>
+</div>
+
+<script>
+async function runMigration() {
+  const btn = document.getElementById('btn-submit');
+  const raw = document.getElementById('json-input').value.trim();
+
+  if (!raw) {
+    alert('Please paste a JSON array first.');
+    return;
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (e) {
+    showResult(null, 'Invalid JSON: ' + e.message);
+    return;
+  }
+
+  if (!Array.isArray(parsed)) {
+    showResult(null, 'The JSON must be an array (starting with [). Got: ' + typeof parsed);
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Importing…';
+
+  try {
+    const res = await fetch('api/migrate.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(parsed)
+    });
+    const data = await res.json();
+
+    if (data.error) {
+      showResult(null, 'Server error: ' + data.error);
+    } else {
+      showResult(data);
+    }
+  } catch (err) {
+    showResult(null, 'Request failed: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Import Campaigns';
+  }
+}
+
+function showResult(data, errorMsg) {
+  const panel = document.getElementById('result');
+  const msg   = document.getElementById('result-msg');
+  const errorList = document.getElementById('error-list');
+  const errorItems = document.getElementById('error-items');
+
+  panel.classList.add('visible');
+
+  if (errorMsg) {
+    document.getElementById('stat-imported').textContent = '—';
+    document.getElementById('stat-skipped').textContent  = '—';
+    errorList.style.display = 'none';
+    msg.textContent = errorMsg;
+    msg.className = 'result-msg error';
+    return;
+  }
+
+  document.getElementById('stat-imported').textContent = data.imported;
+  document.getElementById('stat-skipped').textContent  = data.skipped;
+
+  if (data.errors && data.errors.length > 0) {
+    errorList.style.display = 'block';
+    errorItems.innerHTML = data.errors
+      .map(e => `<li>${e}</li>`)
+      .join('');
+  } else {
+    errorList.style.display = 'none';
+  }
+
+  const total = data.imported + data.skipped;
+  if (data.imported === 0 && data.skipped === 0) {
+    msg.textContent = 'No campaigns were processed. Check that your JSON array is not empty.';
+    msg.className = 'result-msg';
+  } else if (data.imported === 0) {
+    msg.textContent = `All ${data.skipped} campaign${data.skipped !== 1 ? 's' : ''} already exist — nothing was imported.`;
+    msg.className = 'result-msg';
+  } else {
+    msg.textContent = `Done. ${data.imported} campaign${data.imported !== 1 ? 's' : ''} imported successfully.`;
+    msg.className = 'result-msg success';
+  }
+}
+
+function clearForm() {
+  document.getElementById('json-input').value = '';
+  document.getElementById('result').classList.remove('visible');
+}
+</script>
+
+</body>
+</html>
