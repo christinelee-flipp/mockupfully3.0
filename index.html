@@ -342,6 +342,12 @@
 </head>
 <body>
 
+<!-- DEBUG PANEL (remove once dashboard is confirmed working) -->
+<div id="debug-panel" style="display:none;background:#c0392b;color:#fff;font-family:monospace;font-size:13px;padding:16px 20px;line-height:1.7;position:relative;z-index:9999;">
+  <strong style="font-size:15px;">⚠ DEBUG PANEL</strong>
+  <div id="debug-content"></div>
+</div>
+
 <!-- HEADER -->
 <div class="header">
   <div class="header-left">
@@ -439,37 +445,73 @@ const FORM = 'form.html';
 let allCampaigns = [];
 let deleteTarget = null;
 
+// ── DEBUG PANEL ───────────────────────────────────────────────────
+function showDebug(lines) {
+  const panel = document.getElementById('debug-panel');
+  const content = document.getElementById('debug-content');
+  panel.style.display = 'block';
+  content.innerHTML = lines.map(l => `<div>${l}</div>`).join('');
+}
+
 // ── LOAD ──────────────────────────────────────────────────────────
 async function loadCampaigns() {
+  const debugLines = [];
+  const fetchURL = new URL(WEBHOOKS.getAll, window.location.href).href;
+  debugLines.push(`Fetch URL: ${fetchURL}`);
+  debugLines.push(`Page URL: ${window.location.href}`);
+
   try {
     const res = await fetch(WEBHOOKS.getAll);
+    debugLines.push(`HTTP status: ${res.status} ${res.statusText}`);
+
     const text = await res.text();
-    console.log('[Mockupfully] list.php raw response:', text);
+    debugLines.push(`Raw response (first 300 chars): ${text.slice(0, 300)}`);
 
     let data;
-    try { data = JSON.parse(text); } catch {
-      console.error('[Mockupfully] JSON parse failed. Raw text was:', text);
-      throw new Error('API response is not valid JSON — is a PHP server running?');
+    try {
+      data = JSON.parse(text);
+      debugLines.push(`JSON parse: ✓ success`);
+    } catch (e) {
+      debugLines.push(`JSON parse: ✗ FAILED — ${e.message}`);
+      showDebug(debugLines);
+      document.getElementById('table-body').innerHTML = `
+        <tr class="state-row"><td colspan="7">Failed to load campaigns. <button onclick="loadCampaigns()" style="color:var(--red);background:none;border:none;cursor:pointer;font-weight:800;">Retry</button></td></tr>`;
+      return;
     }
-    console.log('[Mockupfully] list.php parsed:', data);
 
-    // Surface any server-side error clearly
     if (data && data.error) {
-      throw new Error('list.php error: ' + data.error);
+      debugLines.push(`Server error: ${data.error}`);
+      showDebug(debugLines);
+      document.getElementById('table-body').innerHTML = `
+        <tr class="state-row"><td colspan="7">Failed to load campaigns. <button onclick="loadCampaigns()" style="color:var(--red);background:none;border:none;cursor:pointer;font-weight:800;">Retry</button></td></tr>`;
+      return;
     }
 
     if (Array.isArray(data)) {
       allCampaigns = data;
+      debugLines.push(`Data shape: array`);
     } else if (data && Array.isArray(data.campaigns)) {
       allCampaigns = data.campaigns;
+      debugLines.push(`Data shape: object with .campaigns array`);
     } else {
-      console.error('[Mockupfully] Unexpected response shape:', data);
-      throw new Error('Unexpected response shape from list.php');
+      debugLines.push(`Data shape: UNEXPECTED — ${JSON.stringify(data).slice(0, 200)}`);
+      showDebug(debugLines);
+      document.getElementById('table-body').innerHTML = `
+        <tr class="state-row"><td colspan="7">Failed to load campaigns. <button onclick="loadCampaigns()" style="color:var(--red);background:none;border:none;cursor:pointer;font-weight:800;">Retry</button></td></tr>`;
+      return;
     }
+
+    debugLines.push(`Campaigns found: ${allCampaigns.length}`);
+    if (allCampaigns.length > 0) {
+      debugLines.push(`First campaign keys: ${Object.keys(allCampaigns[0]).join(', ')}`);
+      debugLines.push(`First campaign: ${JSON.stringify(allCampaigns[0]).slice(0, 200)}`);
+    }
+    showDebug(debugLines);
 
     renderTable(allCampaigns);
   } catch (err) {
-    console.error('[Mockupfully] loadCampaigns error:', err);
+    debugLines.push(`Fetch error: ${err.message}`);
+    showDebug(debugLines);
     document.getElementById('table-body').innerHTML = `
       <tr class="state-row"><td colspan="7">Failed to load campaigns. <button onclick="loadCampaigns()" style="color:var(--red);background:none;border:none;cursor:pointer;font-weight:800;">Retry</button></td></tr>`;
   }
