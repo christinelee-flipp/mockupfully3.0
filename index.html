@@ -444,23 +444,28 @@ async function loadCampaigns() {
   try {
     const res = await fetch(WEBHOOKS.getAll);
     const text = await res.text();
-    let data;
-    try { data = JSON.parse(text); } catch { data = []; }
+    console.log('[Mockupfully] list.php raw response:', text);
 
-    // Normalise: webhook might return array or {campaigns:[...]} etc.
+    let data;
+    try { data = JSON.parse(text); } catch { data = null; }
+    console.log('[Mockupfully] list.php parsed:', data);
+
+    // Surface any server-side error clearly
+    if (data && data.error) {
+      throw new Error('list.php: ' + data.error);
+    }
+
     if (Array.isArray(data)) {
       allCampaigns = data;
     } else if (data && Array.isArray(data.campaigns)) {
       allCampaigns = data.campaigns;
-    } else if (data && typeof data === 'object') {
-      // Single object — wrap it
-      allCampaigns = [data];
     } else {
       allCampaigns = [];
     }
 
     renderTable(allCampaigns);
   } catch (err) {
+    console.error('[Mockupfully] loadCampaigns error:', err);
     document.getElementById('table-body').innerHTML = `
       <tr class="state-row"><td colspan="7">Failed to load campaigns. <button onclick="loadCampaigns()" style="color:var(--red);background:none;border:none;cursor:pointer;font-weight:800;">Retry</button></td></tr>`;
   }

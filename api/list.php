@@ -1,7 +1,6 @@
 <?php
 /**
  * list.php — Return all campaigns as a JSON array.
- * Replaces the Make.com `getAll` webhook.
  *
  * GET /api/list.php
  * Response: Campaign[]  (sorted newest → oldest by submittedAt)
@@ -14,22 +13,38 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 if (!is_dir(DATA_DIR)) {
-    respond([]);
+    error_log('[list.php] Data folder not found: ' . DATA_DIR);
+    error('Data folder not found. Expected: ' . DATA_DIR, 500);
 }
 
+$pattern   = DATA_DIR . 'domination-*.json';
+$files     = glob($pattern) ?: [];   // glob() returns false (not []) when no matches on some systems
 $campaigns = [];
+$skipped   = [];
 
-foreach (glob(DATA_DIR . 'domination-*.json') as $file) {
+foreach ($files as $file) {
     $json = file_get_contents($file);
-    $data = json_decode($json, true);
-    if (is_array($data)) {
-        $campaigns[] = $data;
+    if ($json === false) {
+        $skipped[] = basename($file) . ' (unreadable)';
+        error_log('[list.php] Could not read file: ' . $file);
+        continue;
     }
+    $data = json_decode($json, true);
+    if (!is_array($data)) {
+        $skipped[] = basename($file) . ' (invalid JSON)';
+        error_log('[list.php] Invalid JSON in file: ' . $file);
+        continue;
+    }
+    $campaigns[] = $data;
 }
 
 // Sort newest first
 usort($campaigns, fn($a, $b) =>
     strcmp($b['submittedAt'] ?? '', $a['submittedAt'] ?? '')
 );
+
+if (!empty($skipped)) {
+    error('Some campaign files could not be loaded: ' . implode(', ', $skipped), 500);
+}
 
 respond($campaigns);
