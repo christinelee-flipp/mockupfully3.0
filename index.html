@@ -447,12 +447,15 @@ async function loadCampaigns() {
     console.log('[Mockupfully] list.php raw response:', text);
 
     let data;
-    try { data = JSON.parse(text); } catch { data = null; }
+    try { data = JSON.parse(text); } catch {
+      console.error('[Mockupfully] JSON parse failed. Raw text was:', text);
+      throw new Error('API response is not valid JSON — is a PHP server running?');
+    }
     console.log('[Mockupfully] list.php parsed:', data);
 
     // Surface any server-side error clearly
     if (data && data.error) {
-      throw new Error('list.php: ' + data.error);
+      throw new Error('list.php error: ' + data.error);
     }
 
     if (Array.isArray(data)) {
@@ -460,7 +463,8 @@ async function loadCampaigns() {
     } else if (data && Array.isArray(data.campaigns)) {
       allCampaigns = data.campaigns;
     } else {
-      allCampaigns = [];
+      console.error('[Mockupfully] Unexpected response shape:', data);
+      throw new Error('Unexpected response shape from list.php');
     }
 
     renderTable(allCampaigns);
