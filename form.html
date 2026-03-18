@@ -728,15 +728,15 @@ function buildImageFields() {
       <div class="img-label-row">
         <label>Image ${i}${isRequired ? ' <span class="required">*</span>' : ' <span class="hint">(optional)</span>'}</label>
         <div class="img-mode-toggle">
-          <button type="button" class="mode-btn active" data-mode="url" data-field="${fieldId}">URL</button>
-          <button type="button" class="mode-btn" data-mode="upload" data-field="${fieldId}">Upload</button>
+          <button type="button" class="mode-btn" data-mode="url" data-field="${fieldId}">URL</button>
+          <button type="button" class="mode-btn active" data-mode="upload" data-field="${fieldId}">Upload</button>
         </div>
       </div>
       <div class="url-with-preview">
-        <div class="url-mode-wrap" id="url-wrap-${fieldId}">
+        <div class="url-mode-wrap" id="url-wrap-${fieldId}" style="display:none">
           <input type="url" id="${fieldId}" placeholder="https://...">
         </div>
-        <div class="upload-mode-wrap" id="upload-wrap-${fieldId}" style="display:none">
+        <div class="upload-mode-wrap" id="upload-wrap-${fieldId}">
           <div class="upload-area" id="upload-area-${fieldId}">
             <input type="file" id="file-${fieldId}" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none">
             ${UPLOAD_ICON}
@@ -792,7 +792,7 @@ function detectTemplateType() {
   document.getElementById('templateType').value = isCarousel ? 'Carousel' : 'Single';
   document.getElementById('template-label').textContent = isCarousel ? 'Template: Carousel' : 'Template: Single Image';
 
-  for (let i = 3; i <= 6; i++) {
+  for (let i = 2; i <= 6; i++) {
     const field = document.getElementById(`img-field-${i}`);
     if (field) field.style.display = isCarousel ? '' : 'none';
   }
