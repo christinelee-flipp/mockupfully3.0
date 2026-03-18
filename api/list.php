@@ -12,12 +12,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     error('Method not allowed', 405);
 }
 
-if (!is_dir(DATA_DIR)) {
-    error_log('[list.php] Data folder not found: ' . DATA_DIR);
-    error('Data folder not found. Expected: ' . DATA_DIR, 500);
+$data_dir = DATA_DIRS['domination'];
+
+if (!is_dir($data_dir)) {
+    error_log('[list.php] Data folder not found: ' . $data_dir);
+    error('Data folder not found. Expected: ' . $data_dir, 500);
 }
 
-$pattern   = DATA_DIR . 'domination-*.json';
+$pattern   = $data_dir . 'domination-*.json';
 $files     = glob($pattern) ?: [];   // glob() returns false (not []) when no matches on some systems
 $campaigns = [];
 $skipped   = [];
