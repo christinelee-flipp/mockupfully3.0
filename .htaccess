@@ -5,7 +5,7 @@
     Header set Expires "0"
 </FilesMatch>
 
-# ── Long-term caching for images and uploads ──────────────────────
-<FilesMatch "\.(jpg|jpeg|png|gif|webp|svg|ico)$">
+# ── Long-term caching for images, CSS, and JS ────────────────────
+<FilesMatch "\.(jpg|jpeg|png|gif|webp|svg|ico|css|js)$">
     Header set Cache-Control "public, max-age=2592000"
 </FilesMatch>

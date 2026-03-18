@@ -672,7 +672,7 @@ function prefillForm(c) {
   set('clientLogoURL', c.clientLogoURL);
   set('ghostoverURL', c.ghostoverURL);
 
-  // Rebuild image fields for correct template type, then fill images
+  // Build image fields (always 6), fill values, then auto-detect type
   buildImageFields();
   ['Img01URL','Img02URL','Img03URL','Img04URL','Img05URL','Img06URL'].forEach((key, i) => {
     if (c[key]) {
@@ -685,6 +685,7 @@ function prefillForm(c) {
       }
     }
   });
+  detectTemplateType();
 
   // Colours
   const colourKeys = ['globalBkgColor','globalTextColor','buttonBkgColor',
@@ -715,18 +716,17 @@ const PLACEHOLDER_SVG = `<svg class="placeholder-icon" viewBox="0 0 24 24" fill=
 const UPLOAD_ICON = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke="#777794" stroke-width="1.8" stroke-linecap="round"/><polyline points="17 8 12 3 7 8" stroke="#777794" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="3" x2="12" y2="15" stroke="#777794" stroke-width="1.8" stroke-linecap="round"/></svg>`;
 
 function buildImageFields() {
-  const type  = document.getElementById('templateType').value;
-  const count = type === 'Carousel' ? 6 : 1;
   const container = document.getElementById('img-fields');
   container.innerHTML = '';
 
-  for (let i = 1; i <= count; i++) {
+  for (let i = 1; i <= 6; i++) {
     const pad     = String(i).padStart(2, '0');
     const fieldId = `Img${pad}URL`;
     const isRequired = i === 1;
 
     const field = document.createElement('div');
     field.className = 'field';
+    field.id = `img-field-${i}`;
     field.innerHTML = `
       <div class="img-label-row">
         <label>Image ${i}${isRequired ? ' <span class="required">*</span>' : ' <span class="hint">(optional)</span>'}</label>
@@ -755,11 +755,14 @@ function buildImageFields() {
     `;
     container.appendChild(field);
 
-    // URL input → live preview
-    const urlInput  = field.querySelector(`#${fieldId}`);
+    // URL input → live preview + auto-detect
+    const urlInput    = field.querySelector(`#${fieldId}`);
     const previewImg  = field.querySelector(`#img-img${i}`);
     const previewIcon = field.querySelector('.placeholder-icon');
-    urlInput.addEventListener('input', () => updateImgPreview(urlInput, previewImg, previewIcon));
+    urlInput.addEventListener('input', () => {
+      updateImgPreview(urlInput, previewImg, previewIcon);
+      detectTemplateType();
+    });
 
     // Mode toggle buttons
     field.querySelectorAll('.mode-btn').forEach(btn =>
@@ -771,6 +774,31 @@ function buildImageFields() {
     const fileInput  = field.querySelector(`#file-${fieldId}`);
     uploadArea.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', () => handleFileUpload(fileInput, fieldId, previewImg, previewIcon));
+  }
+
+  detectTemplateType();
+}
+
+// ─── TEMPLATE AUTO-DETECTION ──────────────────────────────────────
+// Counts filled image fields and updates the templateType dropdown
+// and field visibility. Fields 1–2 always visible; 3–6 shown only
+// for Carousel. With 0 images, follows the current dropdown value.
+function detectTemplateType() {
+  let filled = 0;
+  for (let i = 1; i <= 6; i++) {
+    const input = document.getElementById(`Img${String(i).padStart(2, '0')}URL`);
+    if (input && input.value.trim()) filled++;
+  }
+
+  const isCarousel = filled === 0
+    ? document.getElementById('templateType').value === 'Carousel'
+    : filled >= 2;
+
+  document.getElementById('templateType').value = isCarousel ? 'Carousel' : 'Single';
+
+  for (let i = 3; i <= 6; i++) {
+    const field = document.getElementById(`img-field-${i}`);
+    if (field) field.style.display = isCarousel ? '' : 'none';
   }
 }
 
@@ -815,21 +843,24 @@ async function handleFileUpload(fileInput, fieldId, previewImg, previewIcon) {
       previewImg.src = json.url;
       statusEl.textContent = '✓';
       statusEl.className = 'upload-status done';
+      detectTemplateType();
     } else {
       urlInput.value = '';
       statusEl.textContent = json.error || 'Upload failed';
       statusEl.className = 'upload-status error';
+      detectTemplateType();
     }
   } catch {
     urlInput.value = '';
     statusEl.textContent = 'Upload failed';
     statusEl.className = 'upload-status error';
+    detectTemplateType();
   } finally {
     URL.revokeObjectURL(objectURL);
   }
 }
 
-document.getElementById('templateType').addEventListener('change', buildImageFields);
+document.getElementById('templateType').addEventListener('change', detectTemplateType);
 
 // ─── DEBUG HELPERS ────────────────────────────────────────────────
 function showDebug(msg) {
