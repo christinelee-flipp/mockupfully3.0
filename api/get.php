@@ -11,14 +11,16 @@
 
 require __DIR__ . '/config.php';
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+// Accept GET (?id=) for prototype viewers, POST (JSON body) for form.html
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    $id = $_GET['id'] ?? '';
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $body = get_json_body();
+    // Accept both casings — form.html sends lowercase 'campaignid'
+    $id = $body['campaignid'] ?? $body['campaignID'] ?? '';
+} else {
     error('Method not allowed', 405);
 }
-
-$body = get_json_body();
-
-// Accept both casings — form.html sends lowercase 'campaignid'
-$id = $body['campaignid'] ?? $body['campaignID'] ?? '';
 
 if (!$id) {
     error('campaignid is required');
@@ -31,7 +33,7 @@ if (!validate_campaign_id($id)) {
 $campaign = read_campaign($id);
 
 if ($campaign === null) {
-    error('Campaign not found', 404);
+    respond(['error' => 'Campaign not found', 'id' => $id], 404);
 }
 
 respond($campaign);

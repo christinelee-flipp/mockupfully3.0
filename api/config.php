@@ -3,7 +3,11 @@
  * config.php — Shared config and helpers for Mockupfully API
  */
 
-define('DATA_DIR', __DIR__ . '/../data/domination/');
+// Data directories by product prefix
+const DATA_DIRS = [
+    'domination' => __DIR__ . '/../data/domination/',
+    'click2go'   => __DIR__ . '/../data/click2go/',
+];
 
 // ── CORS + JSON headers ────────────────────────────────────────────
 function send_headers(): void {
@@ -43,15 +47,17 @@ function get_json_body(): array {
 
 /**
  * Validate and sanitise a campaignID.
- * Only allows the format: domination-YYYYMMDDHHMMSS
+ * Accepts: domination-YYYYMMDDHHMMSS  or  click2go-YYYYMMDDHHMMSS
  */
 function validate_campaign_id(string $id): bool {
-    return (bool) preg_match('/^domination-\d{14}$/', $id);
+    return (bool) preg_match('/^(domination|click2go)-\d{14}$/', $id);
 }
 
 // ── File I/O ───────────────────────────────────────────────────────
 function campaign_path(string $campaignID): string {
-    return DATA_DIR . $campaignID . '.json';
+    $prefix = explode('-', $campaignID)[0];
+    $dir    = DATA_DIRS[$prefix] ?? DATA_DIRS['domination'];
+    return $dir . $campaignID . '.json';
 }
 
 function read_campaign(string $campaignID): ?array {
