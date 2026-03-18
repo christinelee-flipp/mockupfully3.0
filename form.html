@@ -474,19 +474,16 @@
         </select>
       </div>
     </div>
-    <div class="field-row cols-2">
-      <div class="field">
-        <label>Template Type <span class="required">*</span></label>
-        <select id="templateType">
-          <option value="Carousel">Carousel</option>
-          <option value="Single">Single Image</option>
-        </select>
-      </div>
+    <div class="field-row cols-1">
       <div class="field">
         <label>Button Text <span class="required">*</span></label>
         <input type="text" id="buttonText" placeholder="e.g. Shop Now" value="Click Here">
       </div>
     </div>
+    <select id="templateType" style="display:none">
+      <option value="Single">Single Image</option>
+      <option value="Carousel">Carousel</option>
+    </select>
     <div class="field-row cols-1">
       <div class="field">
         <label>Claim Text <span class="hint">(shown below logo)</span></label>
@@ -612,8 +609,9 @@
   <!-- 4. Images -->
   <div class="form-section">
     <div class="section-title">Images <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--mid)">— 1:1 ratio recommended</span></div>
+    <div id="template-label" style="font-size:12px;font-weight:700;color:var(--mid);margin-top:-8px;margin-bottom:20px;">Template: Single Image</div>
     <div class="field-row cols-1" id="img-fields">
-      <!-- populated by JS based on templateType -->
+      <!-- populated by JS -->
     </div>
   </div>
 
@@ -666,7 +664,6 @@ function prefillForm(c) {
   };
   set('campaignName', c.campaignName);
   set('country', c.country);
-  set('templateType', c.templateType);
   set('buttonText', c.buttonText);
   set('claimText', c.claimText);
   set('clientLogoURL', c.clientLogoURL);
@@ -790,11 +787,10 @@ function detectTemplateType() {
     if (input && input.value.trim()) filled++;
   }
 
-  const isCarousel = filled === 0
-    ? document.getElementById('templateType').value === 'Carousel'
-    : filled >= 2;
+  const isCarousel = filled >= 2;
 
   document.getElementById('templateType').value = isCarousel ? 'Carousel' : 'Single';
+  document.getElementById('template-label').textContent = isCarousel ? 'Template: Carousel' : 'Template: Single Image';
 
   for (let i = 3; i <= 6; i++) {
     const field = document.getElementById(`img-field-${i}`);
@@ -859,8 +855,6 @@ async function handleFileUpload(fileInput, fieldId, previewImg, previewIcon) {
     URL.revokeObjectURL(objectURL);
   }
 }
-
-document.getElementById('templateType').addEventListener('change', detectTemplateType);
 
 // ─── DEBUG HELPERS ────────────────────────────────────────────────
 function showDebug(msg) {
