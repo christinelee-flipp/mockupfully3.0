@@ -20,7 +20,7 @@
 
   .phone {
     width: 430px;
-    min-height: 932px;
+    height: 932px;
     background: white;
     overflow: hidden;
     position: relative;
@@ -712,11 +712,20 @@ function render(d) {
   xPath.setAttribute('stroke', iconColor);
 
   // Top-bar client logo
+  const logoEl = document.getElementById('top-logo');
   if (d.clientLogoURL) {
-    const logoEl = document.getElementById('top-logo');
     logoEl.src = d.clientLogoURL;
     logoEl.style.display = 'block';
-    logoEl.onerror = () => { logoEl.style.display = 'none'; };
+    logoEl.onerror = () => {
+      logoEl.style.display = 'none';
+      const wrap = logoEl.parentElement;
+      if (wrap && d.clientName) {
+        const fallback = document.createElement('span');
+        fallback.textContent = d.clientName;
+        fallback.style.cssText = 'font-family:Montserrat,sans-serif;font-weight:600;font-size:14px;color:var(--icon-color,#fff);';
+        wrap.appendChild(fallback);
+      }
+    };
   }
 
   // CTA button
@@ -751,11 +760,20 @@ function renderBanner(d) {
   document.getElementById('banner-layout').style.display = 'flex';
 
   // Left column logo
+  const bannerLogoEl = document.getElementById('banner-col-logo');
   if (d.clientLogoURL) {
-    const logoEl = document.getElementById('banner-col-logo');
-    logoEl.src = d.clientLogoURL;
-    logoEl.style.display = 'block';
-    logoEl.onerror = () => { logoEl.style.display = 'none'; };
+    bannerLogoEl.src = d.clientLogoURL;
+    bannerLogoEl.style.display = 'block';
+    bannerLogoEl.onerror = () => {
+      bannerLogoEl.style.display = 'none';
+      const wrap = bannerLogoEl.parentElement;
+      if (wrap && d.clientName) {
+        const fallback = document.createElement('span');
+        fallback.textContent = d.clientName;
+        fallback.style.cssText = 'font-family:Montserrat,sans-serif;font-weight:600;font-size:16px;color:var(--global-text-color,#000);';
+        wrap.appendChild(fallback);
+      }
+    };
   }
 
   // Claim text
