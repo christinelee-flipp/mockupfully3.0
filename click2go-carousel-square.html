@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=430, initial-scale=1.0">
+<title>Click2Go Carousel Square</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #888;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  /* ── PHONE FRAME ── */
+  .phone {
+    width: 430px;
+    height: 932px;
+    background: white;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── LOADING ── */
+  .loading {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    background: #f5f5f5;
+  }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid #ddd;
+    border-top-color: #555;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading p { font-size: 13px; color: #666; }
+
+  /* ── ERROR ── */
+  .error-screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 32px;
+    background: #f5f5f5;
+  }
+  .error-screen h2 { font-size: 18px; color: #333; font-weight: 600; }
+  .error-screen p  { font-size: 13px; color: #666; text-align: center; line-height: 1.5; }
+
+  /* ── STATUS BAR ── */
+  .status-bar {
+    height: 54px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px 0;
+  }
+  .status-time {
+    font-family: 'SF Pro Text', 'Montserrat', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--icon-color, white);
+  }
+  .status-icons { display: flex; align-items: center; gap: 2px; }
+  .signal {
+    display: flex;
+    align-items: flex-end;
+    gap: 1.5px;
+    height: 12px;
+    margin-right: 2px;
+  }
+  .signal span { border-radius: 1px; width: 3px; background: var(--icon-color, white); }
+  .signal span:nth-child(1) { height: 4px; }
+  .signal span:nth-child(2) { height: 6px; }
+  .signal span:nth-child(3) { height: 9px; }
+  .signal span:nth-child(4) { height: 12px; }
+  .battery {
+    width: 28px; height: 14px;
+    border: 1.5px solid var(--icon-color, white);
+    border-radius: 3px;
+    position: relative;
+  }
+  .battery::after {
+    content: '';
+    position: absolute;
+    right: -5px; top: 3px;
+    width: 3px; height: 6px;
+    background: var(--icon-color, white);
+    border-radius: 0 1px 1px 0;
+  }
+  .battery-fill {
+    position: absolute;
+    top: 1px; left: 1px; bottom: 1px;
+    width: 70%;
+    background: var(--icon-color, white);
+    border-radius: 1px;
+  }
+
+  /* ── TOP BAR ── */
+  .top-bar {
+    height: 72px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 16px;
+  }
+  .top-logo-wrap {
+    height: 56px;
+    max-width: 150px;
+    display: flex;
+    align-items: center;
+  }
+  .top-logo-wrap img {
+    max-height: 56px;
+    max-width: 150px;
+    width: auto; height: auto;
+    object-fit: contain;
+  }
+  .close-btn {
+    width: 38px; height: 38px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── AD CONTENT ── */
+  .ad-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ── CAROUSEL LAYOUT ── */
+  /* Left 246px (24px + 198px content + 24px) | Right: 160px card column */
+  .carousel-layout {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .carousel-left {
+    width: 246px;
+    flex-shrink: 0;
+    padding-left: 24px;
+    padding-right: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  /* ── COL LOGO ── */
+  .col-logo {
+    max-height: 80px;
+    max-width: 198px;
+    width: auto; height: auto;
+    object-fit: contain;
+    flex-shrink: 0;
+    display: block;
+  }
+
+  /* ── CLAIM TEXT ── */
+  .claim-text {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    font-size: 26px;
+    line-height: 40px;
+    letter-spacing: -0.24px;
+    color: var(--global-text-color, #000000);
+  }
+
+  /* ── CARD COLUMN ── */
+  /* Height = 2 visible cards: padding-top(8) + card(160) + gap(24) + card(160) = 352px */
+  .card-column {
+    width: 160px;
+    height: 352px;
+    flex-shrink: 0;
+    overflow: hidden;
+    position: relative;
+  }
+  .card-track {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    transition: transform 600ms ease-in-out;
+    will-change: transform;
+    padding-top: 8px;
+  }
+  .card-track.no-transition { transition: none; }
+
+  /* ── PRODUCT CARD — SQUARE (160×160) ── */
+  .product-card {
+    width: 160px;
+    height: 160px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+  }
+  .card-img-wrap {
+    height: 120px;
+    flex-shrink: 0;
+    overflow: hidden;
+    border-radius: 8px 8px 0 0;
+  }
+  .card-img-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+  }
+  .card-bottom {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    flex: 1;
+  }
+  .card-prod-name {
+    flex: 1;
+    min-width: 0;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    font-size: 10px;
+    line-height: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .card-vedi {
+    flex-shrink: 0;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    font-size: 10px;
+    letter-spacing: 0.1px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 2px 4px 4px;
+    line-height: 1;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  /* ── CTA AREA ── */
+  .cta-area {
+    height: 73px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cta-button {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1;
+    border-radius: 12px;
+    padding: 12px 24px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    outline: none;
+  }
+
+  /* ── STEP 2 PLACEHOLDER ── */
+  .step2-overlay {
+    position: absolute;
+    inset: 0;
+    background: #888888;
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .step2-overlay.visible { display: flex; }
+  .step2-overlay p {
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+  }
+  .step2-overlay small {
+    color: rgba(255,255,255,0.65);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+  }
+
+  /* ── SAFARI FOOTER ── */
+  .safari-footer {
+    height: 128px;
+    background: #f7f7f7;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding-top: 8px;
+  }
+  .safari-bar {
+    width: 376px;
+    height: 42px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px 0 rgba(0,0,0,0.13);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    flex-shrink: 0;
+  }
+  .safari-bar-aa {
+    font-family: 'SF Pro Text', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: #555;
+    width: 24px;
+    text-align: center;
+  }
+  .safari-bar-url {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .safari-bar-url span {
+    font-family: 'SF Pro Display', sans-serif;
+    font-size: 15px;
+    color: #202124;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .safari-nav {
+    width: 395px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    padding: 0 2px;
+  }
+  .safari-nav svg { width: 24px; height: 24px; display: block; }
+
+  /* ── DEMO BADGE ── */
+  .demo-badge {
+    position: absolute;
+    top: 8px; right: 8px;
+    z-index: 200;
+    background: rgba(0,0,0,0.55);
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    padding: 3px 7px;
+    border-radius: 4px;
+    pointer-events: none;
+    display: none;
+  }
+  .demo-badge.visible { display: block; }
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+
+  <div class="demo-badge" id="demo-badge">Demo Mode</div>
+
+  <!-- LOADING -->
+  <div class="loading" id="state-loading">
+    <div class="spinner"></div>
+    <p>Loading campaign…</p>
+  </div>
+
+  <!-- ERROR -->
+  <div class="error-screen" id="state-error" style="display:none">
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+      <circle cx="24" cy="24" r="22" stroke="#ccc" stroke-width="2"/>
+      <path d="M24 14v14M24 32v2" stroke="#ccc" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
+    <h2>Campaign not found</h2>
+    <p id="error-msg">The campaign could not be loaded.</p>
+  </div>
+
+  <!-- PROTOTYPE -->
+  <div id="proto" style="display:none; flex-direction:column; flex:1">
+
+    <!-- STATUS BAR -->
+    <div class="status-bar" id="status-bar">
+      <span class="status-time">10:10</span>
+      <div class="status-icons">
+        <div class="signal"><span></span><span></span><span></span><span></span></div>
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="none" style="margin-right:2px">
+          <path d="M8 9.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3z" fill="var(--icon-color,white)"/>
+          <path d="M4.1 7.1C5.1 6.1 6.5 5.5 8 5.5s2.9.6 3.9 1.6" stroke="var(--icon-color,white)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          <path d="M1.3 4.3C3 2.6 5.4 1.5 8 1.5s5 1.1 6.7 2.8" stroke="var(--icon-color,white)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        </svg>
+        <div class="battery"><div class="battery-fill"></div></div>
+      </div>
+    </div>
+
+    <!-- TOP BAR -->
+    <div class="top-bar" id="top-bar">
+      <div class="top-logo-wrap">
+        <img id="top-logo" src="" alt="" style="display:none">
+      </div>
+      <div class="close-btn">
+        <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
+          <circle cx="19" cy="19" r="18" stroke-width="1.5" id="close-circle"/>
+          <path d="M13 13l12 12M25 13L13 25" stroke-width="1.8" stroke-linecap="round" id="close-x"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- AD CONTENT -->
+    <div class="ad-content" id="ad-content">
+
+      <!-- CAROUSEL LAYOUT -->
+      <div class="carousel-layout">
+        <div class="carousel-left">
+          <img id="col-logo" src="" alt="" class="col-logo" style="display:none">
+          <div class="claim-text" id="claim-text"></div>
+        </div>
+        <div class="card-column">
+          <div class="card-track" id="card-track"></div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="cta-area">
+        <button class="cta-button" id="cta-btn" onclick="showStep2()">Find the store</button>
+      </div>
+
+      <!-- STEP 2 PLACEHOLDER -->
+      <div class="step2-overlay" id="step2-overlay">
+        <p>Step 2 — coming in Pass 2</p>
+        <small>Location permission modal</small>
+      </div>
+
+    </div><!-- /ad-content -->
+
+    <!-- SAFARI FOOTER -->
+    <div class="safari-footer">
+      <div class="safari-bar">
+        <span class="safari-bar-aa">AA</span>
+        <div class="safari-bar-url">
+          <svg width="14" height="16" viewBox="0 0 14 16" fill="none">
+            <path d="M3.5 7V5a3.5 3.5 0 017 0v2" stroke="#555" stroke-width="1.3" stroke-linecap="round"/>
+            <rect x="1" y="7" width="12" height="8" rx="2" stroke="#555" stroke-width="1.3"/>
+          </svg>
+          <span id="safari-url">designlab.shopfully.com</span>
+        </div>
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M16 10a6 6 0 11-1.76-4.24" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M14 5.5l.5 1.5 1.5-.5" stroke="#555" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="safari-nav">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="#C7C7CC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M8.5 8.5L12 5l3.5 3.5" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 5v10" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M5 14v4a1 1 0 001 1h12a1 1 0 001-1v-4" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M5 4h14a1 1 0 011 1v15l-7-4-7 4V5a1 1 0 011-1z" stroke="#007AFF" stroke-width="1.8" stroke-linejoin="round"/>
+        </svg>
+        <svg viewBox="0 0 24 24" fill="none">
+          <rect x="4" y="7" width="13" height="13" rx="2" stroke="#007AFF" stroke-width="1.8"/>
+          <path d="M8 7V5a2 2 0 012-2h9a2 2 0 012 2v11a2 2 0 01-2 2h-2" stroke="#007AFF" stroke-width="1.5"/>
+        </svg>
+      </div>
+    </div><!-- /safari-footer -->
+
+  </div><!-- /proto -->
+
+</div><!-- /phone -->
+
+<script>
+const EXPECTED_TYPE = 'carousel_square';
+
+const DEMO_DATA = {
+  campaignID:              'click2go-demo',
+  campaignName:            'LIDL Italia Promo',
+  location:                'IT',
+  templateType:            'carousel_square',
+  clientLogoURL:           'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Lidl-Logo.svg/2048px-Lidl-Logo.svg.png',
+  claimText:               'Le offerte della settimana',
+  globalBkgType:           'color',
+  globalBkgColor:          '#FFFFFF',
+  globalTextColor:         '#015AA2',
+  buttonBkgColor:          '#015AA2',
+  buttonTextColor:         '#FFF200',
+  productBkgType:          'color',
+  productBkgColor:         'rgba(255,255,255,0.8)',
+  productTextColor:        '#000000',
+  productCardBtnBkgColor:  '#015AA2',
+  productCardBtnTextColor: '#FFF200',
+  Prod01Name:              'Pollo fresco',
+  Prod01ImageURL:          'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400',
+  Prod01LinkURL:           'https://www.lidl.it/',
+  Prod02Name:              'Latte biologico',
+  Prod02ImageURL:          'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400',
+  Prod02LinkURL:           'https://www.lidl.it/',
+  Prod03Name:              'Salmone',
+  Prod03ImageURL:          'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=400',
+  Prod03LinkURL:           'https://www.lidl.it/',
+  websiteURL:              '',
+};
+
+// Card dimensions for square template
+const CARD_H     = 160; // total card height px
+const CARD_IMG_H = 120; // image portion px
+const CARD_GAP   = 24;
+const CARD_STEP  = CARD_H + CARD_GAP; // 184px — one scroll step
+
+const CTA_LABELS = {
+  IT: 'Trova lo store',
+  ES: 'Encuentra la tienda',
+  FR: 'Trouver le magasin',
+  DE: 'Store finden',
+  PT: 'Encontrar a loja'
+};
+
+function isDark(hex) {
+  if (!hex || hex.startsWith('linear') || !hex.startsWith('#')) return false;
+  const c = hex.replace('#', '');
+  const r = parseInt(c.length === 3 ? c[0]+c[0] : c.slice(0,2), 16);
+  const g = parseInt(c.length === 3 ? c[1]+c[1] : c.slice(2,4), 16);
+  const b = parseInt(c.length === 3 ? c[2]+c[2] : c.slice(4,6), 16);
+  return (r*0.299 + g*0.587 + b*0.114) < 128;
+}
+
+function buildBg(d) {
+  if (d.globalBkgType === 'gradient' && d.globalBkgTop && d.globalBkgBottom) {
+    return `linear-gradient(to bottom, ${d.globalBkgTop}, ${d.globalBkgBottom})`;
+  }
+  return d.globalBkgColor || '#EBEBF5';
+}
+
+function showStep2() {
+  document.getElementById('step2-overlay').classList.add('visible');
+}
+
+function showError(msg) {
+  document.getElementById('state-loading').style.display = 'none';
+  document.getElementById('state-error').style.display  = 'flex';
+  document.getElementById('error-msg').textContent = msg;
+}
+
+// ─── BUILD PRODUCT CARD ───────────────────────────────────────────────
+function buildCard(prod, d) {
+  const card = document.createElement('div');
+  card.className = 'product-card';
+
+  let cardBg;
+  if (d.productBkgType === 'gradient' && d.productBkgTop && d.productBkgBottom) {
+    cardBg = `linear-gradient(to bottom, ${d.productBkgTop}, ${d.productBkgBottom})`;
+  } else {
+    cardBg = d.productBkgColor || 'rgba(255,255,255,0.8)';
+  }
+  card.style.background = cardBg;
+
+  const imgWrap = document.createElement('div');
+  imgWrap.className = 'card-img-wrap';
+  if (prod.imageURL) {
+    const img = document.createElement('img');
+    img.src = prod.imageURL;
+    img.alt = prod.name || '';
+    img.onerror = () => { imgWrap.style.background = 'rgba(0,0,0,0.06)'; };
+    imgWrap.appendChild(img);
+  }
+
+  const bottom = document.createElement('div');
+  bottom.className = 'card-bottom';
+
+  const nameEl = document.createElement('p');
+  nameEl.className = 'card-prod-name';
+  nameEl.textContent = prod.name || '';
+  nameEl.style.color = d.productTextColor || '#000000';
+
+  const vediEl = document.createElement('div');
+  vediEl.className = 'card-vedi';
+  vediEl.textContent = 'Vedi';
+  vediEl.style.background  = d.productCardBtnBkgColor  || '#ffffff';
+  vediEl.style.color        = d.productCardBtnTextColor || '#000000';
+  vediEl.style.borderColor  = d.productCardBtnBkgColor  || '#000000';
+
+  bottom.appendChild(nameEl);
+  bottom.appendChild(vediEl);
+  card.appendChild(imgWrap);
+  card.appendChild(bottom);
+
+  if (prod.linkURL) {
+    card.addEventListener('click', () => { window.location.href = prod.linkURL; });
+  }
+  return card;
+}
+
+// ─── AUTO-SCROLL ──────────────────────────────────────────────────────
+// Duplicated list [P1,P2,P3,P1,P2,P3] for seamless vertical looping.
+let scrollTimer = null;
+
+function initAutoScroll(products, d) {
+  if (products.length < 2) return;
+
+  const track = document.getElementById('card-track');
+  track.innerHTML = '';
+
+  const doubled = [...products, ...products];
+  doubled.forEach(prod => track.appendChild(buildCard(prod, d)));
+
+  let idx = 0;
+
+  function scrollTo(i, animate) {
+    if (!animate) track.classList.add('no-transition');
+    track.style.transform = `translateY(-${i * CARD_STEP}px)`;
+    if (!animate) {
+      track.offsetHeight; // force reflow
+      track.classList.remove('no-transition');
+    }
+  }
+
+  function tick() {
+    idx++;
+    if (idx >= products.length) {
+      scrollTo(idx, true);
+      scrollTimer = setTimeout(() => {
+        idx = idx - products.length;
+        scrollTo(idx, false);
+        scrollTimer = setTimeout(tick, 3000);
+      }, 650);
+    } else {
+      scrollTo(idx, true);
+      scrollTimer = setTimeout(tick, 3000);
+    }
+  }
+
+  scrollTimer = setTimeout(tick, 2500);
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────
+function render(d) {
+  document.getElementById('state-loading').style.display = 'none';
+  document.getElementById('proto').style.display = 'flex';
+
+  const phone = document.getElementById('phone');
+  const bg = buildBg(d);
+  const topHex = d.globalBkgType === 'gradient' ? (d.globalBkgTop || '#000') : (d.globalBkgColor || '#fff');
+  const iconColor = isDark(topHex) ? '#ffffff' : '#000000';
+
+  phone.style.setProperty('--global-text-color', d.globalTextColor || '#000000');
+  phone.style.setProperty('--button-bkg-color',  d.buttonBkgColor  || '#000000');
+  phone.style.setProperty('--button-text-color', d.buttonTextColor || '#ffffff');
+  phone.style.setProperty('--icon-color', iconColor);
+
+  document.getElementById('status-bar').style.background = bg;
+  document.getElementById('top-bar').style.background    = bg;
+  document.getElementById('ad-content').style.background = bg;
+
+  document.getElementById('close-circle').setAttribute('stroke', iconColor);
+  document.getElementById('close-x').setAttribute('stroke', iconColor);
+
+  // Top-bar logo — image only, no text fallback
+  if (d.clientLogoURL) {
+    const logoEl = document.getElementById('top-logo');
+    logoEl.src = d.clientLogoURL;
+    logoEl.style.display = 'block';
+    logoEl.onerror = () => { logoEl.style.display = 'none'; };
+  }
+
+  // CTA button
+  const ctaBtn = document.getElementById('cta-btn');
+  const loc = (d.location || '').toUpperCase();
+  ctaBtn.textContent = CTA_LABELS[loc] || 'Find the store';
+  ctaBtn.style.background = d.buttonBkgColor  || '#000000';
+  ctaBtn.style.color       = d.buttonTextColor || '#ffffff';
+  ctaBtn.style.borderColor = d.buttonBkgColor  || '#000000';
+
+  // Safari URL bar
+  if (d.websiteURL) {
+    try {
+      const u = new URL(d.websiteURL.startsWith('http') ? d.websiteURL : 'https://' + d.websiteURL);
+      document.getElementById('safari-url').textContent = u.hostname;
+    } catch (_) {}
+  }
+
+  // Left column logo — image only
+  if (d.clientLogoURL) {
+    const colLogo = document.getElementById('col-logo');
+    colLogo.src = d.clientLogoURL;
+    colLogo.style.display = 'block';
+    colLogo.onerror = () => { colLogo.style.display = 'none'; };
+  }
+
+  // Claim text
+  document.getElementById('claim-text').textContent = d.claimText || '';
+
+  // Products
+  const products = [
+    { name: d.Prod01Name, imageURL: d.Prod01ImageURL, linkURL: d.Prod01LinkURL },
+    { name: d.Prod02Name, imageURL: d.Prod02ImageURL, linkURL: d.Prod02LinkURL },
+    { name: d.Prod03Name, imageURL: d.Prod03ImageURL, linkURL: d.Prod03LinkURL },
+  ].filter(p => p.imageURL && p.imageURL.trim());
+
+  const track = document.getElementById('card-track');
+  track.innerHTML = '';
+
+  if (products.length === 0) return;
+
+  if (products.length === 1) {
+    track.appendChild(buildCard(products[0], d));
+    return;
+  }
+
+  initAutoScroll(products, d);
+}
+
+// ─── LOAD DATA ────────────────────────────────────────────────────────
+async function init() {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
+
+  if (!id) {
+    document.getElementById('demo-badge').classList.add('visible');
+    render(DEMO_DATA);
+    return;
+  }
+
+  let data;
+  try {
+    const res = await fetch('api/get.php?id=' + encodeURIComponent(id));
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    data = await res.json();
+  } catch (err) {
+    showError('Could not fetch campaign "' + id + '". ' + err.message);
+    return;
+  }
+
+  if (!data || !data.campaignID) {
+    showError('Campaign "' + id + '" was not found.');
+    return;
+  }
+
+  const type = (data.templateType || '').toLowerCase();
+  if (type !== EXPECTED_TYPE) {
+    showError(`This file only renders "${EXPECTED_TYPE}" campaigns. Campaign "${id}" is type "${data.templateType}".`);
+    return;
+  }
+
+  render(data);
+}
+
+init();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+  TODO: Steps 2–5 — built in Pass 2
+  Step 2: Location permission modal
+  Step 3: Static map + store pin + drawer
+  Step 4: Google Maps screenshot
+  Step 5: Retailer list
+═══════════════════════════════════════════════════════════════════ -->
+</body>
+</html>
