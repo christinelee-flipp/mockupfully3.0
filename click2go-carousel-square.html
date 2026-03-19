@@ -123,16 +123,9 @@
     padding: 6px 16px;
   }
   .top-logo-wrap {
+    width: 56px;
     height: 56px;
-    max-width: 150px;
-    display: flex;
-    align-items: center;
-  }
-  .top-logo-wrap img {
-    max-height: 56px;
-    max-width: 150px;
-    width: auto; height: auto;
-    object-fit: contain;
+    flex-shrink: 0;
   }
   .close-btn {
     width: 38px; height: 38px;
@@ -161,6 +154,26 @@
     align-items: center;
     min-height: 0;
     overflow: hidden;
+    position: relative;
+  }
+
+  /* ── CONTENT LOGO ── */
+  .content-logo-wrap {
+    position: absolute;
+    top: 0;
+    left: 24px;
+    width: 174px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    z-index: 1;
+  }
+  .content-logo-wrap img {
+    max-height: 80px;
+    max-width: 174px;
+    width: auto; height: auto;
+    object-fit: contain;
+    display: none;
   }
   .carousel-left {
     width: 246px;
@@ -169,18 +182,7 @@
     padding-right: 24px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: 16px;
-  }
-
-  /* ── COL LOGO ── */
-  .col-logo {
-    max-height: 80px;
-    max-width: 198px;
-    width: auto; height: auto;
-    object-fit: contain;
-    flex-shrink: 0;
-    display: block;
+    justify-content: flex-start;
   }
 
   /* ── CLAIM TEXT ── */
@@ -191,13 +193,15 @@
     line-height: 40px;
     letter-spacing: -0.24px;
     color: var(--global-text-color, #000000);
+    margin-top: auto;
+    margin-bottom: auto;
   }
 
   /* ── CARD COLUMN ── */
-  /* Height = 2 visible cards: padding-top(8) + card(160) + gap(24) + card(160) = 352px */
+  /* Height = 3 visible cards: card(200) + gap(2) + card(200) + gap(2) + card(200) = 604px */
   .card-column {
     width: 160px;
-    height: 352px;
+    height: 604px;
     flex-shrink: 0;
     overflow: hidden;
     position: relative;
@@ -205,17 +209,16 @@
   .card-track {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 2px;
     transition: transform 600ms ease-in-out;
     will-change: transform;
-    padding-top: 8px;
   }
   .card-track.no-transition { transition: none; }
 
-  /* ── PRODUCT CARD — SQUARE (160×160) ── */
+  /* ── PRODUCT CARD — SQUARE (160×200) ── */
   .product-card {
     width: 160px;
-    height: 160px;
+    height: 200px;
     flex-shrink: 0;
     border-radius: 8px;
     overflow: hidden;
@@ -224,7 +227,7 @@
     cursor: pointer;
   }
   .card-img-wrap {
-    height: 120px;
+    height: 160px;
     flex-shrink: 0;
     overflow: hidden;
     border-radius: 8px 8px 0 0;
@@ -429,9 +432,7 @@
 
     <!-- TOP BAR -->
     <div class="top-bar" id="top-bar">
-      <div class="top-logo-wrap">
-        <img id="top-logo" src="" alt="" style="display:none">
-      </div>
+      <div class="top-logo-wrap"></div>
       <div class="close-btn">
         <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
           <circle cx="19" cy="19" r="18" stroke-width="1.5" id="close-circle"/>
@@ -445,8 +446,10 @@
 
       <!-- CAROUSEL LAYOUT -->
       <div class="carousel-layout">
+        <div class="content-logo-wrap">
+          <img id="content-logo" src="" alt="">
+        </div>
         <div class="carousel-left">
-          <img id="col-logo" src="" alt="" class="col-logo" style="display:none">
           <div class="claim-text" id="claim-text"></div>
         </div>
         <div class="card-column">
@@ -538,10 +541,10 @@ const DEMO_DATA = {
 };
 
 // Card dimensions for square template
-const CARD_H     = 160; // total card height px
-const CARD_IMG_H = 120; // image portion px
-const CARD_GAP   = 24;
-const CARD_STEP  = CARD_H + CARD_GAP; // 184px — one scroll step
+const CARD_H     = 200; // total card height px
+const CARD_IMG_H = 160; // image portion px
+const CARD_GAP   = 2;
+const CARD_STEP  = CARD_H + CARD_GAP; // 202px — one scroll step
 
 const CTA_LABELS = {
   IT: 'Trova lo store',
@@ -690,12 +693,12 @@ function render(d) {
   document.getElementById('close-circle').setAttribute('stroke', iconColor);
   document.getElementById('close-x').setAttribute('stroke', iconColor);
 
-  // Top-bar logo — image only, no text fallback
+  // Content area logo (top-left of carousel)
   if (d.clientLogoURL) {
-    const logoEl = document.getElementById('top-logo');
-    logoEl.src = d.clientLogoURL;
-    logoEl.style.display = 'block';
-    logoEl.onerror = () => { logoEl.style.display = 'none'; };
+    const contentLogo = document.getElementById('content-logo');
+    contentLogo.src = d.clientLogoURL;
+    contentLogo.style.display = 'block';
+    contentLogo.onerror = () => { contentLogo.style.display = 'none'; };
   }
 
   // CTA button
@@ -714,13 +717,6 @@ function render(d) {
     } catch (_) {}
   }
 
-  // Left column logo — image only
-  if (d.clientLogoURL) {
-    const colLogo = document.getElementById('col-logo');
-    colLogo.src = d.clientLogoURL;
-    colLogo.style.display = 'block';
-    colLogo.onerror = () => { colLogo.style.display = 'none'; };
-  }
 
   // Claim text
   document.getElementById('claim-text').textContent = d.claimText || '';

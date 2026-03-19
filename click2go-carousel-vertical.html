@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=430, initial-scale=1.0">
 <title>Click2Go Carousel Vertical</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -123,16 +124,10 @@
     padding: 6px 16px;
   }
   .top-logo-wrap {
+    width: 0;
     height: 56px;
-    max-width: 150px;
-    display: flex;
-    align-items: center;
-  }
-  .top-logo-wrap img {
-    max-height: 56px;
-    max-width: 150px;
-    width: auto; height: auto;
-    object-fit: contain;
+    overflow: hidden;
+    flex-shrink: 0;
   }
   .close-btn {
     width: 38px; height: 38px;
@@ -161,6 +156,7 @@
     align-items: center;
     min-height: 0;
     overflow: hidden;
+    position: relative;
   }
   .carousel-left {
     width: 246px;
@@ -170,16 +166,24 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 16px;
   }
 
-  /* ── COL LOGO ── */
+  /* ── COL LOGO FRAME (absolute, top-left of ad content) ── */
+  /* Figma: 174×80px at left:24px, top:0 */
+  .col-logo-wrap {
+    position: absolute;
+    top: 0;
+    left: 24px;
+    width: 174px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+  }
   .col-logo {
-    max-height: 80px;
-    max-width: 198px;
-    width: auto; height: auto;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
-    flex-shrink: 0;
+    object-position: left center;
     display: block;
   }
 
@@ -427,11 +431,9 @@
       </div>
     </div>
 
-    <!-- TOP BAR -->
+    <!-- TOP BAR — close button only, logo moved to ad content -->
     <div class="top-bar" id="top-bar">
-      <div class="top-logo-wrap">
-        <img id="top-logo" src="" alt="" style="display:none">
-      </div>
+      <div class="top-logo-wrap"></div>
       <div class="close-btn">
         <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
           <circle cx="19" cy="19" r="18" stroke-width="1.5" id="close-circle"/>
@@ -445,8 +447,11 @@
 
       <!-- CAROUSEL LAYOUT -->
       <div class="carousel-layout">
-        <div class="carousel-left">
+        <!-- Logo frame: absolute top-left, 174×80px -->
+        <div class="col-logo-wrap">
           <img id="col-logo" src="" alt="" class="col-logo" style="display:none">
+        </div>
+        <div class="carousel-left">
           <div class="claim-text" id="claim-text"></div>
         </div>
         <div class="card-column">
@@ -513,7 +518,7 @@ const DEMO_DATA = {
   campaignName:            'Royal Canin Vienna',
   location:                'AT',
   templateType:            'carousel_vertical',
-  clientLogoURL:           'https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Royal-Canin-Logo.svg/2560px-Royal-Canin-Logo.svg.png',
+  clientLogoURL:           'assets/flipp-sf-logo.svg',
   claimText:               'Premium nutrition for your pet',
   globalBkgType:           'color',
   globalBkgColor:          '#FBF5E6',
@@ -689,14 +694,6 @@ function render(d) {
 
   document.getElementById('close-circle').setAttribute('stroke', iconColor);
   document.getElementById('close-x').setAttribute('stroke', iconColor);
-
-  // Top-bar logo — image only, no text fallback
-  if (d.clientLogoURL) {
-    const logoEl = document.getElementById('top-logo');
-    logoEl.src = d.clientLogoURL;
-    logoEl.style.display = 'block';
-    logoEl.onerror = () => { logoEl.style.display = 'none'; };
-  }
 
   // CTA button
   const ctaBtn = document.getElementById('cta-btn');
