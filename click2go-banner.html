@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=430, initial-scale=1.0">
 <title>Click2Go Banner</title>
@@ -122,18 +123,6 @@
     justify-content: space-between;
     padding: 6px 16px;
   }
-  .top-logo-wrap {
-    height: 56px;
-    max-width: 150px;
-    display: flex;
-    align-items: center;
-  }
-  .top-logo-wrap img {
-    max-height: 56px;
-    max-width: 150px;
-    width: auto; height: auto;
-    object-fit: contain;
-  }
   .close-btn {
     width: 38px; height: 38px;
     flex-shrink: 0;
@@ -152,57 +141,46 @@
     position: relative;
   }
 
-  /* ── BANNER LAYOUT ── */
-  /* Left 222px (24px pad + 198px content) | Right fills remaining */
-  .banner-layout {
-    flex: 1;
-    display: flex;
-    flex-direction: row;
-    min-height: 0;
-    overflow: hidden;
-  }
-  .banner-left {
-    width: 222px;
-    flex-shrink: 0;
-    padding-left: 24px;
+  /* ── AD INNER (logo + image stacked) ── */
+  .ad-inner {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: 16px;
-    overflow: hidden;
-  }
-  .banner-right {
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    position: relative;
-    align-self: stretch;
-  }
-  .banner-right img {
-    position: absolute;
-    inset: 0;
-    width: 100%; height: 100%;
-    object-fit: cover;
-  }
-
-  /* ── COL LOGO ── */
-  .col-logo {
-    max-height: 80px;
-    max-width: 198px;
-    width: auto; height: auto;
-    object-fit: contain;
+    align-items: center;
+    gap: 30px;
     flex-shrink: 0;
-    display: block;
+    overflow: hidden;
+    padding-top: 8px;
   }
 
-  /* ── CLAIM TEXT ── */
-  .claim-text {
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 500;
-    font-size: 26px;
-    line-height: 40px;
-    letter-spacing: -0.24px;
-    color: var(--global-text-color, #000000);
+  /* ── LOGO AREA ── */
+  .logo-area {
+    width: 334px;
+    height: 112px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .logo-area img {
+    max-width: 334px;
+    max-height: 112px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+
+  /* ── IMAGE AREA ── */
+  .image-area {
+    width: 430px;
+    height: 430px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .image-area img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   /* ── CTA AREA ── */
@@ -367,9 +345,7 @@
 
     <!-- TOP BAR -->
     <div class="top-bar" id="top-bar">
-      <div class="top-logo-wrap">
-        <img id="top-logo" src="" alt="" style="display:none">
-      </div>
+      <div style="width:56px;height:56px;flex-shrink:0"></div>
       <div class="close-btn">
         <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
           <circle cx="19" cy="19" r="18" stroke-width="1.5" id="close-circle"/>
@@ -381,13 +357,12 @@
     <!-- AD CONTENT -->
     <div class="ad-content" id="ad-content">
 
-      <!-- BANNER LAYOUT -->
-      <div class="banner-layout">
-        <div class="banner-left">
-          <img id="col-logo" src="" alt="" class="col-logo" style="display:none">
-          <div class="claim-text" id="claim-text"></div>
+      <!-- LOGO + IMAGE STACKED -->
+      <div class="ad-inner">
+        <div class="logo-area">
+          <img id="banner-logo" src="" alt="" style="display:none">
         </div>
-        <div class="banner-right">
+        <div class="image-area">
           <img id="banner-img" src="" alt="">
         </div>
       </div>
@@ -517,9 +492,9 @@ function render(d) {
   document.getElementById('close-circle').setAttribute('stroke', iconColor);
   document.getElementById('close-x').setAttribute('stroke', iconColor);
 
-  // Top-bar logo — image only, no text fallback
+  // Centered logo above image
   if (d.clientLogoURL) {
-    const logoEl = document.getElementById('top-logo');
+    const logoEl = document.getElementById('banner-logo');
     logoEl.src = d.clientLogoURL;
     logoEl.style.display = 'block';
     logoEl.onerror = () => { logoEl.style.display = 'none'; };
@@ -540,17 +515,6 @@ function render(d) {
       document.getElementById('safari-url').textContent = u.hostname;
     } catch (_) {}
   }
-
-  // Left column logo — image only
-  if (d.clientLogoURL) {
-    const colLogo = document.getElementById('col-logo');
-    colLogo.src = d.clientLogoURL;
-    colLogo.style.display = 'block';
-    colLogo.onerror = () => { colLogo.style.display = 'none'; };
-  }
-
-  // Claim text
-  document.getElementById('claim-text').textContent = d.claimText || '';
 
   // Banner image
   if (d.bannerURL) {
