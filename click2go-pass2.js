@@ -88,6 +88,33 @@
     US: '1 Broadway - New York'
   };
 
+  // Location chip data per country
+  const LOCATION_CHIP = {
+    IT: { zip: '20123', city: 'Milano' },
+    ES: { zip: '28001', city: 'Madrid' },
+    FR: { zip: '75001', city: 'Paris' },
+    DE: { zip: '10117', city: 'Berlin' },
+    AT: { zip: '1010',  city: 'Wien' },
+    PT: { zip: '1100',  city: 'Lisboa' },
+    AU: { zip: '2000',  city: 'Sydney' },
+    CA: { zip: 'M5H',   city: 'Toronto' },
+    SE: { zip: '11120', city: 'Stockholm' },
+    NL: { zip: '1012',  city: 'Amsterdam' },
+    PL: { zip: '00-001',city: 'Warszawa' },
+    RO: { zip: '010011',city: 'Bucure\u0219ti' },
+    BG: { zip: '1000',  city: 'Sofia' },
+    HU: { zip: '1052',  city: 'Budapest' },
+    US: { zip: '10007', city: 'New York' },
+    BR: { zip: '01310', city: 'S\u00e3o Paulo' }
+  };
+
+  // Pin positions for map pins (percentage offsets)
+  var PIN_POSITIONS = [
+    { top: '46%', left: '52%' },
+    { top: '34%', left: '20%' },
+    { top: '58%', left: '80%' }
+  ];
+
   // Map backgrounds available per country code
   const MAP_COUNTRIES = ['IT','ES','FR','AU','PT','BR','AT','DE'];
 
@@ -108,6 +135,15 @@
   function injectCSS() {
     if (cssInjected) return;
     cssInjected = true;
+
+    // Load Nunito font
+    if (!document.querySelector('link[href*="Nunito"]')) {
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;800&display=swap';
+      document.head.appendChild(link);
+    }
+
     const style = document.createElement('style');
     style.textContent = `
       .pass2-overlay {
@@ -229,210 +265,286 @@
         z-index: 150;
         display: flex;
         flex-direction: column;
+        background: var(--global-bkg, #7b9ab9);
         animation: pass2FadeIn 0.25s ease-out;
       }
 
-      /* Full-bleed map */
-      .step3-map {
+      /* Header: status bar + logo bar + chip */
+      .step3-header {
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      /* Top app bar with logo + close */
+      .step3-topbar {
+        width: 430px;
+        height: 72px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 16px;
+        flex-shrink: 0;
+      }
+      .step3-topbar-icon {
+        width: 37px;
+        height: 37px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border: none;
+        background: transparent;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .step3-topbar-logo {
+        width: 220px;
+        height: 56px;
+        object-fit: contain;
+        display: block;
+      }
+
+      /* Location chip */
+      .step3-chip-row {
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px 16px;
+        flex-shrink: 0;
+      }
+      .step3-chip {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 8px;
+        border: 1px solid var(--chip-color, #666);
+        border-radius: 28px;
+      }
+      .step3-chip-text {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 13px;
+        font-weight: 400;
+        color: var(--chip-color, #666);
+        white-space: nowrap;
+      }
+      .step3-chip svg { flex-shrink: 0; }
+
+      /* Map + drawer wrapper */
+      .step3-map-drawer {
         flex: 1;
         position: relative;
         overflow: hidden;
+        min-height: 0;
       }
+
+      /* Full-bleed map */
       .step3-map-img {
+        position: absolute;
+        inset: 0;
         width: 100%;
         height: 100%;
         object-fit: cover;
         display: block;
       }
 
-      /* Close button */
-      .step3-close {
-        position: absolute;
-        top: 56px;
-        right: 16px;
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background: rgba(255,255,255,0.92);
-        border: none;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-        z-index: 10;
-        -webkit-tap-highlight-color: transparent;
-      }
-      .step3-close:active {
-        background: rgba(235,235,235,0.95);
-      }
-
-      /* Store pin */
+      /* Retailer pin on map */
       .step3-pin {
         position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -80%);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+        width: 40px;
+        height: 40px;
         z-index: 5;
-        filter: drop-shadow(0 3px 6px rgba(0,0,0,0.25));
       }
-      .step3-pin-logo {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        background: white;
-        border: 3px solid white;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-      }
-      .step3-pin-logo img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        display: block;
-      }
-      .step3-pin-tail {
-        width: 0;
-        height: 0;
-        border-left: 8px solid transparent;
-        border-right: 8px solid transparent;
-        border-top: 10px solid white;
-        margin-top: -1px;
-      }
-      .step3-pin-generic {
-        width: 44px;
-        height: 54px;
-      }
-
-      /* User location dot */
-      .step3-user-dot {
+      .step3-pin-bg {
         position: absolute;
-        top: 58%;
-        left: 42%;
-        width: 20px;
-        height: 20px;
-        z-index: 4;
+        inset: 0;
+        width: 40px;
+        height: 40px;
+      }
+      .step3-pin-img {
+        position: absolute;
+        top: 7.5%;
+        left: 7.5%;
+        width: 85%;
+        height: 85%;
+        border-radius: 50px;
+        object-fit: cover;
       }
 
       /* Bottom drawer */
       .step3-drawer {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 412px;
         background: #fff;
-        border-radius: 20px 20px 0 0;
-        box-shadow: 0 -4px 20px rgba(0,0,0,0.10);
-        padding: 16px 20px 24px;
-        flex-shrink: 0;
-        position: relative;
-      }
-      .step3-drawer-handle {
-        width: 36px;
-        height: 4px;
-        border-radius: 2px;
-        background: #D1D1D6;
-        margin: 0 auto 14px;
-      }
-      .step3-drawer-heading {
-        font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
-        font-size: 20px;
-        font-weight: 700;
-        color: #000;
-        margin-bottom: 16px;
-      }
-
-      /* Store card */
-      .step3-store-card {
+        border-radius: 24px 24px 0 0;
+        box-shadow: 0 4px 4px rgba(0,0,0,0.25);
         display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px;
-        background: #F5F5F7;
-        border-radius: 12px;
-        margin-bottom: 16px;
+        flex-direction: column;
+        z-index: 10;
       }
-      .step3-store-logo {
-        width: 44px;
-        height: 44px;
-        border-radius: 10px;
-        background: white;
-        flex-shrink: 0;
-        overflow: hidden;
+      .step3-drawer-slider {
+        height: 30px;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-      }
-      .step3-store-logo img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        display: block;
-      }
-      .step3-store-info {
-        flex: 1;
-        min-width: 0;
-      }
-      .step3-store-name {
-        font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
-        font-size: 15px;
-        font-weight: 600;
-        color: #000;
-        line-height: 1.3;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .step3-store-address {
-        font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
-        font-size: 13px;
-        font-weight: 400;
-        color: #8E8E93;
-        line-height: 1.3;
-        margin-top: 2px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .step3-store-distance {
-        font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
-        font-size: 13px;
-        font-weight: 600;
-        color: #8E8E93;
+        padding: 4px;
         flex-shrink: 0;
-        text-align: right;
+      }
+      .step3-drawer-handle {
+        width: 80px;
+        height: 5px;
+        border-radius: 4px;
+        background: rgba(0,0,0,0.32);
+      }
+      .step3-drawer-body {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding-bottom: 8px;
+      }
+      .step3-drawer-heading {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 16px;
+        font-weight: 700;
+        color: #474643;
+        letter-spacing: 0.1px;
+        line-height: 24px;
+        padding: 0 12px;
       }
 
-      /* Action buttons */
-      .step3-actions {
+      /* Retailer list in drawer */
+      .step3-retailers {
         display: flex;
-        gap: 10px;
+        flex-direction: column;
+        align-items: center;
       }
-      .step3-action-btn {
+
+      /* Single retailer row */
+      .step3-retailer-row {
+        width: 100%;
+        padding: 0 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .step3-retailer-inner {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 0;
+      }
+      .step3-retailer-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
         flex: 1;
-        height: 44px;
-        border-radius: 12px;
+        min-width: 0;
+        padding-right: 8px;
+      }
+      .step3-retailer-logo {
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+        position: relative;
+      }
+      .step3-retailer-logo-bg {
+        position: absolute;
+        inset: 0;
+        width: 40px;
+        height: 40px;
+      }
+      .step3-retailer-logo-img {
+        position: absolute;
+        top: 7.5%;
+        left: 7.5%;
+        width: 85%;
+        height: 85%;
+        border-radius: 50px;
+        object-fit: cover;
+      }
+      .step3-retailer-info {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+      }
+      .step3-retailer-text {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .step3-retailer-name {
+        font-family: 'Nunito', sans-serif;
+        font-size: 14px;
+        font-weight: 800;
+        color: #474643;
+        width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .step3-retailer-address {
+        font-family: 'Nunito', sans-serif;
+        font-size: 14px;
+        font-weight: 400;
+        color: #474643;
+        white-space: nowrap;
+      }
+      .step3-retailer-distance {
+        font-family: 'Nunito', sans-serif;
+        font-size: 10px;
+        font-weight: 800;
+        color: #474643;
+        line-height: 17px;
+        flex-shrink: 0;
+        white-space: nowrap;
+      }
+      .step3-retailer-directions {
+        width: 32px;
+        height: 32px;
+        flex-shrink: 0;
         border: none;
-        font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
-        font-size: 15px;
-        font-weight: 600;
+        background: transparent;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 6px;
         -webkit-tap-highlight-color: transparent;
       }
-      .step3-action-btn:active {
-        opacity: 0.85;
+      .step3-retailer-divider {
+        width: 402px;
+        height: 2px;
+        border: 1px solid #474643;
+        opacity: 0.2;
       }
-      .step3-btn-directions {
-        background: #007AFF;
-        color: #fff;
+
+      /* More stores link */
+      .step3-more-stores {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0 12px;
       }
-      .step3-btn-more {
-        background: #F5F5F7;
-        color: #007AFF;
+      .step3-more-stores-btn {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        color: #000;
+        line-height: 24px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .step3-more-stores-btn:active {
+        opacity: 0.6;
       }
 
       /* ── STEP 4: Google Maps screenshot ──────────────────── */
@@ -470,6 +582,112 @@
       }
       .step4-back:active {
         background: rgba(235,235,235,0.95);
+      }
+
+      /* ── STEP 5: Retailer list ───────────────────────────── */
+      .pass2-step5 {
+        position: absolute;
+        inset: 0;
+        z-index: 160;
+        display: flex;
+        flex-direction: column;
+        background: #fff;
+        animation: pass2FadeIn 0.25s ease-out;
+      }
+      .step5-header {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        padding: 56px 16px 12px;
+        gap: 12px;
+      }
+      .step5-back {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #F5F5F7;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .step5-back:active {
+        background: #E8E8ED;
+      }
+      .step5-heading {
+        font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+        font-size: 20px;
+        font-weight: 700;
+        color: #000;
+      }
+      .step5-list {
+        flex: 1;
+        overflow-y: auto;
+        padding: 0 20px 24px;
+        -webkit-overflow-scrolling: touch;
+      }
+      .step5-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 0;
+        border-bottom: 0.5px solid #E5E5EA;
+      }
+      .step5-row:last-child {
+        border-bottom: none;
+      }
+      .step5-row-logo {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: #F5F5F7;
+        flex-shrink: 0;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .step5-row-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+      }
+      .step5-row-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .step5-row-name {
+        font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+        font-size: 15px;
+        font-weight: 600;
+        color: #000;
+        line-height: 1.3;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .step5-row-address {
+        font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+        font-size: 13px;
+        font-weight: 400;
+        color: #8E8E93;
+        line-height: 1.3;
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .step5-row-distance {
+        font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        color: #8E8E93;
+        flex-shrink: 0;
+        text-align: right;
       }
     `;
     document.head.appendChild(style);
@@ -548,153 +766,274 @@
     phone.appendChild(overlay);
   };
 
-  // ── Step 3: Map + Store pin + Bottom drawer ───────────────────────
+  // ── Helper: build a retailer pin (Map/Pin with logo image inside) ──
+  function buildRetailerPin(logoURL) {
+    var wrap = document.createElement('div');
+    wrap.style.position = 'relative';
+    wrap.style.width = '40px';
+    wrap.style.height = '40px';
+    var bg = document.createElement('img');
+    bg.src = 'assets/click2go-assets/map/pin.png';
+    bg.alt = '';
+    bg.className = 'step3-pin-bg';
+    wrap.appendChild(bg);
+    if (logoURL) {
+      var img = document.createElement('img');
+      img.src = logoURL;
+      img.alt = '';
+      img.className = 'step3-pin-img';
+      img.onerror = function () { img.style.display = 'none'; };
+      wrap.appendChild(img);
+    }
+    return wrap;
+  }
+
+  // ── Step 3: Map + DTS_Logo + Location chip + Bottom drawer ────────
   function showStep3(campaignData) {
     injectCSS();
 
-    const lang = getLang(campaignData.location);
-    const s = STRINGS[lang];
-    const cc = (campaignData.location || '').toUpperCase();
-    const storeName = campaignData.campaignName || 'Store';
-    const address = PLACEHOLDER_ADDRESSES[cc] || PLACEHOLDER_ADDRESSES['IT'];
+    var lang = getLang(campaignData.location);
+    var s = STRINGS[lang];
+    var cc = (campaignData.location || '').toUpperCase();
+    var fullAddress = PLACEHOLDER_ADDRESSES[cc] || PLACEHOLDER_ADDRESSES['IT'];
+    var addressParts = fullAddress.split(' - ');
+    var chipData = LOCATION_CHIP[cc] || LOCATION_CHIP['IT'];
 
-    const screen = document.createElement('div');
+    // Collect stores
+    var stores = [];
+    for (var i = 1; i <= 5; i++) {
+      var pad = ('0' + i).slice(-2);
+      var name = campaignData['Store' + pad + 'Name'];
+      var logo = campaignData['Store' + pad + 'LogoURL'];
+      if (name || logo) {
+        stores.push({ name: name || '', logoURL: logo || '' });
+      }
+    }
+
+    // Determine background color
+    var bkg = campaignData.globalBkgColor || '#7b9ab9';
+
+    var screen = document.createElement('div');
     screen.className = 'pass2-step3';
     screen.id = 'pass2-step3';
+    screen.style.setProperty('--global-bkg', bkg);
 
-    // ── Map area ──
-    const mapArea = document.createElement('div');
-    mapArea.className = 'step3-map';
+    // Determine chip/icon color based on background brightness
+    var chipColor = '#666';
+    var iconStroke = '#000';
+    if (typeof isDark === 'function' && isDark(bkg)) {
+      chipColor = 'rgba(255,255,255,0.7)';
+      iconStroke = '#fff';
+    } else {
+      // check inline
+      var _c = bkg.replace('#', '');
+      if (_c.length >= 6) {
+        var _r = parseInt(_c.slice(0,2),16), _g = parseInt(_c.slice(2,4),16), _b = parseInt(_c.slice(4,6),16);
+        if ((_r*0.299 + _g*0.587 + _b*0.114) < 128) { chipColor = 'rgba(255,255,255,0.7)'; iconStroke = '#fff'; }
+      }
+    }
+    screen.style.setProperty('--chip-color', chipColor);
 
-    const mapImg = document.createElement('img');
+    // ── Header ──
+    var header = document.createElement('div');
+    header.className = 'step3-header';
+
+    // Top app bar: [close/back]  [DTS_Logo]  [close X]
+    var topbar = document.createElement('div');
+    topbar.className = 'step3-topbar';
+
+    // Leading icon (empty spacer to balance layout)
+    var leadSpacer = document.createElement('div');
+    leadSpacer.style.width = '37px';
+    leadSpacer.style.height = '37px';
+    topbar.appendChild(leadSpacer);
+
+    // DTS_Logo
+    if (campaignData.clientLogoURL) {
+      var logo = document.createElement('img');
+      logo.className = 'step3-topbar-logo';
+      logo.src = campaignData.clientLogoURL;
+      logo.alt = '';
+      logo.onerror = function () { logo.style.display = 'none'; };
+      topbar.appendChild(logo);
+    } else {
+      var logoSpacer = document.createElement('div');
+      logoSpacer.style.width = '220px';
+      topbar.appendChild(logoSpacer);
+    }
+
+    // Trailing icon: close (X) button
+    var closeBtn = document.createElement('button');
+    closeBtn.className = 'step3-topbar-icon';
+    closeBtn.innerHTML = '<svg width="37" height="37" viewBox="0 0 38 38" fill="none"><circle cx="19" cy="19" r="18" stroke="' + iconStroke + '" stroke-width="1.5"/><path d="M13 13l12 12M25 13L13 25" stroke="' + iconStroke + '" stroke-width="1.8" stroke-linecap="round"/></svg>';
+    closeBtn.addEventListener('click', function () { screen.remove(); });
+    topbar.appendChild(closeBtn);
+
+    header.appendChild(topbar);
+
+    // Location chip
+    var chipRow = document.createElement('div');
+    chipRow.className = 'step3-chip-row';
+    var chip = document.createElement('div');
+    chip.className = 'step3-chip';
+
+    // Leading location icon
+    chip.innerHTML = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 1.5C6.1 1.5 3.75 3.85 3.75 6.75c0 3.94 5.25 9.75 5.25 9.75s5.25-5.81 5.25-9.75c0-2.9-2.35-5.25-5.25-5.25z" stroke="' + chipColor + '" stroke-width="1.2"/><circle cx="9" cy="6.75" r="1.5" stroke="' + chipColor + '" stroke-width="1"/></svg>';
+
+    var chipText = document.createElement('span');
+    chipText.className = 'step3-chip-text';
+    chipText.textContent = chipData.zip + ' ' + chipData.city + ' [' + cc + ']';
+    chip.appendChild(chipText);
+
+    // Trailing close icon
+    var chipClose = document.createElement('span');
+    chipClose.innerHTML = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M12 6L6 12M6 6l6 6" stroke="' + chipColor + '" stroke-width="1.2" stroke-linecap="round"/></svg>';
+    chip.appendChild(chipClose);
+
+    chipRow.appendChild(chip);
+    header.appendChild(chipRow);
+    screen.appendChild(header);
+
+    // ── Map + Drawer wrapper ──
+    var mapDrawer = document.createElement('div');
+    mapDrawer.className = 'step3-map-drawer';
+
+    // Map image
+    var mapImg = document.createElement('img');
     mapImg.className = 'step3-map-img';
     mapImg.src = getMapUrl(campaignData.location);
     mapImg.alt = '';
-    mapArea.appendChild(mapImg);
+    mapDrawer.appendChild(mapImg);
 
-    // Close button
-    const closeBtn = document.createElement('button');
-    closeBtn.className = 'step3-close';
-    closeBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12 4L4 12M4 4l8 8" stroke="#000" stroke-width="2" stroke-linecap="round"/></svg>';
-    closeBtn.addEventListener('click', function () {
-      screen.remove();
+    // Retailer pins on map
+    stores.forEach(function (store, idx) {
+      if (idx >= PIN_POSITIONS.length) return;
+      var pos = PIN_POSITIONS[idx];
+      var pin = document.createElement('div');
+      pin.className = 'step3-pin';
+      pin.style.top = pos.top;
+      pin.style.left = pos.left;
+      var pinEl = buildRetailerPin(store.logoURL);
+      pin.appendChild(pinEl);
+      mapDrawer.appendChild(pin);
     });
-    mapArea.appendChild(closeBtn);
 
-    // Store pin
-    const pin = document.createElement('div');
-    pin.className = 'step3-pin';
-
-    if (campaignData.Store01LogoURL) {
-      const pinLogo = document.createElement('div');
-      pinLogo.className = 'step3-pin-logo';
-      const logoImg = document.createElement('img');
-      logoImg.src = campaignData.Store01LogoURL;
-      logoImg.alt = '';
-      logoImg.onerror = function () {
-        pinLogo.innerHTML = '';
-        const fallback = document.createElement('img');
-        fallback.src = 'assets/click2go-assets/map/pin.png';
-        fallback.alt = '';
-        fallback.className = 'step3-pin-generic';
-        pin.innerHTML = '';
-        pin.appendChild(fallback);
-      };
-      pinLogo.appendChild(logoImg);
-      pin.appendChild(pinLogo);
-      const tail = document.createElement('div');
-      tail.className = 'step3-pin-tail';
-      pin.appendChild(tail);
-    } else {
-      const fallback = document.createElement('img');
-      fallback.src = 'assets/click2go-assets/map/pin.png';
-      fallback.alt = '';
-      fallback.className = 'step3-pin-generic';
-      pin.appendChild(fallback);
-    }
-    mapArea.appendChild(pin);
-
-    // User location dot
-    const userDot = document.createElement('img');
-    userDot.className = 'step3-user-dot';
-    userDot.src = 'assets/click2go-assets/map/user-pin.png';
-    userDot.alt = '';
-    mapArea.appendChild(userDot);
-
-    screen.appendChild(mapArea);
-
-    // ── Bottom drawer ──
-    const drawer = document.createElement('div');
+    // ── Drawer ──
+    var drawer = document.createElement('div');
     drawer.className = 'step3-drawer';
 
-    const handle = document.createElement('div');
+    // Slider handle
+    var slider = document.createElement('div');
+    slider.className = 'step3-drawer-slider';
+    var handle = document.createElement('div');
     handle.className = 'step3-drawer-handle';
-    drawer.appendChild(handle);
+    slider.appendChild(handle);
+    drawer.appendChild(slider);
 
-    const heading = document.createElement('div');
+    // Drawer body
+    var body = document.createElement('div');
+    body.className = 'step3-drawer-body';
+
+    // Heading
+    var heading = document.createElement('div');
     heading.className = 'step3-drawer-heading';
     heading.textContent = s.nearbyStores;
-    drawer.appendChild(heading);
+    body.appendChild(heading);
 
-    // Store card
-    const card = document.createElement('div');
-    card.className = 'step3-store-card';
+    // Retailers list
+    var list = document.createElement('div');
+    list.className = 'step3-retailers';
 
-    const logoWrap = document.createElement('div');
-    logoWrap.className = 'step3-store-logo';
-    if (campaignData.clientLogoURL) {
-      const cLogo = document.createElement('img');
-      cLogo.src = campaignData.clientLogoURL;
-      cLogo.alt = '';
-      cLogo.onerror = function () { logoWrap.style.background = '#F0F0F0'; };
-      logoWrap.appendChild(cLogo);
-    }
-    card.appendChild(logoWrap);
+    stores.forEach(function (store, idx) {
+      var row = document.createElement('div');
+      row.className = 'step3-retailer-row';
 
-    const info = document.createElement('div');
-    info.className = 'step3-store-info';
-    const nameEl = document.createElement('div');
-    nameEl.className = 'step3-store-name';
-    nameEl.textContent = storeName;
-    info.appendChild(nameEl);
-    const addrEl = document.createElement('div');
-    addrEl.className = 'step3-store-address';
-    addrEl.textContent = address;
-    info.appendChild(addrEl);
-    card.appendChild(info);
+      var inner = document.createElement('div');
+      inner.className = 'step3-retailer-inner';
 
-    const dist = document.createElement('div');
-    dist.className = 'step3-store-distance';
-    dist.textContent = '0.5 km';
-    card.appendChild(dist);
+      // Left: logo + info
+      var left = document.createElement('div');
+      left.className = 'step3-retailer-left';
 
-    drawer.appendChild(card);
+      // Retailer logo (DTS_RetailerLogo with Map/Pin + Image)
+      var logoWrap = document.createElement('div');
+      logoWrap.className = 'step3-retailer-logo';
+      var logoBg = document.createElement('img');
+      logoBg.src = 'assets/click2go-assets/map/pin.png';
+      logoBg.alt = '';
+      logoBg.className = 'step3-retailer-logo-bg';
+      logoWrap.appendChild(logoBg);
+      if (store.logoURL) {
+        var logoImg = document.createElement('img');
+        logoImg.src = store.logoURL;
+        logoImg.alt = '';
+        logoImg.className = 'step3-retailer-logo-img';
+        logoImg.onerror = function () { logoImg.style.display = 'none'; };
+        logoWrap.appendChild(logoImg);
+      }
+      left.appendChild(logoWrap);
 
-    // Action buttons
-    const actions = document.createElement('div');
-    actions.className = 'step3-actions';
+      // Info: name + address + distance
+      var info = document.createElement('div');
+      info.className = 'step3-retailer-info';
 
-    const dirBtn = document.createElement('button');
-    dirBtn.className = 'step3-action-btn step3-btn-directions';
-    dirBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 13L8 3l5 10-5-3-5 3z" fill="white"/></svg>' + s.directions;
-    dirBtn.addEventListener('click', function () {
-      showStep4(campaignData);
+      var text = document.createElement('div');
+      text.className = 'step3-retailer-text';
+      var nameEl = document.createElement('div');
+      nameEl.className = 'step3-retailer-name';
+      nameEl.textContent = store.name;
+      text.appendChild(nameEl);
+      var addrEl = document.createElement('div');
+      addrEl.className = 'step3-retailer-address';
+      addrEl.textContent = (addressParts[0] || '') + ' - ' + (addressParts[1] || '');
+      text.appendChild(addrEl);
+      info.appendChild(text);
+
+      var dist = document.createElement('div');
+      dist.className = 'step3-retailer-distance';
+      dist.textContent = '000m';
+      info.appendChild(dist);
+
+      left.appendChild(info);
+      inner.appendChild(left);
+
+      // Directions icon
+      var dirBtn = document.createElement('button');
+      dirBtn.className = 'step3-retailer-directions';
+      dirBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M14 16l4-4-4-4" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 12h14" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round"/></svg>';
+      dirBtn.addEventListener('click', function () { showStep4(campaignData); });
+      inner.appendChild(dirBtn);
+
+      row.appendChild(inner);
+
+      // Divider (except after last row)
+      if (idx < stores.length - 1) {
+        var divider = document.createElement('div');
+        divider.className = 'step3-retailer-divider';
+        row.appendChild(divider);
+      }
+
+      list.appendChild(row);
     });
-    actions.appendChild(dirBtn);
 
-    const moreBtn = document.createElement('button');
-    moreBtn.className = 'step3-action-btn step3-btn-more';
+    body.appendChild(list);
+
+    // "More stores" link
+    var moreWrap = document.createElement('div');
+    moreWrap.className = 'step3-more-stores';
+    var moreBtn = document.createElement('button');
+    moreBtn.className = 'step3-more-stores-btn';
     moreBtn.textContent = s.moreStores;
-    moreBtn.addEventListener('click', function () {
-      console.log('Advancing to Step 5');
-    });
-    actions.appendChild(moreBtn);
+    moreBtn.addEventListener('click', function () { showStep5(campaignData); });
+    moreWrap.appendChild(moreBtn);
+    body.appendChild(moreWrap);
 
-    drawer.appendChild(actions);
-    screen.appendChild(drawer);
+    drawer.appendChild(body);
+    mapDrawer.appendChild(drawer);
+    screen.appendChild(mapDrawer);
 
     // Insert into .phone element
-    const phone = document.getElementById('phone');
+    var phone = document.getElementById('phone');
     phone.appendChild(screen);
   }
 
@@ -724,6 +1063,95 @@
 
     // Insert into .phone element
     const phone = document.getElementById('phone');
+    phone.appendChild(screen);
+  }
+
+  // ── Step 5: Retailer list ──────────────────────────────────────
+  function showStep5(campaignData) {
+    injectCSS();
+
+    const lang = getLang(campaignData.location);
+    const s = STRINGS[lang];
+    const cc = (campaignData.location || '').toUpperCase();
+    const address = PLACEHOLDER_ADDRESSES[cc] || PLACEHOLDER_ADDRESSES['IT'];
+
+    // Collect stores from campaign data (Store01–Store05)
+    var stores = [];
+    for (var i = 1; i <= 5; i++) {
+      var pad = ('0' + i).slice(-2);
+      var name = campaignData['Store' + pad + 'Name'];
+      var logo = campaignData['Store' + pad + 'LogoURL'];
+      if (name || logo) {
+        stores.push({ name: name || '', logoURL: logo || '' });
+      }
+    }
+
+    var screen = document.createElement('div');
+    screen.className = 'pass2-step5';
+    screen.id = 'pass2-step5';
+
+    // Header with back button + heading
+    var header = document.createElement('div');
+    header.className = 'step5-header';
+
+    var backBtn = document.createElement('button');
+    backBtn.className = 'step5-back';
+    backBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    backBtn.addEventListener('click', function () {
+      screen.remove();
+    });
+    header.appendChild(backBtn);
+
+    var heading = document.createElement('div');
+    heading.className = 'step5-heading';
+    heading.textContent = s.moreStores;
+    header.appendChild(heading);
+
+    screen.appendChild(header);
+
+    // Scrollable list
+    var list = document.createElement('div');
+    list.className = 'step5-list';
+
+    stores.forEach(function (store) {
+      var row = document.createElement('div');
+      row.className = 'step5-row';
+
+      var logoWrap = document.createElement('div');
+      logoWrap.className = 'step5-row-logo';
+      if (store.logoURL) {
+        var img = document.createElement('img');
+        img.src = store.logoURL;
+        img.alt = '';
+        img.onerror = function () { logoWrap.style.background = '#E8E8ED'; };
+        logoWrap.appendChild(img);
+      }
+      row.appendChild(logoWrap);
+
+      var info = document.createElement('div');
+      info.className = 'step5-row-info';
+      var nameEl = document.createElement('div');
+      nameEl.className = 'step5-row-name';
+      nameEl.textContent = store.name;
+      info.appendChild(nameEl);
+      var addrEl = document.createElement('div');
+      addrEl.className = 'step5-row-address';
+      addrEl.textContent = address;
+      info.appendChild(addrEl);
+      row.appendChild(info);
+
+      var dist = document.createElement('div');
+      dist.className = 'step5-row-distance';
+      dist.textContent = '0.5 km';
+      row.appendChild(dist);
+
+      list.appendChild(row);
+    });
+
+    screen.appendChild(list);
+
+    // Insert into .phone element
+    var phone = document.getElementById('phone');
     phone.appendChild(screen);
   }
 })();
