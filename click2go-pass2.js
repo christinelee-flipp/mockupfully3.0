@@ -794,19 +794,18 @@
     wrap.style.position = 'relative';
     wrap.style.width = '40px';
     wrap.style.height = '40px';
-    // Use clientLogoURL if provided, otherwise fall back to pin.png
     var pinSrc = clientLogoURL || logoURL;
     if (pinSrc) {
-      var bg = document.createElement('img');
-      bg.src = 'assets/click2go-assets/map/pin.png';
-      bg.alt = '';
-      bg.className = 'step3-pin-bg';
-      wrap.appendChild(bg);
+      // Client logo provided — show logo only, no pin.png underneath
       var img = document.createElement('img');
       img.src = pinSrc;
       img.alt = '';
-      img.className = 'step3-pin-img';
-      img.onerror = function () { img.style.display = 'none'; };
+      img.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;border-radius:50%;';
+      img.onerror = function () {
+        // Fallback to pin.png if logo fails to load
+        img.style.borderRadius = '0';
+        img.src = 'assets/click2go-assets/map/pin.png';
+      };
       wrap.appendChild(img);
     } else {
       var fb = document.createElement('img');
@@ -840,27 +839,27 @@
       }
     }
 
-    // Determine background color
-    var bkg = campaignData.globalBkgColor || '#7b9ab9';
+    // Determine background — match Step 1 (supports gradient)
+    var bkg;
+    if (campaignData.globalBkgType === 'gradient' && campaignData.globalBkgTop && campaignData.globalBkgBottom) {
+      bkg = 'linear-gradient(to bottom, ' + campaignData.globalBkgTop + ', ' + campaignData.globalBkgBottom + ')';
+    } else {
+      bkg = campaignData.globalBkgColor || '#EBEBF5';
+    }
+    var topHex = campaignData.globalBkgType === 'gradient' ? (campaignData.globalBkgTop || '#000') : (campaignData.globalBkgColor || '#fff');
 
     var screen = document.createElement('div');
     screen.className = 'pass2-step3';
     screen.id = 'pass2-step3';
-    screen.style.setProperty('--global-bkg', bkg);
+    screen.style.setProperty('--global-bkg', topHex);
 
     // Determine chip/icon color based on background brightness
     var chipColor = '#666';
     var iconStroke = '#000';
-    if (typeof isDark === 'function' && isDark(bkg)) {
-      chipColor = 'rgba(255,255,255,0.7)';
-      iconStroke = '#fff';
-    } else {
-      // check inline
-      var _c = bkg.replace('#', '');
-      if (_c.length >= 6) {
-        var _r = parseInt(_c.slice(0,2),16), _g = parseInt(_c.slice(2,4),16), _b = parseInt(_c.slice(4,6),16);
-        if ((_r*0.299 + _g*0.587 + _b*0.114) < 128) { chipColor = 'rgba(255,255,255,0.7)'; iconStroke = '#fff'; }
-      }
+    var _c = topHex.replace('#', '');
+    if (_c.length >= 6) {
+      var _r = parseInt(_c.slice(0,2),16), _g = parseInt(_c.slice(2,4),16), _b = parseInt(_c.slice(4,6),16);
+      if ((_r*0.299 + _g*0.587 + _b*0.114) < 128) { chipColor = 'rgba(255,255,255,0.7)'; iconStroke = '#fff'; }
     }
     screen.style.setProperty('--chip-color', chipColor);
 
@@ -868,6 +867,7 @@
     var header = document.createElement('div');
     header.className = 'step3-header';
     header.style.background = bkg;
+    header.style.flexShrink = '0';
 
     // Status bar (clock + icons)
     var statusBar = document.createElement('div');
@@ -986,7 +986,8 @@
     var list = document.createElement('div');
     list.className = 'step3-retailers';
 
-    stores.forEach(function (store, idx) {
+    var drawerStores = stores.slice(0, 3);
+    drawerStores.forEach(function (store, idx) {
       var row = document.createElement('div');
       row.className = 'step3-retailer-row';
 
@@ -997,22 +998,27 @@
       var left = document.createElement('div');
       left.className = 'step3-retailer-left';
 
-      // Retailer logo (DTS_RetailerLogo with Map/Pin + Image)
+      // Retailer logo (DTS_RetailerLogo)
       var logoWrap = document.createElement('div');
       logoWrap.className = 'step3-retailer-logo';
-      var logoBg = document.createElement('img');
-      logoBg.src = 'assets/click2go-assets/map/pin.png';
-      logoBg.alt = '';
-      logoBg.className = 'step3-retailer-logo-bg';
-      logoWrap.appendChild(logoBg);
       var retailerLogoSrc = campaignData.clientLogoURL || store.logoURL;
       if (retailerLogoSrc) {
+        // Client logo provided — show logo only, no pin.png
         var logoImg = document.createElement('img');
         logoImg.src = retailerLogoSrc;
         logoImg.alt = '';
-        logoImg.className = 'step3-retailer-logo-img';
-        logoImg.onerror = function () { logoImg.style.display = 'none'; };
+        logoImg.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;border-radius:50%;';
+        logoImg.onerror = function () {
+          logoImg.style.borderRadius = '0';
+          logoImg.src = 'assets/click2go-assets/map/pin.png';
+        };
         logoWrap.appendChild(logoImg);
+      } else {
+        var logoBg = document.createElement('img');
+        logoBg.src = 'assets/click2go-assets/map/pin.png';
+        logoBg.alt = '';
+        logoBg.className = 'step3-retailer-logo-bg';
+        logoWrap.appendChild(logoBg);
       }
       left.appendChild(logoWrap);
 
@@ -1050,7 +1056,7 @@
       row.appendChild(inner);
 
       // Divider (except after last row)
-      if (idx < stores.length - 1) {
+      if (idx < drawerStores.length - 1) {
         var divider = document.createElement('div');
         divider.className = 'step3-retailer-divider';
         row.appendChild(divider);
@@ -1082,6 +1088,7 @@
     var footer = document.createElement('div');
     footer.className = 'step3-footer';
     footer.style.background = bkg;
+    footer.style.flexShrink = '0';
     var ctaBtn = document.createElement('button');
     ctaBtn.className = 'step3-cta';
     ctaBtn.textContent = ctaLabel;
