@@ -547,6 +547,28 @@
         opacity: 0.6;
       }
 
+      /* Footer with CTA */
+      .step3-footer {
+        height: 105px;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .step3-cta {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 600;
+        font-size: 14px;
+        line-height: 1;
+        border-radius: 12px;
+        padding: 12px 24px;
+        border: 1px solid transparent;
+        cursor: pointer;
+        outline: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
       /* ── STEP 4: Google Maps screenshot ──────────────────── */
       .pass2-step4 {
         position: absolute;
@@ -767,23 +789,31 @@
   };
 
   // ── Helper: build a retailer pin (Map/Pin with logo image inside) ──
-  function buildRetailerPin(logoURL) {
+  function buildRetailerPin(logoURL, clientLogoURL) {
     var wrap = document.createElement('div');
     wrap.style.position = 'relative';
     wrap.style.width = '40px';
     wrap.style.height = '40px';
-    var bg = document.createElement('img');
-    bg.src = 'assets/click2go-assets/map/pin.png';
-    bg.alt = '';
-    bg.className = 'step3-pin-bg';
-    wrap.appendChild(bg);
-    if (logoURL) {
+    // Use clientLogoURL if provided, otherwise fall back to pin.png
+    var pinSrc = clientLogoURL || logoURL;
+    if (pinSrc) {
+      var bg = document.createElement('img');
+      bg.src = 'assets/click2go-assets/map/pin.png';
+      bg.alt = '';
+      bg.className = 'step3-pin-bg';
+      wrap.appendChild(bg);
       var img = document.createElement('img');
-      img.src = logoURL;
+      img.src = pinSrc;
       img.alt = '';
       img.className = 'step3-pin-img';
       img.onerror = function () { img.style.display = 'none'; };
       wrap.appendChild(img);
+    } else {
+      var fb = document.createElement('img');
+      fb.src = 'assets/click2go-assets/map/pin.png';
+      fb.alt = '';
+      fb.className = 'step3-pin-bg';
+      wrap.appendChild(fb);
     }
     return wrap;
   }
@@ -837,8 +867,20 @@
     // ── Header ──
     var header = document.createElement('div');
     header.className = 'step3-header';
+    header.style.background = bkg;
 
-    // Top app bar: [close/back]  [DTS_Logo]  [close X]
+    // Status bar (clock + icons)
+    var statusBar = document.createElement('div');
+    statusBar.style.cssText = 'width:430px;height:54px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:12px 16px 0;';
+    statusBar.innerHTML = '<span style="font-family:\'SF Pro Text\',Montserrat,sans-serif;font-weight:600;font-size:16px;color:' + iconStroke + '">10:10</span>'
+      + '<div style="display:flex;align-items:center;gap:2px">'
+      + '<div style="display:flex;align-items:flex-end;gap:1.5px;height:12px;margin-right:2px"><span style="border-radius:1px;width:3px;height:4px;background:' + iconStroke + ';display:block"></span><span style="border-radius:1px;width:3px;height:6px;background:' + iconStroke + ';display:block"></span><span style="border-radius:1px;width:3px;height:9px;background:' + iconStroke + ';display:block"></span><span style="border-radius:1px;width:3px;height:12px;background:' + iconStroke + ';display:block"></span></div>'
+      + '<svg width="16" height="12" viewBox="0 0 16 12" fill="none" style="margin-right:2px"><path d="M8 9.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3z" fill="' + iconStroke + '"/><path d="M4.1 7.1C5.1 6.1 6.5 5.5 8 5.5s2.9.6 3.9 1.6" stroke="' + iconStroke + '" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M1.3 4.3C3 2.6 5.4 1.5 8 1.5s5 1.1 6.7 2.8" stroke="' + iconStroke + '" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>'
+      + '<div style="width:28px;height:14px;border:1.5px solid ' + iconStroke + ';border-radius:3px;position:relative"><div style="position:absolute;top:1px;left:1px;bottom:1px;width:70%;background:' + iconStroke + ';border-radius:1px"></div></div>'
+      + '</div>';
+    header.appendChild(statusBar);
+
+    // Top app bar: [spacer]  [DTS_Logo]  [close X]
     var topbar = document.createElement('div');
     topbar.className = 'step3-topbar';
 
@@ -913,7 +955,7 @@
       pin.className = 'step3-pin';
       pin.style.top = pos.top;
       pin.style.left = pos.left;
-      var pinEl = buildRetailerPin(store.logoURL);
+      var pinEl = buildRetailerPin(store.logoURL, campaignData.clientLogoURL);
       pin.appendChild(pinEl);
       mapDrawer.appendChild(pin);
     });
@@ -963,9 +1005,10 @@
       logoBg.alt = '';
       logoBg.className = 'step3-retailer-logo-bg';
       logoWrap.appendChild(logoBg);
-      if (store.logoURL) {
+      var retailerLogoSrc = campaignData.clientLogoURL || store.logoURL;
+      if (retailerLogoSrc) {
         var logoImg = document.createElement('img');
-        logoImg.src = store.logoURL;
+        logoImg.src = retailerLogoSrc;
         logoImg.alt = '';
         logoImg.className = 'step3-retailer-logo-img';
         logoImg.onerror = function () { logoImg.style.display = 'none'; };
@@ -1000,7 +1043,7 @@
       // Directions icon
       var dirBtn = document.createElement('button');
       dirBtn.className = 'step3-retailer-directions';
-      dirBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M14 16l4-4-4-4" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 12h14" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round"/></svg>';
+      dirBtn.innerHTML = '<img src="assets/click2go-assets/map/direction-icon.svg" width="32" height="32" alt="">';
       dirBtn.addEventListener('click', function () { showStep4(campaignData); });
       inner.appendChild(dirBtn);
 
@@ -1031,6 +1074,22 @@
     drawer.appendChild(body);
     mapDrawer.appendChild(drawer);
     screen.appendChild(mapDrawer);
+
+    // ── Footer with DTS_CTA ──
+    var loc = (campaignData.location || '').toUpperCase();
+    var CTA_LABELS = { IT:'Trova lo store', ES:'Encuentra la tienda', FR:'Trouver le magasin', DE:'Store finden', PT:'Encontrar a loja' };
+    var ctaLabel = CTA_LABELS[loc] || 'Find the store';
+    var footer = document.createElement('div');
+    footer.className = 'step3-footer';
+    footer.style.background = bkg;
+    var ctaBtn = document.createElement('button');
+    ctaBtn.className = 'step3-cta';
+    ctaBtn.textContent = ctaLabel;
+    ctaBtn.style.background = campaignData.buttonBkgColor || '#000';
+    ctaBtn.style.color = campaignData.buttonTextColor || '#fff';
+    ctaBtn.style.borderColor = campaignData.buttonBkgColor || '#000';
+    footer.appendChild(ctaBtn);
+    screen.appendChild(footer);
 
     // Insert into .phone element
     var phone = document.getElementById('phone');
