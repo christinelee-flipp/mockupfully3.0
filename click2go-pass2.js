@@ -579,7 +579,35 @@
         background: #fff;
         animation: pass2FadeIn 0.25s ease-out;
       }
-      .step4-img {
+      .step4-statusbar {
+        width: 430px;
+        height: 54px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px 0;
+        background: #fff;
+      }
+      .step4-maps-area {
+        flex: 1;
+        min-height: 0;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .step4-maps-area img {
+        width: 100%;
+        display: block;
+        flex-shrink: 0;
+      }
+      .step4-maps-content {
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+      }
+      .step4-maps-content img {
         width: 100%;
         height: 100%;
         object-fit: cover;
@@ -587,23 +615,33 @@
       }
       .step4-back {
         position: absolute;
-        top: 56px;
-        left: 16px;
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background: rgba(255,255,255,0.92);
+        top: 8px;
+        left: 6px;
+        width: 44px;
+        height: 44px;
         border: none;
+        background: transparent;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         z-index: 10;
         -webkit-tap-highlight-color: transparent;
       }
-      .step4-back:active {
-        background: rgba(235,235,235,0.95);
+      .step4-footer {
+        height: 32px;
+        flex-shrink: 0;
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 8px;
+      }
+      .step4-home-indicator {
+        width: 154px;
+        height: 5px;
+        border-radius: 4px;
+        background: #949494;
       }
 
       /* ── STEP 5: Retailer list ───────────────────────────── */
@@ -613,103 +651,35 @@
         z-index: 160;
         display: flex;
         flex-direction: column;
-        background: #fff;
         animation: pass2FadeIn 0.25s ease-out;
+        overflow: hidden;
       }
-      .step5-header {
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        padding: 56px 16px 12px;
-        gap: 12px;
-      }
-      .step5-back {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background: #F5F5F7;
-        border: none;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        -webkit-tap-highlight-color: transparent;
-      }
-      .step5-back:active {
-        background: #E8E8ED;
-      }
-      .step5-heading {
-        font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
-        font-size: 20px;
-        font-weight: 700;
-        color: #000;
-      }
-      .step5-list {
+      .step5-list-area {
         flex: 1;
+        min-height: 0;
+        background: #fff;
         overflow-y: auto;
-        padding: 0 20px 24px;
         -webkit-overflow-scrolling: touch;
-      }
-      .step5-row {
         display: flex;
-        align-items: center;
+        flex-direction: column;
         gap: 12px;
-        padding: 14px 0;
-        border-bottom: 0.5px solid #E5E5EA;
+        padding: 16px 0 8px;
       }
-      .step5-row:last-child {
-        border-bottom: none;
+      .step5-list-heading {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 16px;
+        font-weight: 700;
+        color: #474643;
+        letter-spacing: 0.1px;
+        line-height: 24px;
+        padding: 0 12px;
       }
-      .step5-row-logo {
-        width: 44px;
-        height: 44px;
-        border-radius: 10px;
-        background: #F5F5F7;
-        flex-shrink: 0;
-        overflow: hidden;
+      .step5-retailers {
         display: flex;
+        flex-direction: column;
         align-items: center;
-        justify-content: center;
-      }
-      .step5-row-logo img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        display: block;
-      }
-      .step5-row-info {
-        flex: 1;
-        min-width: 0;
-      }
-      .step5-row-name {
-        font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
-        font-size: 15px;
-        font-weight: 600;
-        color: #000;
-        line-height: 1.3;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .step5-row-address {
-        font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
-        font-size: 13px;
-        font-weight: 400;
-        color: #8E8E93;
-        line-height: 1.3;
-        margin-top: 2px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .step5-row-distance {
-        font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
-        font-size: 13px;
-        font-weight: 600;
-        color: #8E8E93;
-        flex-shrink: 0;
-        text-align: right;
+        width: 412px;
+        margin: 0 auto;
       }
     `;
     document.head.appendChild(style);
@@ -1104,31 +1074,78 @@
   }
 
   // ── Step 4: Google Maps directions screenshot ───────────────────
+  var GMAPS_COUNTRIES = ['IT','ES','FR','AU','PT','BR','AT','DE'];
+
+  function getGMapsPath(location) {
+    var cc = (location || '').toUpperCase();
+    if (GMAPS_COUNTRIES.indexOf(cc) !== -1) return 'assets/click2go-assets/googleMaps/' + cc + '/';
+    return 'assets/click2go-assets/googleMaps/IT/';
+  }
+
   function showStep4(campaignData) {
     injectCSS();
 
-    const screen = document.createElement('div');
+    var basePath = getGMapsPath(campaignData.location);
+
+    var screen = document.createElement('div');
     screen.className = 'pass2-step4';
     screen.id = 'pass2-step4';
 
-    // Full-bleed Google Maps placeholder image
-    const img = document.createElement('img');
-    img.className = 'step4-img';
-    img.src = 'images/maps/google-maps-placeholder.png';
-    img.alt = '';
-    screen.appendChild(img);
+    // Status bar (white bg, black text)
+    var statusBar = document.createElement('div');
+    statusBar.className = 'step4-statusbar';
+    statusBar.innerHTML = '<span style="font-family:\'SF Pro Text\',Montserrat,sans-serif;font-weight:600;font-size:16px;color:#000">10:10</span>'
+      + '<div style="display:flex;align-items:center;gap:2px">'
+      + '<div style="display:flex;align-items:flex-end;gap:1.5px;height:12px;margin-right:2px"><span style="border-radius:1px;width:3px;height:4px;background:#000;display:block"></span><span style="border-radius:1px;width:3px;height:6px;background:#000;display:block"></span><span style="border-radius:1px;width:3px;height:9px;background:#000;display:block"></span><span style="border-radius:1px;width:3px;height:12px;background:#000;display:block"></span></div>'
+      + '<svg width="16" height="12" viewBox="0 0 16 12" fill="none" style="margin-right:2px"><path d="M8 9.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3z" fill="#000"/><path d="M4.1 7.1C5.1 6.1 6.5 5.5 8 5.5s2.9.6 3.9 1.6" stroke="#000" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M1.3 4.3C3 2.6 5.4 1.5 8 1.5s5 1.1 6.7 2.8" stroke="#000" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>'
+      + '<div style="width:28px;height:14px;border:1.5px solid #000;border-radius:3px;position:relative"><div style="position:absolute;top:1px;left:1px;bottom:1px;width:70%;background:#000;border-radius:1px"></div></div>'
+      + '</div>';
+    screen.appendChild(statusBar);
 
-    // Back button
-    const backBtn = document.createElement('button');
+    // Google Maps area (header + content + footer images)
+    var mapsArea = document.createElement('div');
+    mapsArea.className = 'step4-maps-area';
+
+    // Header image (directions bar)
+    var headerImg = document.createElement('img');
+    headerImg.src = basePath + 'header.png';
+    headerImg.alt = '';
+    mapsArea.appendChild(headerImg);
+
+    // Content image (map with route) — fills remaining space
+    var contentWrap = document.createElement('div');
+    contentWrap.className = 'step4-maps-content';
+    var contentImg = document.createElement('img');
+    contentImg.src = basePath + 'content.png';
+    contentImg.alt = '';
+    contentWrap.appendChild(contentImg);
+    mapsArea.appendChild(contentWrap);
+
+    // Footer image (duration bar + buttons)
+    var footerImg = document.createElement('img');
+    footerImg.src = basePath + 'footer.png';
+    footerImg.alt = '';
+    mapsArea.appendChild(footerImg);
+
+    // Back button (overlaid on the header area)
+    var backBtn = document.createElement('button');
     backBtn.className = 'step4-back';
-    backBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-    backBtn.addEventListener('click', function () {
-      screen.remove();
-    });
-    screen.appendChild(backBtn);
+    backBtn.innerHTML = '';
+    backBtn.addEventListener('click', function () { screen.remove(); });
+    mapsArea.appendChild(backBtn);
+
+    screen.appendChild(mapsArea);
+
+    // Home indicator footer
+    var footer = document.createElement('div');
+    footer.className = 'step4-footer';
+    var indicator = document.createElement('div');
+    indicator.className = 'step4-home-indicator';
+    footer.appendChild(indicator);
+    screen.appendChild(footer);
 
     // Insert into .phone element
-    const phone = document.getElementById('phone');
+    var phone = document.getElementById('phone');
     phone.appendChild(screen);
   }
 
@@ -1136,12 +1153,30 @@
   function showStep5(campaignData) {
     injectCSS();
 
-    const lang = getLang(campaignData.location);
-    const s = STRINGS[lang];
-    const cc = (campaignData.location || '').toUpperCase();
-    const address = PLACEHOLDER_ADDRESSES[cc] || PLACEHOLDER_ADDRESSES['IT'];
+    var lang = getLang(campaignData.location);
+    var s = STRINGS[lang];
+    var cc = (campaignData.location || '').toUpperCase();
+    var fullAddress = PLACEHOLDER_ADDRESSES[cc] || PLACEHOLDER_ADDRESSES['IT'];
+    var addressParts = fullAddress.split(' - ');
+    var chipData = LOCATION_CHIP[cc] || LOCATION_CHIP['IT'];
 
-    // Collect stores from campaign data (Store01–Store05)
+    // Background — match Step 1
+    var bkg;
+    if (campaignData.globalBkgType === 'gradient' && campaignData.globalBkgTop && campaignData.globalBkgBottom) {
+      bkg = 'linear-gradient(to bottom, ' + campaignData.globalBkgTop + ', ' + campaignData.globalBkgBottom + ')';
+    } else {
+      bkg = campaignData.globalBkgColor || '#EBEBF5';
+    }
+    var topHex = campaignData.globalBkgType === 'gradient' ? (campaignData.globalBkgTop || '#000') : (campaignData.globalBkgColor || '#fff');
+    var chipColor = '#666';
+    var iconStroke = '#000';
+    var _c5 = topHex.replace('#', '');
+    if (_c5.length >= 6) {
+      var _r5 = parseInt(_c5.slice(0,2),16), _g5 = parseInt(_c5.slice(2,4),16), _b5 = parseInt(_c5.slice(4,6),16);
+      if ((_r5*0.299 + _g5*0.587 + _b5*0.114) < 128) { chipColor = 'rgba(255,255,255,0.7)'; iconStroke = '#fff'; }
+    }
+
+    // Collect stores
     var stores = [];
     for (var i = 1; i <= 5; i++) {
       var pad = ('0' + i).slice(-2);
@@ -1155,66 +1190,185 @@
     var screen = document.createElement('div');
     screen.className = 'pass2-step5';
     screen.id = 'pass2-step5';
+    screen.style.setProperty('--chip-color', chipColor);
 
-    // Header with back button + heading
+    // ── Header (same as Step 3) ──
     var header = document.createElement('div');
-    header.className = 'step5-header';
+    header.className = 'step3-header';
+    header.style.background = bkg;
+    header.style.flexShrink = '0';
 
+    // Status bar
+    var statusBar = document.createElement('div');
+    statusBar.style.cssText = 'width:430px;height:54px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:12px 16px 0;';
+    statusBar.innerHTML = '<span style="font-family:\'SF Pro Text\',Montserrat,sans-serif;font-weight:600;font-size:16px;color:' + iconStroke + '">10:10</span>'
+      + '<div style="display:flex;align-items:center;gap:2px">'
+      + '<div style="display:flex;align-items:flex-end;gap:1.5px;height:12px;margin-right:2px"><span style="border-radius:1px;width:3px;height:4px;background:' + iconStroke + ';display:block"></span><span style="border-radius:1px;width:3px;height:6px;background:' + iconStroke + ';display:block"></span><span style="border-radius:1px;width:3px;height:9px;background:' + iconStroke + ';display:block"></span><span style="border-radius:1px;width:3px;height:12px;background:' + iconStroke + ';display:block"></span></div>'
+      + '<svg width="16" height="12" viewBox="0 0 16 12" fill="none" style="margin-right:2px"><path d="M8 9.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3z" fill="' + iconStroke + '"/><path d="M4.1 7.1C5.1 6.1 6.5 5.5 8 5.5s2.9.6 3.9 1.6" stroke="' + iconStroke + '" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M1.3 4.3C3 2.6 5.4 1.5 8 1.5s5 1.1 6.7 2.8" stroke="' + iconStroke + '" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>'
+      + '<div style="width:28px;height:14px;border:1.5px solid ' + iconStroke + ';border-radius:3px;position:relative"><div style="position:absolute;top:1px;left:1px;bottom:1px;width:70%;background:' + iconStroke + ';border-radius:1px"></div></div>'
+      + '</div>';
+    header.appendChild(statusBar);
+
+    // Top app bar: [back] [DTS_Logo] [close X]
+    var topbar = document.createElement('div');
+    topbar.className = 'step3-topbar';
+
+    // Leading icon: back arrow
     var backBtn = document.createElement('button');
-    backBtn.className = 'step5-back';
-    backBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-    backBtn.addEventListener('click', function () {
+    backBtn.className = 'step3-topbar-icon';
+    backBtn.innerHTML = '<svg width="37" height="37" viewBox="0 0 37 37" fill="none"><path d="M22 11L14 18.5L22 26" stroke="' + iconStroke + '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    backBtn.addEventListener('click', function () { screen.remove(); });
+    topbar.appendChild(backBtn);
+
+    // DTS_Logo
+    if (campaignData.clientLogoURL) {
+      var logo = document.createElement('img');
+      logo.className = 'step3-topbar-logo';
+      logo.src = campaignData.clientLogoURL;
+      logo.alt = '';
+      logo.onerror = function () { logo.style.display = 'none'; };
+      topbar.appendChild(logo);
+    } else {
+      var logoSpacer = document.createElement('div');
+      logoSpacer.style.width = '220px';
+      topbar.appendChild(logoSpacer);
+    }
+
+    // Trailing icon: close (X)
+    var closeBtn = document.createElement('button');
+    closeBtn.className = 'step3-topbar-icon';
+    closeBtn.innerHTML = '<svg width="37" height="37" viewBox="0 0 38 38" fill="none"><circle cx="19" cy="19" r="18" stroke="' + iconStroke + '" stroke-width="1.5"/><path d="M13 13l12 12M25 13L13 25" stroke="' + iconStroke + '" stroke-width="1.8" stroke-linecap="round"/></svg>';
+    closeBtn.addEventListener('click', function () {
       screen.remove();
+      // Also remove Step 3 underneath
+      var s3 = document.getElementById('pass2-step3');
+      if (s3) s3.remove();
     });
-    header.appendChild(backBtn);
+    topbar.appendChild(closeBtn);
+    header.appendChild(topbar);
 
-    var heading = document.createElement('div');
-    heading.className = 'step5-heading';
-    heading.textContent = s.moreStores;
-    header.appendChild(heading);
-
+    // Location chip
+    var chipRow = document.createElement('div');
+    chipRow.className = 'step3-chip-row';
+    var chip = document.createElement('div');
+    chip.className = 'step3-chip';
+    chip.innerHTML = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 1.5C6.1 1.5 3.75 3.85 3.75 6.75c0 3.94 5.25 9.75 5.25 9.75s5.25-5.81 5.25-9.75c0-2.9-2.35-5.25-5.25-5.25z" stroke="' + chipColor + '" stroke-width="1.2"/><circle cx="9" cy="6.75" r="1.5" stroke="' + chipColor + '" stroke-width="1"/></svg>';
+    var chipText = document.createElement('span');
+    chipText.className = 'step3-chip-text';
+    chipText.textContent = chipData.zip + ' ' + chipData.city + ' [' + cc + ']';
+    chip.appendChild(chipText);
+    var chipClose = document.createElement('span');
+    chipClose.innerHTML = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M12 6L6 12M6 6l6 6" stroke="' + chipColor + '" stroke-width="1.2" stroke-linecap="round"/></svg>';
+    chip.appendChild(chipClose);
+    chipRow.appendChild(chip);
+    header.appendChild(chipRow);
     screen.appendChild(header);
 
-    // Scrollable list
-    var list = document.createElement('div');
-    list.className = 'step5-list';
+    // ── Scrollable retailer list ──
+    var listArea = document.createElement('div');
+    listArea.className = 'step5-list-area';
 
-    stores.forEach(function (store) {
+    // "Store intorno a te" / localised heading
+    var heading = document.createElement('div');
+    heading.className = 'step5-list-heading';
+    heading.textContent = s.nearbyStores;
+    listArea.appendChild(heading);
+
+    var retailers = document.createElement('div');
+    retailers.className = 'step5-retailers';
+
+    stores.forEach(function (store, idx) {
       var row = document.createElement('div');
-      row.className = 'step5-row';
+      row.className = 'step3-retailer-row';
 
+      var inner = document.createElement('div');
+      inner.className = 'step3-retailer-inner';
+
+      var left = document.createElement('div');
+      left.className = 'step3-retailer-left';
+
+      // Retailer logo
       var logoWrap = document.createElement('div');
-      logoWrap.className = 'step5-row-logo';
-      if (store.logoURL) {
-        var img = document.createElement('img');
-        img.src = store.logoURL;
-        img.alt = '';
-        img.onerror = function () { logoWrap.style.background = '#E8E8ED'; };
-        logoWrap.appendChild(img);
+      logoWrap.className = 'step3-retailer-logo';
+      var retailerLogoSrc = campaignData.clientLogoURL || store.logoURL;
+      if (retailerLogoSrc) {
+        var logoImg = document.createElement('img');
+        logoImg.src = retailerLogoSrc;
+        logoImg.alt = '';
+        logoImg.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;border-radius:50%;';
+        logoImg.onerror = function () {
+          logoImg.style.borderRadius = '0';
+          logoImg.src = 'assets/click2go-assets/map/pin.png';
+        };
+        logoWrap.appendChild(logoImg);
+      } else {
+        var logoBg = document.createElement('img');
+        logoBg.src = 'assets/click2go-assets/map/pin.png';
+        logoBg.alt = '';
+        logoBg.className = 'step3-retailer-logo-bg';
+        logoWrap.appendChild(logoBg);
       }
-      row.appendChild(logoWrap);
+      left.appendChild(logoWrap);
 
+      // Info
       var info = document.createElement('div');
-      info.className = 'step5-row-info';
+      info.className = 'step3-retailer-info';
+      var text = document.createElement('div');
+      text.className = 'step3-retailer-text';
       var nameEl = document.createElement('div');
-      nameEl.className = 'step5-row-name';
+      nameEl.className = 'step3-retailer-name';
       nameEl.textContent = store.name;
-      info.appendChild(nameEl);
+      text.appendChild(nameEl);
       var addrEl = document.createElement('div');
-      addrEl.className = 'step5-row-address';
-      addrEl.textContent = address;
-      info.appendChild(addrEl);
-      row.appendChild(info);
+      addrEl.className = 'step3-retailer-address';
+      addrEl.textContent = (addressParts[0] || '') + ' - ' + (addressParts[1] || '');
+      text.appendChild(addrEl);
+      info.appendChild(text);
 
       var dist = document.createElement('div');
-      dist.className = 'step5-row-distance';
-      dist.textContent = '0.5 km';
-      row.appendChild(dist);
+      dist.className = 'step3-retailer-distance';
+      dist.textContent = '000m';
+      info.appendChild(dist);
 
-      list.appendChild(row);
+      left.appendChild(info);
+      inner.appendChild(left);
+
+      // Directions icon
+      var dirBtn = document.createElement('button');
+      dirBtn.className = 'step3-retailer-directions';
+      dirBtn.innerHTML = '<img src="assets/click2go-assets/map/direction-icon.svg" width="32" height="32" alt="">';
+      dirBtn.addEventListener('click', function () { showStep4(campaignData); });
+      inner.appendChild(dirBtn);
+
+      row.appendChild(inner);
+
+      // Divider
+      var divider = document.createElement('div');
+      divider.className = 'step3-retailer-divider';
+      row.appendChild(divider);
+
+      retailers.appendChild(row);
     });
 
-    screen.appendChild(list);
+    listArea.appendChild(retailers);
+    screen.appendChild(listArea);
+
+    // ── Footer with DTS_CTA ──
+    var loc = cc;
+    var CTA_LABELS = { IT:'Trova lo store', ES:'Encuentra la tienda', FR:'Trouver le magasin', DE:'Store finden', PT:'Encontrar a loja' };
+    var ctaLabel = CTA_LABELS[loc] || 'Find the store';
+    var footer = document.createElement('div');
+    footer.className = 'step3-footer';
+    footer.style.background = bkg;
+    footer.style.flexShrink = '0';
+    var ctaBtn = document.createElement('button');
+    ctaBtn.className = 'step3-cta';
+    ctaBtn.textContent = ctaLabel;
+    ctaBtn.style.background = campaignData.buttonBkgColor || '#000';
+    ctaBtn.style.color = campaignData.buttonTextColor || '#fff';
+    ctaBtn.style.borderColor = campaignData.buttonBkgColor || '#000';
+    footer.appendChild(ctaBtn);
+    screen.appendChild(footer);
 
     // Insert into .phone element
     var phone = document.getElementById('phone');
