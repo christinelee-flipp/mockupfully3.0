@@ -369,7 +369,7 @@
 
       <!-- CTA -->
       <div class="cta-area">
-        <button class="cta-button" id="cta-btn" onclick="showStep2()">Find the store</button>
+        <button class="cta-button" id="cta-btn" onclick="initPass2(window._campaignData)">Find the store</button>
       </div>
 
       <!-- STEP 2 PLACEHOLDER -->
@@ -472,6 +472,7 @@ function showError(msg) {
 }
 
 function render(d) {
+  window._campaignData = d;
   document.getElementById('state-loading').style.display = 'none';
   document.getElementById('proto').style.display = 'flex';
 
@@ -561,12 +562,6 @@ async function init() {
 init();
 </script>
 
-<!-- ═══════════════════════════════════════════════════════════════════
-  TODO: Steps 2–5 — built in Pass 2
-  Step 2: Location permission modal
-  Step 3: Static map + store pin + drawer
-  Step 4: Google Maps screenshot
-  Step 5: Retailer list
-═══════════════════════════════════════════════════════════════════ -->
+<script src="click2go-pass2.js"></script>
 </body>
 </html>

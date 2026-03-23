@@ -540,7 +540,7 @@
           </div>
         </div>
         <div class="cta-area">
-          <button class="cta-button" id="cta-btn-banner" onclick="showStep2()">Find the store</button>
+          <button class="cta-button" id="cta-btn-banner" onclick="initPass2(window._campaignData)">Find the store</button>
         </div>
       </div>
 
@@ -558,7 +558,7 @@
           </div>
         </div>
         <div class="cta-area">
-          <button class="cta-button" id="cta-btn-cv" onclick="showStep2()">Find the store</button>
+          <button class="cta-button" id="cta-btn-cv" onclick="initPass2(window._campaignData)">Find the store</button>
         </div>
       </div>
 
@@ -576,7 +576,7 @@
           </div>
         </div>
         <div class="cta-area">
-          <button class="cta-button" id="cta-btn-cs" onclick="showStep2()">Find the store</button>
+          <button class="cta-button" id="cta-btn-cs" onclick="initPass2(window._campaignData)">Find the store</button>
         </div>
       </div>
 
@@ -837,6 +837,7 @@ function initAutoScroll(products, d, cfg) {
 
 // ─── RENDER ───────────────────────────────────────────────────────────
 function render(d) {
+  window._campaignData = d;
   document.getElementById('state-loading').style.display = 'none';
   document.getElementById('proto').style.display = 'flex';
 
@@ -999,16 +1000,6 @@ async function init() {
 init();
 </script>
 
-<!-- ═══════════════════════════════════════════════════════════════════
-  Template types rendered inline:
-    banner            → ad-body-banner
-    carousel_vertical → ad-body-cv
-    carousel_square   → ad-body-cs
-
-  Demo mode (no ?id=):
-    Default:                        banner demo
-    ?type=carousel_vertical         vertical carousel demo
-    ?type=carousel_square           square carousel demo
-═══════════════════════════════════════════════════════════════════ -->
+<script src="click2go-pass2.js"></script>
 </body>
 </html>
