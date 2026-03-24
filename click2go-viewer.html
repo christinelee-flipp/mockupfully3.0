@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=430, initial-scale=1.0">
+<title>Click2Go Viewer</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #888;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  .viewer-frame {
+    width: 380px;
+    height: 932px;
+    position: relative;
+    overflow: hidden;
+    background: #fff;
+  }
+  @media (pointer: coarse) {
+    .viewer-frame { max-width: 780px; }
+  }
+
+  /* ── LOADING ── */
+  .loading {
+    position: absolute; inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    background: #f5f5f5;
+    z-index: 5;
+  }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid #ddd;
+    border-top-color: #555;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading p { font-size: 13px; color: #666; }
+
+  /* ── ERROR ── */
+  .error-screen {
+    position: absolute; inset: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px; padding: 32px;
+    background: #f5f5f5;
+    z-index: 5;
+  }
+  .error-screen h2 { font-size: 18px; color: #333; font-weight: 600; }
+  .error-screen p  { font-size: 13px; color: #666; text-align: center; line-height: 1.5; }
+
+  /* ── SECTIONS (hidden by default) ── */
+  .section { display: none; }
+
+  /* ── WEBSITE VIEW ── */
+  #website-view {
+    position: absolute; inset: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-direction: column;
+    align-items: center;
+    background: #fff;
+    max-width: 380px;
+    margin: 0 auto;
+  }
+  #website-view img {
+    width: 100%;
+    display: block;
+  }
+
+  /* ── MARKETPLACE: SCREEN 1 — App Home ── */
+  #market-home {
+    position: absolute; inset: 0;
+    flex-direction: column;
+    background: #fff;
+  }
+  .mh-header {
+    flex-shrink: 0;
+  }
+  .mh-header img { width: 100%; display: block; }
+  .mh-scroll {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 8px;
+  }
+  .mh-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .mh-card {
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .mh-card--tappable { cursor: pointer; }
+  .mh-card-thumb {
+    width: 100%;
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+    background-color: #ebebf5;
+  }
+  .mh-card-info {
+    padding: 8px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .mh-card-logo {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: #ddd;
+    overflow: hidden;
+  }
+  .mh-card-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+  .mh-card-text {
+    flex: 1;
+    min-width: 0;
+  }
+  .mh-card-name {
+    font-size: 11px;
+    font-weight: 700;
+    color: #333;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .mh-card-dist {
+    font-size: 10px;
+    font-weight: 400;
+    color: #888;
+    margin-top: 1px;
+  }
+  .mh-card-badge {
+    flex-shrink: 0;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    align-self: center;
+  }
+  .mh-badge-green { background: #d4edda; color: #155724; }
+  .mh-badge-orange { background: #ffe0b2; color: #e65100; }
+  .mh-footer {
+    flex-shrink: 0;
+  }
+  .mh-footer img { width: 100%; display: block; }
+
+  /* ── MARKETPLACE: SCREEN 2 — Flyer Viewer ── */
+  #market-viewer {
+    position: absolute; inset: 0;
+    flex-direction: column;
+    background: #282832;
+  }
+  .mv-header {
+    flex-shrink: 0;
+  }
+  .mv-header img { width: 100%; display: block; }
+  .mv-info-bar {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px;
+  }
+  .mv-info-badge {
+    background: rgba(0,0,0,0.55);
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 10px;
+    white-space: nowrap;
+  }
+  .mv-swiper {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .mv-swiper .swiper { width: 100%; height: 100%; }
+  .mv-slide {
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: #282832;
+  }
+  .mv-footer {
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .mv-footer img { width: 100%; display: block; }
+
+  /* ── AD IFRAME ── */
+  #ad-iframe-wrap {
+    position: absolute; inset: 0;
+    z-index: 50;
+  }
+  #ad-iframe-wrap iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+</style>
+</head>
+<body>
+<div class="viewer-frame" id="viewer-frame">
+
+  <!-- LOADING -->
+  <div class="loading" id="state-loading">
+    <div class="spinner"></div>
+    <p>Loading...</p>
+  </div>
+
+  <!-- ERROR -->
+  <div class="error-screen" id="state-error">
+    <h2>Error</h2>
+    <p id="error-msg">Could not load campaign.</p>
+  </div>
+
+  <!-- WEBSITE -->
+  <div class="section" id="website-view"></div>
+
+  <!-- MARKETPLACE: HOME -->
+  <div class="section" id="market-home"></div>
+
+  <!-- MARKETPLACE: VIEWER -->
+  <div class="section" id="market-viewer"></div>
+
+  <!-- AD IFRAME (hidden by default) -->
+  <div class="section" id="ad-iframe-wrap"></div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var params = new URLSearchParams(window.location.search);
+  var id = params.get('id');
+  var viewer = params.get('viewer'); // "marketplace" or "website"
+
+  var campaignData = null;
+  var swiperInstance = null;
+
+  // ── Helpers ──
+  function showError(msg) {
+    document.getElementById('state-loading').style.display = 'none';
+    var el = document.getElementById('state-error');
+    el.style.display = 'flex';
+    document.getElementById('error-msg').textContent = msg;
+  }
+
+  function showSection(id) {
+    var el = document.getElementById(id);
+    el.style.display = 'flex';
+  }
+
+  function hideSection(id) {
+    var el = document.getElementById(id);
+    el.style.display = 'none';
+  }
+
+  function hideLoading() {
+    document.getElementById('state-loading').style.display = 'none';
+  }
+
+  function assetBase() {
+    return 'assets/click2go-assets/';
+  }
+
+  // ── Ad iframe ──
+  function showAd() {
+    var wrap = document.getElementById('ad-iframe-wrap');
+    if (!wrap.querySelector('iframe')) {
+      var iframe = document.createElement('iframe');
+      iframe.src = 'click2go-prototype.html?id=' + encodeURIComponent(id) + '&viewer=' + encodeURIComponent(viewer || '');
+      iframe.allow = 'autoplay';
+      wrap.appendChild(iframe);
+    }
+    // Hide viewer chrome
+    hideSection('website-view');
+    hideSection('market-home');
+    hideSection('market-viewer');
+    showSection('ad-iframe-wrap');
+  }
+
+  function hideAd() {
+    hideSection('ad-iframe-wrap');
+    if (viewer === 'marketplace') {
+      showSection('market-viewer');
+    } else if (viewer === 'website') {
+      showSection('website-view');
+    }
+  }
+
+  // Listen for close message from iframe
+  window.addEventListener('message', function (e) {
+    if (e.data === 'closeAd') {
+      hideAd();
+    }
+  });
+
+  // ── Website flow ──
+  function initWebsite(d) {
+    var loc = (d.location || 'IT').toUpperCase();
+    var pub = d.website || 'ansa';
+    var base = assetBase() + 'website/' + loc + '/' + pub + '/';
+
+    var container = document.getElementById('website-view');
+    var topImg = document.createElement('img');
+    topImg.src = base + 'top.png';
+    topImg.alt = '';
+    container.appendChild(topImg);
+
+    var bottomImg = document.createElement('img');
+    bottomImg.src = base + 'bottom.png';
+    bottomImg.alt = '';
+    container.appendChild(bottomImg);
+
+    hideLoading();
+    showSection('website-view');
+
+    // After 9 seconds, show ad
+    setTimeout(function () {
+      showAd();
+    }, 9000);
+  }
+
+  // ── Marketplace flow ──
+  function initMarketplace(d) {
+    var loc = (d.location || 'IT').toUpperCase();
+    var cat = d.marketplace || 'coles';
+    var appBase = assetBase() + 'app/' + loc + '/';
+    var catBase = assetBase() + 'catalogs/' + loc + '/' + cat + '/';
+
+    buildScreen1(appBase, catBase);
+    hideLoading();
+    showSection('market-home');
+  }
+
+  function buildCard(thumbUrl, logoUrl, name, distance, badgeText, badgeClass, tappable) {
+    var card = document.createElement('div');
+    card.className = 'mh-card' + (tappable ? ' mh-card--tappable' : '');
+
+    var thumb = document.createElement('div');
+    thumb.className = 'mh-card-thumb';
+    thumb.style.backgroundImage = 'url(' + thumbUrl + ')';
+    card.appendChild(thumb);
+
+    var info = document.createElement('div');
+    info.className = 'mh-card-info';
+
+    var logoWrap = document.createElement('div');
+    logoWrap.className = 'mh-card-logo';
+    if (logoUrl) {
+      var logoImg = document.createElement('img');
+      logoImg.src = logoUrl;
+      logoImg.alt = '';
+      logoWrap.appendChild(logoImg);
+    }
+    info.appendChild(logoWrap);
+
+    var text = document.createElement('div');
+    text.className = 'mh-card-text';
+    var nameEl = document.createElement('div');
+    nameEl.className = 'mh-card-name';
+    nameEl.textContent = name;
+    text.appendChild(nameEl);
+    var distEl = document.createElement('div');
+    distEl.className = 'mh-card-dist';
+    distEl.textContent = distance;
+    text.appendChild(distEl);
+    info.appendChild(text);
+
+    if (badgeText) {
+      var badge = document.createElement('div');
+      badge.className = 'mh-card-badge ' + (badgeClass || '');
+      badge.textContent = badgeText;
+      info.appendChild(badge);
+    }
+
+    card.appendChild(info);
+    return card;
+  }
+
+  function buildScreen1(appBase, catBase) {
+    var container = document.getElementById('market-home');
+    var d = campaignData;
+
+    // Header
+    var header = document.createElement('div');
+    header.className = 'mh-header';
+    var headerImg = document.createElement('img');
+    headerImg.src = appBase + 'headerHome.png';
+    headerImg.alt = '';
+    header.appendChild(headerImg);
+    container.appendChild(header);
+
+    // Scrollable grid
+    var scroll = document.createElement('div');
+    scroll.className = 'mh-scroll';
+    var grid = document.createElement('div');
+    grid.className = 'mh-grid';
+
+    // Card 1 — catalog cover (tappable)
+    var card1 = buildCard(
+      catBase + '1.png',
+      d.clientLogoURL || '',
+      d.clientName || 'Retailer',
+      '1.1 Km',
+      'NUEVO',
+      'mh-badge-green',
+      true
+    );
+    card1.addEventListener('click', function () {
+      hideSection('market-home');
+      buildScreen2(appBase, catBase);
+      showSection('market-viewer');
+    });
+    grid.appendChild(card1);
+
+    // Cards 2, 3, 4 — decorative flyers
+    var badges = [
+      { text: '-2 D\u00cdAS', cls: 'mh-badge-orange' },
+      { text: '-2 D\u00cdAS', cls: 'mh-badge-orange' },
+      { text: '', cls: '' }
+    ];
+    for (var i = 0; i < 3; i++) {
+      var card = buildCard(
+        appBase + 'flyer0' + (i + 1) + '.png',
+        '',
+        'Retailer',
+        '1.1 Km',
+        badges[i].text,
+        badges[i].cls,
+        false
+      );
+      grid.appendChild(card);
+    }
+
+    scroll.appendChild(grid);
+    container.appendChild(scroll);
+
+    // Footer
+    var footer = document.createElement('div');
+    footer.className = 'mh-footer';
+    var footerImg = document.createElement('img');
+    footerImg.src = appBase + 'footerHome.png';
+    footerImg.alt = '';
+    footer.appendChild(footerImg);
+    container.appendChild(footer);
+  }
+
+  var screen2Built = false;
+
+  // Localised page counter format
+  var PAGE_FORMAT = { IT: 'di', ES: 'de', FR: 'sur', DE: 'von', PT: 'de' };
+  function pageLabel(current, total) {
+    var loc = campaignData ? (campaignData.location || '').toUpperCase() : '';
+    var word = PAGE_FORMAT[loc] || 'of';
+    return current + ' ' + word + ' ' + total;
+  }
+
+  function buildScreen2(appBase, catBase) {
+    if (screen2Built) return;
+    screen2Built = true;
+
+    var container = document.getElementById('market-viewer');
+
+    // Header image
+    var header = document.createElement('div');
+    header.className = 'mv-header';
+    var headerImg = document.createElement('img');
+    headerImg.src = appBase + 'headerViewer.png';
+    headerImg.alt = '';
+    header.appendChild(headerImg);
+    container.appendChild(header);
+
+    // Info bar below header (page counter + validity)
+    var infoBar = document.createElement('div');
+    infoBar.className = 'mv-info-bar';
+
+    var pageBadge = document.createElement('div');
+    pageBadge.className = 'mv-info-badge';
+    pageBadge.id = 'page-badge';
+    pageBadge.textContent = pageLabel(1, 3);
+    infoBar.appendChild(pageBadge);
+
+    var validBadge = document.createElement('div');
+    validBadge.className = 'mv-info-badge';
+    validBadge.textContent = 'V\u00e1lido hasta el martes';
+    infoBar.appendChild(validBadge);
+
+    container.appendChild(infoBar);
+
+    // Swiper
+    var swiperWrap = document.createElement('div');
+    swiperWrap.className = 'mv-swiper';
+
+    var swiperEl = document.createElement('div');
+    swiperEl.className = 'swiper';
+    var wrapper = document.createElement('div');
+    wrapper.className = 'swiper-wrapper';
+
+    for (var i = 1; i <= 3; i++) {
+      var slide = document.createElement('div');
+      slide.className = 'swiper-slide mv-slide';
+      slide.style.backgroundImage = 'url(' + catBase + i + '.png)';
+      wrapper.appendChild(slide);
+    }
+
+    swiperEl.appendChild(wrapper);
+    swiperWrap.appendChild(swiperEl);
+    container.appendChild(swiperWrap);
+
+    // Footer (tappable → show ad)
+    var footer = document.createElement('div');
+    footer.className = 'mv-footer';
+    var footerImg = document.createElement('img');
+    footerImg.src = appBase + 'footerViewer.png';
+    footerImg.alt = '';
+    footer.appendChild(footerImg);
+    footer.addEventListener('click', function () { showAd(); });
+    container.appendChild(footer);
+
+    // Init Swiper with reachEnd swipe-past detection
+    var reachedEnd = false;
+
+    swiperInstance = new Swiper(swiperEl, {
+      slidesPerView: 1,
+      spaceBetween: 0,
+      resistanceRatio: 0.65,
+      on: {
+        slideChange: function (sw) {
+          document.getElementById('page-badge').textContent =
+            pageLabel(sw.activeIndex + 1, 3);
+          // Reset flag if user swipes back from last slide
+          if (sw.activeIndex < 2) {
+            reachedEnd = false;
+          }
+        },
+        reachEnd: function () {
+          reachedEnd = true;
+        },
+        touchEnd: function (sw) {
+          if (reachedEnd && sw.touches.diff < -30) {
+            reachedEnd = false;
+            showAd();
+          }
+        }
+      }
+    });
+  }
+
+  // ── Init ──
+  async function init() {
+    if (!id) {
+      showError('Missing ?id= parameter.');
+      return;
+    }
+    if (!viewer || (viewer !== 'marketplace' && viewer !== 'website')) {
+      showError('Missing or invalid ?viewer= parameter. Use "marketplace" or "website".');
+      return;
+    }
+
+    try {
+      var res = await fetch('api/get.php?id=' + encodeURIComponent(id));
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      campaignData = await res.json();
+    } catch (err) {
+      showError('Could not fetch campaign "' + id + '". ' + err.message);
+      return;
+    }
+
+    if (!campaignData || !campaignData.campaignID) {
+      showError('Campaign "' + id + '" was not found.');
+      return;
+    }
+
+    if (viewer === 'website') {
+      initWebsite(campaignData);
+    } else {
+      initMarketplace(campaignData);
+    }
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

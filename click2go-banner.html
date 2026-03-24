@@ -346,7 +346,7 @@
     <!-- TOP BAR -->
     <div class="top-bar" id="top-bar">
       <div style="width:56px;height:56px;flex-shrink:0"></div>
-      <div class="close-btn">
+      <div class="close-btn" onclick="window.parent.postMessage('closeAd','*')">
         <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
           <circle cx="19" cy="19" r="18" stroke-width="1.5" id="close-circle"/>
           <path d="M13 13l12 12M25 13L13 25" stroke-width="1.8" stroke-linecap="round" id="close-x"/>

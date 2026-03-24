@@ -17,16 +17,20 @@
       allowOnce:      'Allow Once',
       allowWhileUsing:'Allow While Using App',
       dontAllow:      "Don\u2019t Allow",
-      titleSuffix:    'Would Like to Use Your Current Location',
+      modalTitle:     'Allow \u201CSafari\u201D to use your location?',
+      modalBody:      'Your precise location is used to show your location on the map, get directions, estimate travel times and improve search results',
+      preciseOn:      'Precise: On',
       nearbyStores:   'Nearby stores',
       directions:     'Directions',
       moreStores:     'More stores'
     },
     it: {
       allowOnce:      'Consenti una volta',
-      allowWhileUsing:'Consenti quando usi l\u2019app',
-      dontAllow:      'Non consentire',
-      titleSuffix:    'desidera utilizzare la tua posizione attuale',
+      allowWhileUsing:'Consenti mentre usi l\u2019app',
+      dontAllow:      'Non permettere',
+      modalTitle:     'Consenti a \u201CSafari\u201D di usare la tua posizione?',
+      modalBody:      'La tua posizione precisa viene utilizzata per mostrare la tua posizione sulla mappa, ottenere indicazioni stradali, stimare i tempi di percorrenza e migliorare i risultati della ricerca',
+      preciseOn:      'Preciso: On',
       nearbyStores:   'Negozi vicini',
       directions:     'Indicazioni',
       moreStores:     'Altri negozi'
@@ -35,7 +39,9 @@
       allowOnce:      'Permitir una vez',
       allowWhileUsing:'Permitir mientras se usa la app',
       dontAllow:      'No permitir',
-      titleSuffix:    'quiere usar tu ubicaci\u00f3n actual',
+      modalTitle:     '\u00bfPermitir a \u201CSafari\u201D usar tu ubicaci\u00f3n?',
+      modalBody:      'Tu ubicaci\u00f3n precisa se utiliza para mostrar tu posici\u00f3n en el mapa, obtener indicaciones, estimar tiempos de viaje y mejorar los resultados de b\u00fasqueda',
+      preciseOn:      'Preciso: On',
       nearbyStores:   'Tiendas cercanas',
       directions:     'C\u00f3mo llegar',
       moreStores:     'M\u00e1s tiendas'
@@ -44,7 +50,9 @@
       allowOnce:      'Autoriser une fois',
       allowWhileUsing:'Autoriser lorsque l\u2019app est active',
       dontAllow:      'Ne pas autoriser',
-      titleSuffix:    'souhaite utiliser votre position actuelle',
+      modalTitle:     'Autoriser \u201CSafari\u201D \u00e0 utiliser votre position\u00a0?',
+      modalBody:      'Votre position pr\u00e9cise est utilis\u00e9e pour afficher votre position sur la carte, obtenir des itin\u00e9raires, estimer les temps de trajet et am\u00e9liorer les r\u00e9sultats de recherche',
+      preciseOn:      'Pr\u00e9cis\u00a0: activ\u00e9',
       nearbyStores:   'Magasins \u00e0 proximit\u00e9',
       directions:     'Itin\u00e9raire',
       moreStores:     'Plus de magasins'
@@ -53,7 +61,9 @@
       allowOnce:      'Einmal erlauben',
       allowWhileUsing:'Beim Verwenden der App erlauben',
       dontAllow:      'Nicht erlauben',
-      titleSuffix:    'm\u00f6chte deinen aktuellen Standort verwenden',
+      modalTitle:     '\u201ESafari\u201C m\u00f6chte deinen Standort verwenden',
+      modalBody:      'Dein genauer Standort wird verwendet, um deine Position auf der Karte anzuzeigen, Wegbeschreibungen zu erhalten, Reisezeiten zu sch\u00e4tzen und Suchergebnisse zu verbessern',
+      preciseOn:      'Genau: Ein',
       nearbyStores:   'Gesch\u00e4fte in der N\u00e4he',
       directions:     'Wegbeschreibung',
       moreStores:     'Mehr Gesch\u00e4fte'
@@ -62,7 +72,9 @@
       allowOnce:      'Permitir uma vez',
       allowWhileUsing:'Permitir ao usar o app',
       dontAllow:      'N\u00e3o permitir',
-      titleSuffix:    'pretende utilizar a sua localiza\u00e7\u00e3o atual',
+      modalTitle:     'Permitir que o \u201CSafari\u201D utilize a sua localiza\u00e7\u00e3o?',
+      modalBody:      'A sua localiza\u00e7\u00e3o precisa \u00e9 utilizada para mostrar a sua posi\u00e7\u00e3o no mapa, obter dire\u00e7\u00f5es, estimar tempos de viagem e melhorar os resultados da pesquisa',
+      preciseOn:      'Preciso: On',
       nearbyStores:   'Lojas pr\u00f3ximas',
       directions:     'Dire\u00e7\u00f5es',
       moreStores:     'Mais lojas'
@@ -146,10 +158,11 @@
 
     const style = document.createElement('style');
     style.textContent = `
+      /* ── STEP 2: Permission modal overlay on Step 3 ────── */
       .pass2-overlay {
         position: absolute;
         inset: 0;
-        z-index: 150;
+        z-index: 200;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -159,103 +172,121 @@
         from { opacity: 0; }
         to   { opacity: 1; }
       }
-
-      /* Blurred map background */
-      .pass2-map-bg {
-        position: absolute;
-        inset: 0;
-        background-size: cover;
-        background-position: center;
-        filter: blur(6px) brightness(0.85);
-        transform: scale(1.05);
-      }
-
-      /* Dark scrim on top of blurred map */
       .pass2-scrim {
         position: absolute;
         inset: 0;
-        background: rgba(0,0,0,0.35);
+        background: rgba(0,0,0,0.4);
       }
 
-      /* iOS-style modal card */
+      /* iOS permission modal */
       .pass2-modal {
         position: relative;
-        width: 270px;
-        background: rgba(255,255,255,0.95);
-        border-radius: 14px;
+        width: 310px;
+        background: rgba(255,255,255,0.9);
+        border-radius: 18px;
         overflow: hidden;
         text-align: center;
-        box-shadow: 0 8px 40px rgba(0,0,0,0.25);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(2.3px);
+        -webkit-backdrop-filter: blur(2.3px);
       }
-
-      /* Modal header area */
-      .pass2-modal-header {
-        padding: 20px 16px 16px;
+      .pass2-modal-question {
+        padding: 18px;
+        overflow: hidden;
       }
-
-      /* Location icon */
-      .pass2-loc-icon {
-        width: 56px;
-        height: 56px;
-        margin: 0 auto 12px;
-        background: linear-gradient(135deg, #4A90D9, #357ABD);
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
       .pass2-modal-title {
         font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
-        font-size: 17px;
+        font-size: 19.5px;
         font-weight: 600;
         color: #000;
-        line-height: 1.3;
-        letter-spacing: -0.2px;
-        margin-bottom: 8px;
+        line-height: 25px;
+        letter-spacing: -0.47px;
+        margin-bottom: 2px;
       }
-
       .pass2-modal-body {
         font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
-        font-size: 13px;
+        font-size: 15px;
         font-weight: 400;
         color: #000;
-        line-height: 1.4;
-        letter-spacing: -0.1px;
+        line-height: 18px;
+        letter-spacing: -0.09px;
+      }
+
+      /* Map preview inside modal */
+      .pass2-modal-map {
+        position: relative;
+        width: 310px;
+        height: 199px;
+        overflow: hidden;
+      }
+      .pass2-modal-map img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .pass2-precise-pill {
+        position: absolute;
+        top: 10px;
+        left: 9px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 3px 11px;
+        background: #fff;
+        border-radius: 1147px;
+        box-shadow: 0 3.4px 9.2px rgba(0,0,0,0.12);
+      }
+      .pass2-precise-text {
+        font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+        font-size: 15px;
+        font-weight: 600;
+        color: #007AFF;
+        letter-spacing: -0.09px;
+        line-height: 21px;
+        white-space: nowrap;
+      }
+      .pass2-blue-dot {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 14px;
+        height: 14px;
+        background: #4285F4;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        box-shadow: 0 0 6px rgba(66,133,244,0.5);
+        transform: translate(-50%, -50%);
       }
 
       /* Button stack */
       .pass2-btn-stack {
-        border-top: 0.5px solid rgba(60,60,67,0.29);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .pass2-btn-divider {
+        width: 310px;
+        height: 0.57px;
+        background: rgba(60,60,67,0.29);
       }
       .pass2-btn {
         display: block;
         width: 100%;
-        padding: 11px 16px;
+        padding: 11.5px 16px;
         border: none;
         background: transparent;
         font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
-        font-size: 17px;
+        font-size: 19.5px;
         color: #007AFF;
         cursor: pointer;
         text-align: center;
-        line-height: 1.3;
-        letter-spacing: -0.2px;
+        line-height: 25px;
+        letter-spacing: -0.47px;
+        font-weight: 400;
         -webkit-tap-highlight-color: transparent;
       }
       .pass2-btn:active {
         background: rgba(0,0,0,0.06);
-      }
-      .pass2-btn + .pass2-btn {
-        border-top: 0.5px solid rgba(60,60,67,0.29);
-      }
-      .pass2-btn--bold {
-        font-weight: 600;
-      }
-      .pass2-btn--regular {
-        font-weight: 400;
       }
 
       /* ── STEP 3: Map + Drawer ─────────────────────────────── */
@@ -685,76 +716,100 @@
     document.head.appendChild(style);
   }
 
-  // ── Build & show the Step 2 modal ─────────────────────────────────
+  // ── Build & show Step 2: permission modal on top of Step 3 ───────
   window.initPass2 = function (campaignData) {
     if (!campaignData) return;
     injectCSS();
 
-    const lang = getLang(campaignData.location);
-    const s = STRINGS[lang];
-    const clientName = campaignData.campaignName || 'This app';
+    // First, show Step 3 behind the modal
+    showStep3(campaignData);
 
-    // Container — covers the .phone frame
-    const overlay = document.createElement('div');
+    var lang = getLang(campaignData.location);
+    var s = STRINGS[lang];
+
+    // Overlay container — sits on top of Step 3
+    var overlay = document.createElement('div');
     overlay.className = 'pass2-overlay';
     overlay.id = 'pass2-step2';
 
-    // Blurred map background
-    const mapBg = document.createElement('div');
-    mapBg.className = 'pass2-map-bg';
-    mapBg.style.backgroundImage = 'url(' + getMapUrl(campaignData.location) + ')';
-    overlay.appendChild(mapBg);
-
     // Dark scrim
-    const scrim = document.createElement('div');
+    var scrim = document.createElement('div');
     scrim.className = 'pass2-scrim';
     overlay.appendChild(scrim);
 
     // Modal card
-    const modal = document.createElement('div');
+    var modal = document.createElement('div');
     modal.className = 'pass2-modal';
 
-    // Header
-    const header = document.createElement('div');
-    header.className = 'pass2-modal-header';
+    // Question section (title + body)
+    var question = document.createElement('div');
+    question.className = 'pass2-modal-question';
 
-    // Location icon (white pin on blue rounded square)
-    const iconWrap = document.createElement('div');
-    iconWrap.className = 'pass2-loc-icon';
-    iconWrap.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="white"/><circle cx="12" cy="9" r="2.5" fill="#4A90D9"/></svg>';
-    header.appendChild(iconWrap);
-
-    // Title
-    const title = document.createElement('div');
+    var title = document.createElement('div');
     title.className = 'pass2-modal-title';
-    title.textContent = '\u201C' + clientName + '\u201D ' + s.titleSuffix;
-    header.appendChild(title);
+    title.textContent = s.modalTitle;
+    question.appendChild(title);
 
-    modal.appendChild(header);
+    var body = document.createElement('div');
+    body.className = 'pass2-modal-body';
+    body.textContent = s.modalBody;
+    question.appendChild(body);
 
-    // Buttons
-    const btnStack = document.createElement('div');
+    modal.appendChild(question);
+
+    // Map preview
+    var mapWrap = document.createElement('div');
+    mapWrap.className = 'pass2-modal-map';
+
+    var mapImg = document.createElement('img');
+    mapImg.src = getMapUrl(campaignData.location);
+    mapImg.alt = '';
+    mapWrap.appendChild(mapImg);
+
+    // "Preciso: On" pill
+    var pill = document.createElement('div');
+    pill.className = 'pass2-precise-pill';
+    pill.innerHTML = '<svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M5.5 0L7 4H11L7.5 6.5L9 11L5.5 8L2 11L3.5 6.5L0 4H4L5.5 0Z" fill="#007AFF"/></svg>';
+    var pillText = document.createElement('span');
+    pillText.className = 'pass2-precise-text';
+    pillText.textContent = s.preciseOn;
+    pill.appendChild(pillText);
+    mapWrap.appendChild(pill);
+
+    // Blue location dot
+    var dot = document.createElement('div');
+    dot.className = 'pass2-blue-dot';
+    mapWrap.appendChild(dot);
+
+    modal.appendChild(mapWrap);
+
+    // Button stack with dividers
+    var btnStack = document.createElement('div');
     btnStack.className = 'pass2-btn-stack';
 
-    function makeBtn(label, bold) {
-      const btn = document.createElement('button');
-      btn.className = 'pass2-btn ' + (bold ? 'pass2-btn--bold' : 'pass2-btn--regular');
+    function addBtn(label) {
+      var divider = document.createElement('div');
+      divider.className = 'pass2-btn-divider';
+      btnStack.appendChild(divider);
+
+      var btn = document.createElement('button');
+      btn.className = 'pass2-btn';
       btn.textContent = label;
       btn.addEventListener('click', function () {
         overlay.remove();
-        showStep3(campaignData);
       });
-      return btn;
+      btnStack.appendChild(btn);
     }
 
-    btnStack.appendChild(makeBtn(s.allowWhileUsing, true));
-    btnStack.appendChild(makeBtn(s.allowOnce, false));
-    btnStack.appendChild(makeBtn(s.dontAllow, false));
+    addBtn(s.allowOnce);
+    addBtn(s.allowWhileUsing);
+    addBtn(s.dontAllow);
+
     modal.appendChild(btnStack);
     overlay.appendChild(modal);
 
-    // Insert into .phone element
-    const phone = document.getElementById('phone');
+    // Insert into .phone element (on top of Step 3)
+    var phone = document.getElementById('phone');
     phone.appendChild(overlay);
   };
 
