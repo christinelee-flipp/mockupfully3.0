@@ -10,19 +10,23 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   html, body {
+    margin: 0;
+    padding: 0;
     height: 100%;
+    background: #e5e5e5;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
   }
   body {
-    background: #e5e5e5;
     font-family: 'Montserrat', sans-serif;
   }
 
   #viewer-container {
+    position: relative;
     width: 100%;
     max-width: 380px;
     height: 100dvh;
-    margin: 0 auto;
-    position: relative;
     overflow: hidden;
     background: #fff;
   }
@@ -70,22 +74,23 @@
 
   /* ── WEBSITE VIEW ── */
   #website-view {
-    position: absolute; inset: 0;
     width: 100%;
+    height: 100%;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    flex-direction: column;
-    background: #fff;
+    display: none;
   }
   #website-view img {
     width: 100%;
     display: block;
+    margin: 0;
+    padding: 0;
   }
 
   /* ── MARKETPLACE: SCREEN 1 — App Home ── */
   #market-home {
     position: absolute; inset: 0;
-    width: 100%;
+    width: 100%; height: 100%;
     flex-direction: column;
     background: #fff;
   }
@@ -95,80 +100,45 @@
   .mh-header img { width: 100%; display: block; }
   .mh-scroll {
     flex: 1;
+    min-height: 0;
+    height: 0;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    padding: 8px;
   }
-  .mh-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-  .mh-card {
-    border-radius: 12px;
-    overflow: hidden;
-    background: #fff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-  }
-  .mh-card--tappable { cursor: pointer; }
-  .mh-card-thumb {
-    width: 100%;
-    height: 200px;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-  }
-  .mh-card-info {
-    padding: 8px;
+  .mh-content {
     display: flex;
-    align-items: center;
-    gap: 0;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px;
   }
-  .mh-card-logo {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    background: #e0e0e0;
-    overflow: hidden;
+  .mh-flyer {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: calc(50% - 8px);
+    cursor: pointer;
   }
-  .mh-card-logo img {
+  .mh-flyer img {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
     display: block;
   }
-  .mh-card-text {
-    flex: 1;
-    min-width: 0;
-    padding: 0 8px;
+  .mh-cover-home {
+    width: 100%;
+    min-height: 240px;
+    background-color: #ebebf5;
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
   }
-  .mh-card-name {
-    font-size: 13px;
-    font-weight: 700;
-    color: #1a1a1a;
-    line-height: 1.3;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  .mh-flyer-img {
+    width: calc(50% - 8px);
   }
-  .mh-card-dist {
-    font-size: 11px;
-    font-weight: 400;
-    color: #666;
-    margin-top: 2px;
+  .mh-flyer-img img {
+    width: 100%;
+    display: block;
   }
-  .mh-card-badge {
-    flex-shrink: 0;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 3px 8px;
-    border-radius: 20px;
-    white-space: nowrap;
-    align-self: center;
-  }
-  .mh-badge-green { background: #4CAF50; color: #fff; }
-  .mh-badge-orange { background: #FF6B00; color: #fff; }
   .mh-footer {
     flex-shrink: 0;
   }
@@ -177,7 +147,7 @@
   /* ── MARKETPLACE: SCREEN 2 — Flyer Viewer ── */
   #market-viewer {
     position: absolute; inset: 0;
-    width: 100%;
+    width: 100%; height: 100%;
     flex-direction: column;
     background: #282832;
   }
@@ -220,17 +190,7 @@
   }
   .mv-footer img { width: 100%; display: block; }
 
-  /* ── AD IFRAME ── */
-  #ad-iframe-wrap {
-    position: absolute; inset: 0;
-    z-index: 50;
-  }
-  #ad-iframe-wrap iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    display: block;
-  }
+  /* ── AD IFRAME (appended directly to #viewer-container by JS) ── */
 </style>
 </head>
 <body>
@@ -257,8 +217,7 @@
   <!-- MARKETPLACE: VIEWER -->
   <div class="section" id="market-viewer"></div>
 
-  <!-- AD IFRAME (hidden by default) -->
-  <div class="section" id="ad-iframe-wrap"></div>
+  <!-- AD IFRAME: appended directly to viewer-container by JS -->
 
 </div><!-- /viewer-container -->
 
@@ -284,7 +243,7 @@
 
   function showSection(id) {
     var el = document.getElementById(id);
-    el.style.display = 'flex';
+    el.style.display = (id === 'website-view') ? 'block' : 'flex';
   }
 
   function hideSection(id) {
@@ -301,23 +260,31 @@
   }
 
   // ── Ad iframe ──
-  function showAd() {
-    var wrap = document.getElementById('ad-iframe-wrap');
-    if (!wrap.querySelector('iframe')) {
-      var iframe = document.createElement('iframe');
+  function getOrCreateIframe() {
+    var container = document.getElementById('viewer-container');
+    var iframe = container.querySelector('iframe');
+    if (!iframe) {
+      iframe = document.createElement('iframe');
       iframe.src = 'click2go-prototype.html?id=' + encodeURIComponent(id) + '&viewer=' + encodeURIComponent(viewer || '');
       iframe.allow = 'autoplay';
-      wrap.appendChild(iframe);
+      iframe.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;border:none;display:none;z-index:50;';
+      container.appendChild(iframe);
     }
+    return iframe;
+  }
+
+  function showAd() {
+    var iframe = getOrCreateIframe();
     // Hide viewer chrome
     hideSection('website-view');
     hideSection('market-home');
     hideSection('market-viewer');
-    showSection('ad-iframe-wrap');
+    iframe.style.display = 'block';
   }
 
   function hideAd() {
-    hideSection('ad-iframe-wrap');
+    var iframe = document.querySelector('#viewer-container > iframe');
+    if (iframe) iframe.style.display = 'none';
     if (viewer === 'marketplace') {
       showSection('market-viewer');
     } else if (viewer === 'website') {
@@ -339,18 +306,29 @@
     var base = assetBase() + 'website/' + loc + '/' + pub + '/';
 
     var container = document.getElementById('website-view');
+
     var topImg = document.createElement('img');
     topImg.src = base + 'top.png';
     topImg.alt = '';
+    topImg.style.cssText = 'width:100%;display:block;margin:0;padding:0;';
+    topImg.onerror = function() { console.error('404:', topImg.src); };
+    topImg.onload  = function() { console.log('OK:',  topImg.src); };
     container.appendChild(topImg);
 
     var bottomImg = document.createElement('img');
     bottomImg.src = base + 'bottom.png';
     bottomImg.alt = '';
+    bottomImg.style.cssText = 'width:100%;display:block;margin:0;padding:0;';
+    bottomImg.onerror = function() { console.error('404:', bottomImg.src); };
+    bottomImg.onload  = function() { console.log('OK:',  bottomImg.src); };
     container.appendChild(bottomImg);
 
+    // Show AFTER appending
     hideLoading();
-    showSection('website-view');
+    var wsEl = document.getElementById('website-view');
+    wsEl.style.cssText = 'display:block;width:100%;height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;';
+
+    console.log('initWebsite complete, path base was:', base);
 
     // After 9 seconds, show ad
     setTimeout(function () {
@@ -370,54 +348,8 @@
     showSection('market-home');
   }
 
-  function buildCard(thumbUrl, logoUrl, name, distance, badgeText, badgeClass, tappable) {
-    var card = document.createElement('div');
-    card.className = 'mh-card' + (tappable ? ' mh-card--tappable' : '');
-
-    var thumb = document.createElement('div');
-    thumb.className = 'mh-card-thumb';
-    thumb.style.backgroundImage = 'url(' + thumbUrl + ')';
-    card.appendChild(thumb);
-
-    var info = document.createElement('div');
-    info.className = 'mh-card-info';
-
-    var logoWrap = document.createElement('div');
-    logoWrap.className = 'mh-card-logo';
-    if (logoUrl) {
-      var logoImg = document.createElement('img');
-      logoImg.src = logoUrl;
-      logoImg.alt = '';
-      logoWrap.appendChild(logoImg);
-    }
-    info.appendChild(logoWrap);
-
-    var text = document.createElement('div');
-    text.className = 'mh-card-text';
-    var nameEl = document.createElement('div');
-    nameEl.className = 'mh-card-name';
-    nameEl.textContent = name;
-    text.appendChild(nameEl);
-    var distEl = document.createElement('div');
-    distEl.className = 'mh-card-dist';
-    distEl.textContent = distance;
-    text.appendChild(distEl);
-    info.appendChild(text);
-
-    if (badgeText) {
-      var badge = document.createElement('div');
-      badge.className = 'mh-card-badge ' + (badgeClass || '');
-      badge.textContent = badgeText;
-      info.appendChild(badge);
-    }
-
-    card.appendChild(info);
-    return card;
-  }
-
   function buildScreen1(appBase, catBase) {
     var container = document.getElementById('market-home');
-    var d = campaignData;
 
     // Header
     var header = document.createElement('div');
@@ -428,49 +360,45 @@
     header.appendChild(headerImg);
     container.appendChild(header);
 
-    // Scrollable grid
+    // Scrollable content area
     var scroll = document.createElement('div');
     scroll.className = 'mh-scroll';
-    var grid = document.createElement('div');
-    grid.className = 'mh-grid';
+    var content = document.createElement('div');
+    content.className = 'mh-content';
 
-    // Card 1 — catalog cover (tappable)
-    var card1 = buildCard(
-      catBase + '1.png',
-      d.clientLogoURL || '',
-      d.clientName || 'Retailer',
-      '1.1 Km',
-      'NUEVO',
-      'mh-badge-green',
-      true
-    );
-    card1.addEventListener('click', function () {
+    // Card 1: catalog cover + footerFlyer (tappable)
+    var cover = document.createElement('div');
+    cover.className = 'mh-flyer';
+    cover.addEventListener('click', function () {
       hideSection('market-home');
       buildScreen2(appBase, catBase);
       showSection('market-viewer');
     });
-    grid.appendChild(card1);
 
-    // Cards 2, 3, 4 — decorative flyers
-    var badges = [
-      { text: '-2 D\u00cdAS', cls: 'mh-badge-orange' },
-      { text: '-2 D\u00cdAS', cls: 'mh-badge-orange' },
-      { text: 'NUOVO', cls: 'mh-badge-green' }
-    ];
-    for (var i = 0; i < 3; i++) {
-      var card = buildCard(
-        appBase + 'flyer0' + (i + 1) + '.png',
-        appBase + 'flyer0' + (i + 1) + '.png',
-        'Retailer',
-        '1.1 Km',
-        badges[i].text,
-        badges[i].cls,
-        false
-      );
-      grid.appendChild(card);
+    var coverImg = document.createElement('div');
+    coverImg.className = 'mh-cover-home';
+    coverImg.style.backgroundImage = 'url(' + catBase + '1.png)';
+    cover.appendChild(coverImg);
+
+    var footerFlyerImg = document.createElement('img');
+    footerFlyerImg.src = appBase + 'footerFlyer.png';
+    footerFlyerImg.alt = '';
+    cover.appendChild(footerFlyerImg);
+
+    content.appendChild(cover);
+
+    // Cards 2–4: plain flyer images
+    for (var i = 1; i <= 3; i++) {
+      var flyerWrap = document.createElement('div');
+      flyerWrap.className = 'mh-flyer-img';
+      var flyerImg = document.createElement('img');
+      flyerImg.src = appBase + 'flyer0' + i + '.png';
+      flyerImg.alt = '';
+      flyerWrap.appendChild(flyerImg);
+      content.appendChild(flyerWrap);
     }
 
-    scroll.appendChild(grid);
+    scroll.appendChild(content);
     container.appendChild(scroll);
 
     // Footer
@@ -600,6 +528,7 @@
       if (!res.ok) throw new Error('HTTP ' + res.status);
       campaignData = await res.json();
     } catch (err) {
+      console.error('Campaign fetch failed:', err);
       showError('Could not fetch campaign "' + id + '". ' + err.message);
       return;
     }
@@ -608,6 +537,8 @@
       showError('Campaign "' + id + '" was not found.');
       return;
     }
+
+    console.log('Campaign loaded:', campaignData);
 
     if (viewer === 'website') {
       initWebsite(campaignData);
