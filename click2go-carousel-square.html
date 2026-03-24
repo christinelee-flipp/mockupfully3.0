@@ -687,9 +687,13 @@ function render(d) {
   phone.style.setProperty('--button-text-color', d.buttonTextColor || '#ffffff');
   phone.style.setProperty('--icon-color', iconColor);
 
-  document.getElementById('status-bar').style.background = bg;
-  document.getElementById('top-bar').style.background    = bg;
-  document.getElementById('ad-content').style.background = bg;
+  // Set background once on the phone wrapper only
+  document.getElementById('phone').style.background = bg;
+
+  // Make individual sections transparent
+  document.getElementById('status-bar').style.background = 'transparent';
+  document.getElementById('top-bar').style.background    = 'transparent';
+  document.getElementById('ad-content').style.background = 'transparent';
 
   document.getElementById('close-circle').setAttribute('stroke', iconColor);
   document.getElementById('close-x').setAttribute('stroke', iconColor);
