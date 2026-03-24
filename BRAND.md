@@ -58,6 +58,36 @@ Google Fonts import (already in brand.css):
 
 ---
 
+## Logo
+
+The combined Flipp x Shopfully logo is used as the primary
+brand mark across all Mockupfully 3.0 interfaces.
+
+File location: assets/flipp-sf-logo.svg
+
+Usage in navigation bar:
+  <img src="assets/flipp-sf-logo.svg"
+       alt="Flipp x Shopfully"
+       style="height: 28px; width: auto; display: block;">
+
+Rules:
+- Always use the SVG file — never recreate the logo in HTML/CSS
+- Height should be 28px in the nav bar, width auto
+- Never place the logo on a coloured background other than
+  navy (#000C52) or white (#FFFFFF)
+- Never add a red dot, circle, or any other shape next to it
+- The word "MOCKUPFULLY" may appear next to the logo as a
+  product name label in uppercase, font-weight 700,
+  color white, letter-spacing 1.5px
+- Any page that uses .brand-nav must include the logo
+
+Pages that must show the logo:
+- form.html (Domination form)
+- click2go-form.html (Click2Go form — to be built)
+- index.html (Dashboard — to be updated)
+
+---
+
 ## Tone
 Joyful · Positive · Fun · Unification
 
