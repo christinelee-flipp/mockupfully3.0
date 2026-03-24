@@ -1,0 +1,348 @@
+/* ══════════════════════════════════════════════════════════════════════
+   brand.css — Mockupfully 3.0 Design System
+   Single source of truth for visual tokens and reusable components.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── SECTION 1: Google Font ──────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+/* ── SECTION 2: CSS Custom Properties (Tokens) ──────────────────── */
+:root {
+  /* Brand colours */
+  --color-navy:      #000C52;
+  --color-cream:     #FBF5E6;
+  --color-sky:       #43C4F4;
+  --color-purple:    #760FCA;
+  --color-pink:      #FF658F;
+  --color-yellow:    #FFD500;
+  --color-white:     #FFFFFF;
+  --color-b2b-navy:  #002551;
+
+  /* Neutral greys */
+  --color-grey-100:  #F5F5F5;
+  --color-grey-200:  #E5E7EB;
+  --color-grey-300:  #D1D5DB;
+  --color-grey-500:  #6B7280;
+  --color-grey-700:  #374151;
+
+  /* Typography */
+  --font-base: 'Plus Jakarta Sans', sans-serif;
+
+  /* Spacing */
+  --space-xs:   4px;
+  --space-sm:   8px;
+  --space-md:   16px;
+  --space-lg:   24px;
+  --space-xl:   32px;
+  --space-2xl:  48px;
+
+  /* Radius */
+  --radius-sm:  6px;
+  --radius-md:  10px;
+  --radius-lg:  16px;
+  --radius-xl:  24px;
+
+  /* Shadows */
+  --shadow-card: 0 4px 24px rgba(0, 12, 82, 0.08);
+  --shadow-sm:   0 1px 4px rgba(0, 12, 82, 0.06);
+}
+
+/* ── SECTION 3: Base Reset ───────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-base);
+  background: var(--color-cream);
+  color: var(--color-navy);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── SECTION 4: Navigation / Header Bar ──────────────────────────── */
+.brand-nav {
+  background: var(--color-navy);
+  color: var(--color-white);
+  padding: 0 var(--space-xl);
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.brand-nav-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-white);
+  text-decoration: none;
+  letter-spacing: -0.3px;
+}
+.brand-nav-links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+.brand-nav-link {
+  color: rgba(255,255,255,0.75);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: color 0.15s;
+}
+.brand-nav-link:hover {
+  color: var(--color-sky);
+}
+
+/* ── SECTION 5: Page Wrapper ─────────────────────────────────────── */
+.brand-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--space-xl) var(--space-lg);
+}
+.brand-page-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-navy);
+  letter-spacing: -0.4px;
+  margin-bottom: var(--space-xl);
+}
+
+/* ── SECTION 6: Card ─────────────────────────────────────────────── */
+.brand-card {
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-xl);
+  margin-bottom: var(--space-xl);
+}
+
+/* ── SECTION 7: Form Section Group ───────────────────────────────── */
+.form-section {
+  margin-bottom: var(--space-xl);
+}
+.form-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-navy);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  border-bottom: 2px solid var(--color-sky);
+  padding-bottom: var(--space-sm);
+  margin-bottom: var(--space-md);
+  display: block;
+}
+
+/* ── SECTION 8: Form Fields ──────────────────────────────────────── */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-md);
+}
+.form-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-grey-700);
+}
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  font-family: var(--font-base);
+  font-size: 14px;
+  color: var(--color-navy);
+  background: var(--color-white);
+  border: 1.5px solid var(--color-grey-300);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+}
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  border-color: var(--color-sky);
+  box-shadow: 0 0 0 3px rgba(67, 196, 244, 0.18);
+}
+.form-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+.form-hint {
+  font-size: 12px;
+  color: var(--color-grey-500);
+  margin-top: 2px;
+}
+
+/* ── SECTION 9: Toggle Buttons ───────────────────────────────────── */
+.toggle-group {
+  display: flex;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1.5px solid var(--color-grey-300);
+  width: fit-content;
+}
+.toggle-btn {
+  padding: 8px 16px;
+  font-family: var(--font-base);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-grey-500);
+  background: var(--color-grey-100);
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.toggle-btn.active,
+.toggle-btn:checked {
+  background: var(--color-navy);
+  color: var(--color-white);
+  font-weight: 600;
+}
+.toggle-btn:hover:not(.active) {
+  background: var(--color-grey-200);
+}
+
+/* ── SECTION 10: Buttons ─────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  font-family: var(--font-base);
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  padding: 10px 24px;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn:active { transform: translateY(1px); }
+
+.btn-primary {
+  background: var(--color-navy);
+  color: var(--color-white);
+  border-color: var(--color-navy);
+}
+.btn-primary:hover {
+  background: var(--color-b2b-navy);
+  border-color: var(--color-b2b-navy);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,12,82,0.2);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--color-navy);
+  border-color: var(--color-navy);
+}
+.btn-secondary:hover {
+  background: var(--color-navy);
+  color: var(--color-white);
+}
+
+.btn-danger {
+  background: transparent;
+  color: var(--color-pink);
+  border-color: var(--color-pink);
+}
+.btn-danger:hover {
+  background: var(--color-pink);
+  color: var(--color-white);
+}
+
+.btn-sm {
+  font-size: 12px;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+}
+
+/* ── SECTION 11: Colour Picker ───────────────────────────────────── */
+.color-input {
+  width: 48px;
+  height: 40px;
+  border: 1.5px solid var(--color-grey-300);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+  cursor: pointer;
+  background: none;
+}
+.color-input:focus {
+  border-color: var(--color-sky);
+  outline: none;
+}
+
+/* ── SECTION 12: Image Thumbnail Preview ─────────────────────────── */
+.img-preview {
+  border: 2px dashed var(--color-grey-300);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+.img-preview.has-image {
+  border-style: solid;
+  border-color: var(--color-sky);
+}
+.img-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── SECTION 13: Alerts / Toasts ─────────────────────────────────── */
+.alert {
+  padding: var(--space-md);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  margin-bottom: var(--space-md);
+}
+.alert-success {
+  background: #ECFDF5;
+  border-color: #10B981;
+  color: #065F46;
+}
+.alert-error {
+  background: #FEF2F2;
+  border-color: var(--color-pink);
+  color: #991B1B;
+}
+.alert-info {
+  background: #EFF8FF;
+  border-color: var(--color-sky);
+  color: var(--color-b2b-navy);
+}
+
+/* ── SECTION 14: Badge / Pill ────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.badge-navy  { background: var(--color-navy);   color: white; }
+.badge-sky   { background: var(--color-sky);    color: var(--color-navy); }
+.badge-cream { background: var(--color-cream);  color: var(--color-navy); border: 1px solid var(--color-grey-300); }
+
+/* ── SECTION 15: Divider ─────────────────────────────────────────── */
+.brand-divider {
+  border: none;
+  border-top: 1px solid var(--color-grey-200);
+  margin: var(--space-lg) 0;
+}
