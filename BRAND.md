@@ -82,8 +82,8 @@ Rules:
 - Any page that uses .brand-nav must include the logo
 
 Pages that must show the logo:
-- form.html (Domination form)
-- click2go-form.html (Click2Go form — to be built)
+- domination-form.html (Domination form)
+- click2go-form.html (Click2Go form)
 - index.html (Dashboard — to be updated)
 
 ---
@@ -159,6 +159,6 @@ Joyful · Positive · Fun · Unification
 ---
 
 ## Files that use brand.css
-- form.html (Domination campaign form)
-- click2go-form.html (Click2Go campaign form — to be built)
+- domination-form.html (Domination campaign form)
+- click2go-form.html (Click2Go campaign form)
 - index.html (Dashboard — to be updated)

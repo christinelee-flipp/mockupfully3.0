@@ -355,7 +355,7 @@
     <div class="header-divider"></div>
     <span class="header-page">Campaigns</span>
   </div>
-  <a class="btn-new-campaign" href="form.html">+ New Campaign</a>
+  <a class="btn-new-campaign" href="domination-form.html">+ New Campaign</a>
 </div>
 
 <!-- TOOLBAR -->
@@ -439,7 +439,7 @@ const WEBHOOKS = {
   submit:  'api/save.php',
 };
 const PROTOTYPE = 'domination-prototype.html';
-const FORM = 'form.html';
+const FORM = 'domination-form.html';
 
 let allCampaigns = [];
 let deleteTarget = null;
@@ -657,7 +657,7 @@ async function cloneCampaign(i) {
 
 function editCampaign(i) {
   const c = allCampaigns[i];
-  // Pass campaignID to form.html via URL so it can pre-fill
+  // Pass campaignID to domination-form.html via URL so it can pre-fill
   const params = new URLSearchParams({ edit: c.campaignID });
   window.location.href = `${FORM}?${params.toString()}`;
 }
