@@ -377,12 +377,6 @@
 </head>
 <body>
 
-<!-- DEBUG PANEL (remove once dashboard is confirmed working) -->
-<div id="debug-panel" style="display:none;background:#c0392b;color:#fff;font-family:monospace;font-size:13px;padding:16px 20px;line-height:1.7;position:relative;z-index:9999;">
-  <strong style="font-size:15px;">DEBUG PANEL</strong>
-  <div id="debug-content"></div>
-</div>
-
 <!-- HEADER -->
 <div class="header">
   <div class="header-left">
@@ -445,7 +439,7 @@
     <thead>
       <tr>
         <th>Campaign</th>
-        <th>Country</th>
+        <th onclick="sortCampaigns('country')" style="cursor:pointer;user-select:none" id="th-country">Country <span class="sort-icon"></span></th>
         <th onclick="sortCampaigns('product')" style="cursor:pointer;user-select:none" id="th-product">Product <span class="sort-icon"></span></th>
         <th>Type</th>
         <th onclick="sortCampaigns('date')" style="cursor:pointer;user-select:none" id="th-date">Date <span class="sort-icon">&darr;</span></th>
@@ -525,42 +519,22 @@ let sortDir = 'desc';
 let previewTargetID = null;
 let urlModalQR = null;
 
-// ── DEBUG PANEL ───────────────────────────────────────────────────
-function showDebug(lines) {
-  const panel = document.getElementById('debug-panel');
-  const content = document.getElementById('debug-content');
-  panel.style.display = 'block';
-  content.innerHTML = lines.map(l => `<div>${l}</div>`).join('');
-}
-
 // ── LOAD ──────────────────────────────────────────────────────────
 async function loadCampaigns() {
-  const debugLines = [];
-  const fetchURL = new URL(WEBHOOKS.getAll, window.location.href).href;
-  debugLines.push(`Fetch URL: ${fetchURL}`);
-
   try {
     const res = await fetch(WEBHOOKS.getAll);
-    debugLines.push(`HTTP status: ${res.status} ${res.statusText}`);
-
     const text = await res.text();
-    debugLines.push(`Raw response (first 300 chars): ${text.slice(0, 300)}`);
 
     let data;
     try {
       data = JSON.parse(text);
-      debugLines.push(`JSON parse: success`);
     } catch (e) {
-      debugLines.push(`JSON parse: FAILED - ${e.message}`);
-      showDebug(debugLines);
       document.getElementById('table-body').innerHTML = `
         <tr class="state-row"><td colspan="6">Failed to load campaigns. <button onclick="loadCampaigns()" style="color:var(--pink);background:none;border:none;cursor:pointer;font-weight:800;">Retry</button></td></tr>`;
       return;
     }
 
     if (data && data.error) {
-      debugLines.push(`Server error: ${data.error}`);
-      showDebug(debugLines);
       document.getElementById('table-body').innerHTML = `
         <tr class="state-row"><td colspan="6">Failed to load campaigns. <button onclick="loadCampaigns()" style="color:var(--pink);background:none;border:none;cursor:pointer;font-weight:800;">Retry</button></td></tr>`;
       return;
@@ -571,19 +545,13 @@ async function loadCampaigns() {
     } else if (data && Array.isArray(data.campaigns)) {
       allCampaigns = data.campaigns;
     } else {
-      debugLines.push(`Data shape: UNEXPECTED`);
-      showDebug(debugLines);
       document.getElementById('table-body').innerHTML = `
         <tr class="state-row"><td colspan="6">Failed to load campaigns. <button onclick="loadCampaigns()" style="color:var(--pink);background:none;border:none;cursor:pointer;font-weight:800;">Retry</button></td></tr>`;
       return;
     }
 
-    debugLines.push(`Campaigns found: ${allCampaigns.length}`);
-    showDebug(debugLines);
     filterTable();
   } catch (err) {
-    debugLines.push(`Fetch error: ${err.message}`);
-    showDebug(debugLines);
     document.getElementById('table-body').innerHTML = `
       <tr class="state-row"><td colspan="6">Failed to load campaigns. <button onclick="loadCampaigns()" style="color:var(--pink);background:none;border:none;cursor:pointer;font-weight:800;">Retry</button></td></tr>`;
   }
@@ -644,7 +612,7 @@ function sortCampaigns(col) {
     sortDir = sortDir === 'asc' ? 'desc' : 'asc';
   } else {
     sortColumn = col;
-    sortDir = col === 'date' ? 'desc' : 'asc';
+    sortDir = 'asc';
   }
   updateSortIndicators();
   filterTable();
@@ -655,8 +623,10 @@ function updateSortIndicators() {
   const icon = sortDir === 'asc' ? '\u2191' : '\u2193';
   const thDate = document.getElementById('th-date');
   const thProd = document.getElementById('th-product');
+  const thCountry = document.getElementById('th-country');
   if (sortColumn === 'date' && thDate) thDate.querySelector('.sort-icon').textContent = icon;
   if (sortColumn === 'product' && thProd) thProd.querySelector('.sort-icon').textContent = icon;
+  if (sortColumn === 'country' && thCountry) thCountry.querySelector('.sort-icon').textContent = icon;
 }
 
 // ── PREVIEW DIALOG (Click2Go) ───────────────────────────────────
@@ -798,6 +768,12 @@ function filterTable() {
       const pa = (a.productType || '').toLowerCase();
       const pb = (b.productType || '').toLowerCase();
       return sortDir === 'asc' ? pa.localeCompare(pb) : pb.localeCompare(pa);
+    });
+  } else if (sortColumn === 'country') {
+    filtered.sort((a, b) => {
+      const ca = (a.location || '').toLowerCase();
+      const cb = (b.location || '').toLowerCase();
+      return sortDir === 'asc' ? ca.localeCompare(cb) : cb.localeCompare(ca);
     });
   }
 
