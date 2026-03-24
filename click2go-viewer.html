@@ -9,25 +9,25 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
+  html, body {
+    height: 100%;
+  }
   body {
-    background: #888;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
-    padding: 20px;
+    background: #e5e5e5;
     font-family: 'Montserrat', sans-serif;
   }
 
-  .viewer-frame {
-    width: 380px;
-    height: 932px;
+  #viewer-container {
+    width: 100%;
+    max-width: 380px;
+    height: 100dvh;
+    margin: 0 auto;
     position: relative;
     overflow: hidden;
     background: #fff;
   }
-  @media (pointer: coarse) {
-    .viewer-frame { max-width: 780px; }
+  @media (hover: none) and (pointer: coarse) {
+    #viewer-container { max-width: 780px; }
   }
 
   /* ── LOADING ── */
@@ -71,13 +71,11 @@
   /* ── WEBSITE VIEW ── */
   #website-view {
     position: absolute; inset: 0;
+    width: 100%;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     flex-direction: column;
-    align-items: center;
     background: #fff;
-    max-width: 380px;
-    margin: 0 auto;
   }
   #website-view img {
     width: 100%;
@@ -87,6 +85,7 @@
   /* ── MARKETPLACE: SCREEN 1 — App Home ── */
   #market-home {
     position: absolute; inset: 0;
+    width: 100%;
     flex-direction: column;
     background: #fff;
   }
@@ -177,6 +176,7 @@
   /* ── MARKETPLACE: SCREEN 2 — Flyer Viewer ── */
   #market-viewer {
     position: absolute; inset: 0;
+    width: 100%;
     flex-direction: column;
     background: #282832;
   }
@@ -233,7 +233,7 @@
 </style>
 </head>
 <body>
-<div class="viewer-frame" id="viewer-frame">
+<div id="viewer-container">
 
   <!-- LOADING -->
   <div class="loading" id="state-loading">
@@ -259,7 +259,7 @@
   <!-- AD IFRAME (hidden by default) -->
   <div class="section" id="ad-iframe-wrap"></div>
 
-</div>
+</div><!-- /viewer-container -->
 
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
