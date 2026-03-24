@@ -181,7 +181,7 @@
       /* iOS permission modal */
       .pass2-modal {
         position: relative;
-        width: 310px;
+        width: min(310px, 88%);
         background: rgba(255,255,255,0.9);
         border-radius: 18px;
         overflow: hidden;
@@ -214,7 +214,7 @@
       /* Map preview inside modal */
       .pass2-modal-map {
         position: relative;
-        width: 310px;
+        width: 100%;
         height: 199px;
         overflow: hidden;
       }
@@ -265,7 +265,7 @@
         align-items: center;
       }
       .pass2-btn-divider {
-        width: 310px;
+        width: 100%;
         height: 0.57px;
         background: rgba(60,60,67,0.29);
       }
@@ -310,7 +310,7 @@
 
       /* Top app bar with logo + close */
       .step3-topbar {
-        width: 430px;
+        width: 100%;
         height: 72px;
         display: flex;
         align-items: center;
@@ -410,7 +410,7 @@
         bottom: 0;
         left: 50%;
         transform: translateX(-50%);
-        width: 412px;
+        width: 100%;
         background: #fff;
         border-radius: 24px 24px 0 0;
         box-shadow: 0 4px 4px rgba(0,0,0,0.25);
@@ -550,7 +550,7 @@
         -webkit-tap-highlight-color: transparent;
       }
       .step3-retailer-divider {
-        width: 402px;
+        width: 100%;
         height: 2px;
         border: 1px solid #474643;
         opacity: 0.2;
@@ -611,7 +611,7 @@
         animation: pass2FadeIn 0.25s ease-out;
       }
       .step4-statusbar {
-        width: 430px;
+        width: 100%;
         height: 54px;
         flex-shrink: 0;
         display: flex;
@@ -709,7 +709,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        width: 412px;
+        width: 100%;
         margin: 0 auto;
       }
     `;
@@ -896,7 +896,7 @@
 
     // Status bar (clock + icons)
     var statusBar = document.createElement('div');
-    statusBar.style.cssText = 'width:430px;height:54px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:12px 16px 0;';
+    statusBar.style.cssText = 'width:100%;height:54px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:12px 16px 0;';
     statusBar.innerHTML = '<span style="font-family:\'SF Pro Text\',Montserrat,sans-serif;font-weight:600;font-size:16px;color:' + iconStroke + '">10:10</span>'
       + '<div style="display:flex;align-items:center;gap:2px">'
       + '<div style="display:flex;align-items:flex-end;gap:1.5px;height:12px;margin-right:2px"><span style="border-radius:1px;width:3px;height:4px;background:' + iconStroke + ';display:block"></span><span style="border-radius:1px;width:3px;height:6px;background:' + iconStroke + ';display:block"></span><span style="border-radius:1px;width:3px;height:9px;background:' + iconStroke + ';display:block"></span><span style="border-radius:1px;width:3px;height:12px;background:' + iconStroke + ';display:block"></span></div>'
@@ -1255,7 +1255,7 @@
 
     // Status bar
     var statusBar = document.createElement('div');
-    statusBar.style.cssText = 'width:430px;height:54px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:12px 16px 0;';
+    statusBar.style.cssText = 'width:100%;height:54px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:12px 16px 0;';
     statusBar.innerHTML = '<span style="font-family:\'SF Pro Text\',Montserrat,sans-serif;font-weight:600;font-size:16px;color:' + iconStroke + '">10:10</span>'
       + '<div style="display:flex;align-items:center;gap:2px">'
       + '<div style="display:flex;align-items:flex-end;gap:1.5px;height:12px;margin-right:2px"><span style="border-radius:1px;width:3px;height:4px;background:' + iconStroke + ';display:block"></span><span style="border-radius:1px;width:3px;height:6px;background:' + iconStroke + ';display:block"></span><span style="border-radius:1px;width:3px;height:9px;background:' + iconStroke + ';display:block"></span><span style="border-radius:1px;width:3px;height:12px;background:' + iconStroke + ';display:block"></span></div>'
