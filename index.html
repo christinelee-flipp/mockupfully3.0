@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mockupfully — Campaigns</title>
 <link rel="stylesheet" href="brand.css">
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <style>
   :root {
     --navy:     #000C52;
@@ -332,6 +333,39 @@
     cursor: pointer;
   }
 
+  /* Preview modal options */
+  .preview-options {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 16px;
+  }
+  .preview-opt {
+    flex: 1;
+    padding: 20px 12px;
+    border-radius: 12px;
+    border: 2px solid var(--grey-200);
+    background: var(--grey-100);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--navy);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+    line-height: 1.8;
+  }
+  .preview-opt:hover {
+    border-color: var(--sky);
+    background: white;
+  }
+
+  /* Sort icon */
+  .sort-icon {
+    font-size: 10px;
+    margin-left: 2px;
+  }
+
   @media (max-width: 600px) {
     .header { padding: 0 16px; }
     .toolbar { padding: 16px 16px 0; }
@@ -415,9 +449,9 @@
       <tr>
         <th>Campaign</th>
         <th>Country</th>
-        <th>Product</th>
+        <th onclick="sortCampaigns('product')" style="cursor:pointer;user-select:none" id="th-product">Product <span class="sort-icon"></span></th>
         <th>Type</th>
-        <th>Date</th>
+        <th onclick="sortCampaigns('date')" style="cursor:pointer;user-select:none" id="th-date">Date <span class="sort-icon">&darr;</span></th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -446,6 +480,34 @@
   </div>
 </div>
 
+<!-- PREVIEW MODAL (Click2Go) -->
+<div class="overlay" id="preview-overlay">
+  <div class="dialog">
+    <h3>Preview Campaign</h3>
+    <p id="preview-campaign-name">Choose a viewer context</p>
+    <div class="preview-options">
+      <button class="preview-opt" id="preview-marketplace-btn">&#127978;<br>Marketplace</button>
+      <button class="preview-opt" id="preview-website-btn">&#127760;<br>Website</button>
+    </div>
+    <div class="dialog-actions" style="margin-top:16px">
+      <button class="btn-cancel" onclick="closePreviewDialog()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- URL / QR MODAL -->
+<div class="overlay" id="url-overlay">
+  <div class="dialog" style="max-width:440px;text-align:center">
+    <h3 id="url-modal-title">Campaign URL</h3>
+    <div id="url-modal-link" style="margin:16px 0;padding:12px;background:var(--grey-100);border-radius:8px;font-size:12px;word-break:break-all;color:var(--navy);"></div>
+    <div id="url-qr-container" style="display:flex;justify-content:center;margin:16px 0;"></div>
+    <div class="dialog-actions" style="justify-content:center;gap:10px">
+      <button class="btn-cancel" onclick="closeURLDialog()">Close</button>
+      <button class="btn-confirm-delete" style="background:var(--navy)" id="url-copy-btn">Copy URL</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const WEBHOOKS = {
   getAll:  'api/list.php',
@@ -461,6 +523,10 @@ const FORM_C2G  = 'click2go-form.html';
 let allCampaigns = [];
 let deleteTarget = null;
 let activeProduct = 'all';
+let sortColumn = 'date';
+let sortDir = 'desc';
+let previewTargetID = null;
+let urlModalQR = null;
 
 // ── DEBUG PANEL ───────────────────────────────────────────────────
 function showDebug(lines) {
@@ -560,8 +626,84 @@ function fmtDate(str) {
 }
 
 // ── COUNTRY FLAG ─────────────────────────────────────────────────
-const FLAGS = {IT:'IT',AU:'AU',CA:'CA',US:'US',FR:'FR',DE:'DE',
-               ES:'ES',AT:'AT',NL:'NL',PL:'PL',PT:'PT',RO:'RO',BG:'BG',HU:'HU',SE:'SE',BR:'BR'};
+const FLAGS = {IT:'\ud83c\uddee\ud83c\uddf9',AU:'\ud83c\udde6\ud83c\uddfa',CA:'\ud83c\udde8\ud83c\udde6',US:'\ud83c\uddfa\ud83c\uddf8',FR:'\ud83c\uddeb\ud83c\uddf7',DE:'\ud83c\udde9\ud83c\uddea',
+               ES:'\ud83c\uddea\ud83c\uddf8',AT:'\ud83c\udde6\ud83c\uddf9',NL:'\ud83c\uddf3\ud83c\uddf1',PL:'\ud83c\uddf5\ud83c\uddf1',PT:'\ud83c\uddf5\ud83c\uddf9',RO:'\ud83c\uddf7\ud83c\uddf4',BG:'\ud83c\udde7\ud83c\uddec',HU:'\ud83c\udded\ud83c\uddfa',SE:'\ud83c\uddf8\ud83c\uddea',BR:'\ud83c\udde7\ud83c\uddf7'};
+
+// ── FORMAT TYPE ──────────────────────────────────────────────────
+function formatType(type) {
+  const map = {
+    'banner':            'Banner',
+    'carousel_vertical': 'Carousel Vertical',
+    'carousel_square':   'Carousel Square',
+    'carousel':          'Carousel',
+    'single':            'Single Image'
+  };
+  return map[(type || '').toLowerCase()] || map[type] || type || '-';
+}
+
+// ── SORT ─────────────────────────────────────────────────────────
+function sortCampaigns(col) {
+  if (sortColumn === col) {
+    sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortColumn = col;
+    sortDir = col === 'date' ? 'desc' : 'asc';
+  }
+  updateSortIndicators();
+  filterTable();
+}
+
+function updateSortIndicators() {
+  document.querySelectorAll('.sort-icon').forEach(el => el.textContent = '');
+  const icon = sortDir === 'asc' ? '\u2191' : '\u2193';
+  const thDate = document.getElementById('th-date');
+  const thProd = document.getElementById('th-product');
+  if (sortColumn === 'date' && thDate) thDate.querySelector('.sort-icon').textContent = icon;
+  if (sortColumn === 'product' && thProd) thProd.querySelector('.sort-icon').textContent = icon;
+}
+
+// ── PREVIEW DIALOG (Click2Go) ───────────────────────────────────
+function openPreviewDialog(campaignID, campaignName) {
+  previewTargetID = campaignID;
+  document.getElementById('preview-campaign-name').textContent = campaignName;
+  document.getElementById('preview-marketplace-btn').onclick = function() {
+    window.open('click2go-viewer.html?id=' + encodeURIComponent(campaignID) + '&viewer=marketplace', '_blank');
+    closePreviewDialog();
+  };
+  document.getElementById('preview-website-btn').onclick = function() {
+    window.open('click2go-viewer.html?id=' + encodeURIComponent(campaignID) + '&viewer=website', '_blank');
+    closePreviewDialog();
+  };
+  document.getElementById('preview-overlay').classList.add('show');
+}
+
+function closePreviewDialog() {
+  document.getElementById('preview-overlay').classList.remove('show');
+  previewTargetID = null;
+}
+
+// ── URL / QR MODAL ──────────────────────────────────────────────
+function openURLModal(url, campaignName) {
+  document.getElementById('url-modal-title').textContent = campaignName;
+  const fullURL = window.location.origin + window.location.pathname.replace('index.html', '') + url;
+  document.getElementById('url-modal-link').innerHTML = '<a href="' + fullURL + '" target="_blank" style="color:var(--sky);text-decoration:underline;">' + fullURL + '</a>';
+  const qrContainer = document.getElementById('url-qr-container');
+  qrContainer.innerHTML = '';
+  urlModalQR = new QRCode(qrContainer, {
+    text: fullURL, width: 180, height: 180,
+    colorDark: '#000C52', colorLight: '#FBF5E6',
+    correctLevel: QRCode.CorrectLevel.M
+  });
+  document.getElementById('url-copy-btn').onclick = function() {
+    navigator.clipboard.writeText(fullURL).then(() => showToast('URL copied'));
+  };
+  document.getElementById('url-overlay').classList.add('show');
+}
+
+function closeURLDialog() {
+  document.getElementById('url-overlay').classList.remove('show');
+  urlModalQR = null;
+}
 
 // ── PRODUCT FILTER ───────────────────────────────────────────────
 function setProductFilter(product) {
@@ -592,24 +734,22 @@ function renderTable(campaigns) {
       : `<span class="prod-badge prod-dom">Domination</span>`;
 
     const loc = c.location || '-';
-    const templateType = c.templateType || '-';
-    const meta = c2g && c.viewer
-      ? `${loc} · ${templateType} · ${c.viewer}`
-      : `${loc} · ${templateType}`;
+    const flag = FLAGS[c.location] || '';
 
     let actions = '';
     if (c2g) {
+      const urlPath = 'click2go-viewer.html?id=' + encodeURIComponent(c.campaignID) + '&viewer=marketplace';
       actions = `
-        <button class="btn-action btn-open" onclick="openC2G(${idx},'marketplace')">Marketplace</button>
-        <button class="btn-action btn-open-website" onclick="openC2G(${idx},'website')">Website</button>
-        <button class="btn-action btn-copy" onclick="copyC2GURL(${idx})">Copy</button>
+        <button class="btn-action btn-open" onclick="openPreviewDialog('${esc(c.campaignID)}','${esc(c.campaignName)}')">Preview</button>
+        <button class="btn-action btn-copy" onclick="openURLModal('${esc(urlPath)}','${esc(c.campaignName)}')">URL</button>
         <button class="btn-action btn-clone" onclick="cloneCampaign(${idx})">Clone</button>
         <button class="btn-action btn-edit" onclick="editCampaign(${idx})">Edit</button>
         <button class="btn-action btn-delete" onclick="askDelete(${idx})">Delete</button>`;
     } else {
+      const urlPath = 'domination-prototype.html?id=' + encodeURIComponent(c.campaignID);
       actions = `
         <button class="btn-action btn-open" onclick="openProto(${idx})">Preview</button>
-        <button class="btn-action btn-copy" onclick="copyDomURL(${idx})">Copy</button>
+        <button class="btn-action btn-copy" onclick="openURLModal('${esc(urlPath)}','${esc(c.campaignName)}')">URL</button>
         <button class="btn-action btn-clone" onclick="cloneCampaign(${idx})">Clone</button>
         <button class="btn-action btn-edit" onclick="editCampaign(${idx})">Edit</button>
         <button class="btn-action btn-delete" onclick="askDelete(${idx})">Delete</button>`;
@@ -617,14 +757,10 @@ function renderTable(campaigns) {
 
     return `
       <tr data-index="${idx}">
-        <td>
-          ${prodBadge}<br>
-          <div style="font-weight:800;font-size:13px;">${esc(c.campaignName || '-')}</div>
-          <div style="font-size:11px;color:var(--grey-500);margin-top:2px;">${meta}</div>
-        </td>
-        <td><span class="country-badge">${loc}</span></td>
-        <td>${prodLabel}</td>
-        <td>${templateType}</td>
+        <td><div style="font-weight:800;font-size:13px;">${esc(c.campaignName || '-')}</div></td>
+        <td><span class="country-badge">${flag} ${loc}</span></td>
+        <td>${prodBadge}</td>
+        <td>${formatType(c.templateType)}</td>
         <td class="date-cell">${fmtDate(c.submittedAt)}</td>
         <td><div class="actions">${actions}</div></td>
       </tr>`;
@@ -652,6 +788,21 @@ function filterTable() {
       (activeProduct === 'Domination' && !(c.productType || '').toLowerCase().includes('click2go') && !(c.campaignID || '').startsWith('click2go-'));
     return matchQ && matchCountry && matchType && matchProduct;
   });
+
+  // Sort
+  if (sortColumn === 'date') {
+    filtered.sort((a, b) => {
+      const da = new Date(a.submittedAt || 0);
+      const db = new Date(b.submittedAt || 0);
+      return sortDir === 'asc' ? da - db : db - da;
+    });
+  } else if (sortColumn === 'product') {
+    filtered.sort((a, b) => {
+      const pa = (a.productType || '').toLowerCase();
+      const pb = (b.productType || '').toLowerCase();
+      return sortDir === 'asc' ? pa.localeCompare(pb) : pb.localeCompare(pa);
+    });
+  }
 
   renderTable(filtered);
 }
@@ -756,6 +907,7 @@ function showToast(msg) {
 }
 
 // ── INIT ──────────────────────────────────────────────────────────
+updateSortIndicators();
 loadCampaigns();
 </script>
 
