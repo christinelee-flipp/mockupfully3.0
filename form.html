@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>New Domination Campaign</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="brand.css">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -19,8 +19,8 @@
   }
 
   body {
-    font-family: 'Nunito', sans-serif;
-    background: #f4f4f8;
+    font-family: var(--font-base);
+    background: var(--color-cream);
     color: var(--dark);
     min-height: 100vh;
     padding: 40px 20px 80px;
@@ -127,7 +127,7 @@
     border: 1.5px solid var(--light);
     border-radius: var(--radius);
     padding: 0 14px;
-    font-family: 'Nunito', sans-serif;
+    font-family: var(--font-base);
     font-size: 14px;
     font-weight: 600;
     color: var(--dark);
@@ -174,7 +174,7 @@
     flex: 1;
     border: none;
     outline: none;
-    font-family: 'Nunito', sans-serif;
+    font-family: var(--font-base);
     font-size: 13px;
     font-weight: 600;
     color: var(--dark);
@@ -226,7 +226,7 @@
   .mode-btn {
     height: 22px;
     padding: 0 8px;
-    font-family: 'Nunito', sans-serif;
+    font-family: var(--font-base);
     font-size: 10px;
     font-weight: 800;
     text-transform: uppercase;
@@ -297,7 +297,7 @@
     color: white;
     border: none;
     border-radius: var(--radius);
-    font-family: 'Nunito', sans-serif;
+    font-family: var(--font-base);
     font-weight: 800;
     font-size: 14px;
     text-transform: uppercase;
@@ -375,7 +375,7 @@
     color: white;
     border: none;
     border-radius: var(--radius);
-    font-family: 'Nunito', sans-serif;
+    font-family: var(--font-base);
     font-weight: 800;
     font-size: 14px;
     text-transform: uppercase;
@@ -392,7 +392,7 @@
     color: var(--dark);
     border: 1.5px solid var(--light);
     border-radius: var(--radius);
-    font-family: 'Nunito', sans-serif;
+    font-family: var(--font-base);
     font-weight: 800;
     font-size: 14px;
     text-transform: uppercase;
@@ -406,7 +406,7 @@
     color: var(--mid);
     border: 1.5px solid var(--light);
     border-radius: var(--radius);
-    font-family: 'Nunito', sans-serif;
+    font-family: var(--font-base);
     font-weight: 800;
     font-size: 14px;
     text-transform: uppercase;
@@ -434,21 +434,21 @@
 </head>
 <body>
 
-<div class="page-header">
+<div class="page-header brand-page">
   <div class="logo">
     <div class="logo-dot"></div>
     <span class="logo-text">Mockupfully</span>
   </div>
-  <h1>New Domination Campaign</h1>
+  <h1 class="brand-page-title">New Domination Campaign</h1>
   <p>Fill in the details below to generate a live prototype URL.</p>
 </div>
 
 <!-- FORM -->
-<div class="form-card" id="form-card">
+<div class="form-card brand-card" id="form-card">
 
   <!-- 1. Campaign basics -->
   <div class="form-section">
-    <div class="section-title">Campaign</div>
+    <div class="section-title form-section-label">Campaign</div>
     <div class="field-row cols-2">
       <div class="field">
         <label>Campaign Name <span class="required">*</span></label>
@@ -494,13 +494,13 @@
 
   <!-- 2. Branding -->
   <div class="form-section">
-    <div class="section-title">Branding</div>
+    <div class="section-title form-section-label">Branding</div>
     <div class="field-row cols-1">
       <div class="field">
         <div class="img-label-row">
           <label>Client Logo URL <span class="required">*</span></label>
-          <div class="img-mode-toggle">
-            <button type="button" class="mode-btn" data-mode="url" data-field="clientLogoURL">URL</button>
+          <div class="img-mode-toggle toggle-group">
+            <button type="button" class="mode-btn toggle-btn" data-mode="url" data-field="clientLogoURL">URL</button>
             <button type="button" class="mode-btn active" data-mode="upload" data-field="clientLogoURL">Upload</button>
           </div>
         </div>
@@ -527,8 +527,8 @@
       <div class="field">
         <div class="img-label-row">
           <label>Ghostover URL <span class="hint">(optional interstitial image)</span></label>
-          <div class="img-mode-toggle">
-            <button type="button" class="mode-btn" data-mode="url" data-field="ghostoverURL">URL</button>
+          <div class="img-mode-toggle toggle-group">
+            <button type="button" class="mode-btn toggle-btn" data-mode="url" data-field="ghostoverURL">URL</button>
             <button type="button" class="mode-btn active" data-mode="upload" data-field="ghostoverURL">Upload</button>
           </div>
         </div>
@@ -555,7 +555,7 @@
 
   <!-- 3. Colours -->
   <div class="form-section">
-    <div class="section-title">Colours</div>
+    <div class="section-title form-section-label">Colours</div>
     <div class="field-row cols-2">
       <div class="colour-field">
         <label>Ad Background</label>
@@ -608,7 +608,7 @@
 
   <!-- 4. Images -->
   <div class="form-section">
-    <div class="section-title">Images <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--mid)">— 1:1 ratio recommended</span></div>
+    <div class="section-title form-section-label">Images <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--mid)">— 1:1 ratio recommended</span></div>
     <div id="template-label" style="font-size:12px;font-weight:700;color:var(--mid);margin-top:-8px;margin-bottom:20px;">Template: Carousel</div>
     <div class="field-row cols-1" id="img-fields">
       <!-- populated by JS -->
@@ -618,7 +618,7 @@
   <!-- Footer -->
   <div class="form-footer">
     <span class="footer-note" id="footer-note">All fields marked <span style="color:var(--red)">*</span> are required.</span>
-    <button class="btn-submit" id="btn-submit" onclick="submitForm()">Generate Prototype →</button>
+    <button class="btn-submit btn btn-primary" id="btn-submit" onclick="submitForm()">Generate Prototype →</button>
   </div>
 
 </div>
@@ -627,7 +627,7 @@
 <div id="debug-panel" style="display:none;max-width:680px;margin:0 auto 16px;background:#1e1e2e;border-radius:12px;padding:16px 20px;font-family:monospace;font-size:12px;color:#a6e3a1;white-space:pre-wrap;word-break:break-all;line-height:1.6;"></div>
 
 <!-- SUCCESS -->
-<div class="success-panel" id="success-panel">
+<div class="success-panel brand-card" id="success-panel">
   <div class="success-icon">✓</div>
   <h2>Campaign Created!</h2>
   <p id="success-campaign-name">Your prototype is ready.</p>
@@ -636,9 +636,9 @@
     <div class="url-text" id="success-url"></div>
   </div>
   <div class="success-actions">
-    <a class="btn-preview" id="btn-preview" href="#" target="_blank">Open Prototype</a>
-    <button class="btn-copy" onclick="copyURL()">Copy URL</button>
-    <button class="btn-new" onclick="resetForm()">New Campaign</button>
+    <a class="btn-preview btn btn-primary" id="btn-preview" href="#" target="_blank">Open Prototype</a>
+    <button class="btn-copy btn btn-secondary" onclick="copyURL()">Copy URL</button>
+    <button class="btn-new btn btn-secondary" onclick="resetForm()">New Campaign</button>
   </div>
 </div>
 
@@ -733,8 +733,8 @@ function buildImageFields() {
     field.innerHTML = `
       <div class="img-label-row">
         <label>Image ${i}${isRequired ? ' <span class="required">*</span>' : ' <span class="hint">(optional)</span>'}</label>
-        <div class="img-mode-toggle">
-          <button type="button" class="mode-btn" data-mode="url" data-field="${fieldId}">URL</button>
+        <div class="img-mode-toggle toggle-group">
+          <button type="button" class="mode-btn toggle-btn" data-mode="url" data-field="${fieldId}">URL</button>
           <button type="button" class="mode-btn active" data-mode="upload" data-field="${fieldId}">Upload</button>
         </div>
       </div>
