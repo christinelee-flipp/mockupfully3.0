@@ -4,31 +4,35 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mockupfully — Campaigns</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="brand.css">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --red: #D1233E;
-    --dark: #282832;
-    --mid: #777794;
-    --light: #EBEBF5;
-    --white: #FFFFFF;
-    --radius: 10px;
-    --shadow: 0 2px 12px rgba(0,0,0,0.07);
+    --navy:     #000C52;
+    --cream:    #FBF5E6;
+    --sky:      #43C4F4;
+    --pink:     #FF658F;
+    --white:    #FFFFFF;
+    --grey-100: #F5F5F5;
+    --grey-200: #E5E7EB;
+    --grey-300: #D1D5DB;
+    --grey-500: #6B7280;
+    --grey-700: #374151;
+    --shadow:   0 4px 24px rgba(0,12,82,0.08);
+    --radius:   10px;
   }
 
   body {
-    font-family: 'Nunito', sans-serif;
-    background: #f4f4f8;
-    color: var(--dark);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--cream);
+    color: var(--navy);
     min-height: 100vh;
   }
 
   /* ── HEADER ── */
   .header {
-    background: white;
-    border-bottom: 1px solid var(--light);
+    background: var(--navy);
+    border-bottom: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     padding: 0 32px;
     height: 60px;
     display: flex;
@@ -43,48 +47,47 @@
     align-items: center;
     gap: 10px;
   }
-  .logo-dot {
-    width: 10px; height: 10px;
-    background: var(--red);
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
   .logo-text {
-    font-weight: 800;
+    font-weight: 700;
     font-size: 15px;
-    color: var(--dark);
-    letter-spacing: 0.5px;
+    color: white;
+    letter-spacing: 1.5px;
     text-transform: uppercase;
+    font-family: 'Plus Jakarta Sans', sans-serif;
   }
   .header-divider {
     width: 1px; height: 20px;
-    background: var(--light);
+    background: rgba(255,255,255,0.2);
     margin: 0 12px;
   }
   .header-page {
     font-size: 14px;
     font-weight: 600;
-    color: var(--mid);
+    color: rgba(255,255,255,0.65);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  .header-buttons {
+    display: flex;
+    gap: 8px;
   }
   .btn-new-campaign {
     height: 36px;
-    padding: 0 18px;
-    background: var(--red);
-    color: white;
-    border: none;
+    padding: 0 16px;
     border-radius: 8px;
-    font-family: 'Nunito', sans-serif;
-    font-weight: 800;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
     font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
     cursor: pointer;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    border: none;
+    transition: opacity 0.15s;
   }
-  .btn-new-campaign:hover { opacity: 0.9; }
+  .btn-new-campaign:hover { opacity: 0.85; }
+  .btn-dom { background: white; color: var(--navy); }
+  .btn-c2g { background: var(--sky); color: var(--navy); }
 
   /* ── TOOLBAR ── */
   .toolbar {
@@ -100,51 +103,65 @@
     align-items: center;
     gap: 12px;
   }
-  .search-wrap {
-    position: relative;
-  }
+  .search-wrap { position: relative; }
   .search-wrap input {
-    height: 38px;
-    width: 260px;
-    border: 1.5px solid var(--light);
+    height: 38px; width: 260px;
+    border: 1.5px solid var(--grey-300);
     border-radius: 8px;
     padding: 0 14px 0 36px;
-    font-family: 'Nunito', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--dark);
-    background: white;
-    outline: none;
-    transition: border-color 0.15s;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px; font-weight: 600;
+    color: var(--navy); background: white;
+    outline: none; transition: border-color 0.15s;
   }
-  .search-wrap input:focus { border-color: var(--red); }
+  .search-wrap input:focus { border-color: var(--sky); }
   .search-wrap input::placeholder { color: #b0b0c0; font-weight: 400; }
   .search-icon {
-    position: absolute;
-    left: 12px; top: 50%;
-    transform: translateY(-50%);
-    color: var(--mid);
+    position: absolute; left: 12px; top: 50%;
+    transform: translateY(-50%); color: var(--grey-500);
     pointer-events: none;
   }
   .filter-select {
     height: 38px;
-    border: 1.5px solid var(--light);
+    border: 1.5px solid var(--grey-300);
     border-radius: 8px;
     padding: 0 32px 0 12px;
-    font-family: 'Nunito', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--dark);
-    background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23777794' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 12px center;
-    -webkit-appearance: none;
-    appearance: none;
-    outline: none;
-    cursor: pointer;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px; font-weight: 600;
+    color: var(--navy);
+    background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236B7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 12px center;
+    -webkit-appearance: none; appearance: none;
+    outline: none; cursor: pointer;
   }
-  .campaign-count {
+  .campaign-count { font-size: 13px; color: var(--grey-500); font-weight: 600; }
+
+  /* ── PRODUCT TABS ── */
+  .product-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 16px 32px 0;
+  }
+  .product-tab {
+    height: 34px;
+    padding: 0 18px;
+    border-radius: 20px;
+    border: 1.5px solid var(--grey-300);
+    background: white;
+    color: var(--grey-500);
+    font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 13px;
-    color: var(--mid);
     font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .product-tab.active {
+    background: var(--navy);
+    color: white;
+    border-color: var(--navy);
+  }
+  .product-tab:hover:not(.active) {
+    border-color: var(--navy);
+    color: var(--navy);
   }
 
   /* ── TABLE ── */
@@ -159,7 +176,7 @@
     border-radius: 14px;
     overflow: hidden;
     box-shadow: var(--shadow);
-    min-width: 900px;
+    min-width: 800px;
   }
   thead th {
     padding: 12px 16px;
@@ -168,13 +185,13 @@
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.8px;
-    color: var(--mid);
-    border-bottom: 1px solid var(--light);
+    color: var(--grey-500);
+    border-bottom: 1px solid var(--grey-200);
     background: #fafafa;
     white-space: nowrap;
   }
   tbody tr {
-    border-bottom: 1px solid var(--light);
+    border-bottom: 1px solid var(--grey-200);
     transition: background 0.1s;
   }
   tbody tr:last-child { border-bottom: none; }
@@ -183,25 +200,26 @@
     padding: 14px 16px;
     font-size: 13px;
     font-weight: 600;
-    color: var(--dark);
+    color: var(--navy);
     vertical-align: middle;
   }
 
-  /* Colour swatch */
-  .swatch-row {
-    display: flex;
-    gap: 4px;
-    align-items: center;
+  /* Product badge */
+  .prod-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
   }
-  .swatch {
-    width: 16px; height: 16px;
-    border-radius: 4px;
-    border: 1px solid rgba(0,0,0,0.08);
-    flex-shrink: 0;
-  }
+  .prod-dom { background: var(--navy); color: white; }
+  .prod-c2g { background: var(--sky); color: var(--navy); }
 
   /* Country badge */
-  .badge {
+  .country-badge {
     display: inline-flex;
     align-items: center;
     height: 22px;
@@ -209,66 +227,49 @@
     border-radius: 6px;
     font-size: 11px;
     font-weight: 800;
-    background: var(--light);
-    color: var(--mid);
+    background: var(--grey-100);
+    color: var(--grey-500);
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
-  .badge.carousel { background: #e8f4fd; color: #2980b9; }
-  .badge.single { background: #f0faf3; color: #27ae60; }
-
-  /* Logo preview */
-  .logo-thumb {
-    width: 48px; height: 24px;
-    object-fit: contain;
-    border-radius: 4px;
-    background: var(--light);
-    display: block;
-  }
 
   /* Date */
-  .date-cell { color: var(--mid); font-size: 12px; font-weight: 600; }
+  .date-cell { color: var(--grey-500); font-size: 12px; font-weight: 600; }
 
   /* Actions */
-  .actions {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-  }
+  .actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
   .btn-action {
-    height: 30px;
-    padding: 0 10px;
+    height: 30px; padding: 0 10px;
     border-radius: 6px;
-    font-family: 'Nunito', sans-serif;
-    font-size: 11px;
-    font-weight: 800;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 11px; font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.3px;
-    cursor: pointer;
-    border: none;
+    cursor: pointer; border: none;
     white-space: nowrap;
     transition: opacity 0.1s;
   }
   .btn-action:hover { opacity: 0.8; }
-  .btn-open    { background: var(--red); color: white; }
-  .btn-copy    { background: var(--light); color: var(--dark); }
-  .btn-clone   { background: var(--light); color: var(--dark); }
-  .btn-edit    { background: var(--light); color: var(--dark); }
-  .btn-delete  { background: #fdecea; color: #c0392b; }
+  .btn-open    { background: var(--navy); color: white; }
+  .btn-open-website { background: var(--sky); color: var(--navy); }
+  .btn-copy    { background: var(--grey-100); color: var(--navy); border: 1px solid var(--grey-300); }
+  .btn-clone   { background: var(--grey-100); color: var(--navy); border: 1px solid var(--grey-300); }
+  .btn-edit    { background: var(--grey-100); color: var(--navy); border: 1px solid var(--grey-300); }
+  .btn-delete  { background: #FEF2F2; color: var(--pink); border: 1px solid var(--pink); }
 
   /* Empty / loading states */
   .state-row td {
     text-align: center;
     padding: 60px 20px;
-    color: var(--mid);
+    color: var(--grey-500);
     font-size: 14px;
     font-weight: 600;
   }
   .spinner {
     display: inline-block;
     width: 20px; height: 20px;
-    border: 2px solid var(--light);
-    border-top-color: var(--red);
+    border: 2px solid var(--grey-200);
+    border-top-color: var(--sky);
     border-radius: 50%;
     animation: spin 0.7s linear infinite;
     margin-bottom: 10px;
@@ -280,7 +281,7 @@
     position: fixed;
     bottom: 24px; left: 50%;
     transform: translateX(-50%) translateY(80px);
-    background: var(--dark);
+    background: var(--navy);
     color: white;
     padding: 12px 20px;
     border-radius: 10px;
@@ -312,21 +313,21 @@
     box-shadow: 0 8px 40px rgba(0,0,0,0.15);
   }
   .dialog h3 { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
-  .dialog p { font-size: 14px; color: var(--mid); margin-bottom: 24px; }
+  .dialog p { font-size: 14px; color: var(--grey-500); margin-bottom: 24px; }
   .dialog-actions { display: flex; gap: 10px; justify-content: flex-end; }
   .btn-cancel {
     height: 38px; padding: 0 18px;
-    background: var(--light); color: var(--dark);
+    background: var(--grey-100); color: var(--navy);
     border: none; border-radius: 8px;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     font-weight: 800; font-size: 13px;
     cursor: pointer;
   }
   .btn-confirm-delete {
     height: 38px; padding: 0 18px;
-    background: #c0392b; color: white;
+    background: var(--pink); color: white;
     border: none; border-radius: 8px;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     font-weight: 800; font-size: 13px;
     cursor: pointer;
   }
@@ -334,6 +335,7 @@
   @media (max-width: 600px) {
     .header { padding: 0 16px; }
     .toolbar { padding: 16px 16px 0; }
+    .product-tabs { padding: 12px 16px 0; }
     .table-wrap { padding: 12px 16px 40px; }
     .search-wrap input { width: 180px; }
   }
@@ -343,52 +345,67 @@
 
 <!-- DEBUG PANEL (remove once dashboard is confirmed working) -->
 <div id="debug-panel" style="display:none;background:#c0392b;color:#fff;font-family:monospace;font-size:13px;padding:16px 20px;line-height:1.7;position:relative;z-index:9999;">
-  <strong style="font-size:15px;">⚠ DEBUG PANEL</strong>
+  <strong style="font-size:15px;">DEBUG PANEL</strong>
   <div id="debug-content"></div>
 </div>
 
 <!-- HEADER -->
 <div class="header">
   <div class="header-left">
-    <div class="logo-dot"></div>
+    <img src="assets/flipp-sf-logo.svg" alt="Flipp x Shopfully" style="height:28px;width:auto;display:block;">
     <span class="logo-text">Mockupfully</span>
     <div class="header-divider"></div>
     <span class="header-page">Campaigns</span>
   </div>
-  <a class="btn-new-campaign" href="domination-form.html">+ New Campaign</a>
+  <div class="header-buttons">
+    <a class="btn-new-campaign btn-dom" href="domination-form.html">+ Domination</a>
+    <a class="btn-new-campaign btn-c2g" href="click2go-form.html">+ Click2Go</a>
+  </div>
 </div>
 
 <!-- TOOLBAR -->
 <div class="toolbar">
   <div class="toolbar-left">
     <div class="search-wrap">
-      <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#777794" stroke-width="2"/><path d="M16.5 16.5L21 21" stroke="#777794" stroke-width="2" stroke-linecap="round"/></svg>
-      <input type="text" id="search-input" placeholder="Search campaigns…" oninput="filterTable()">
+      <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#6B7280" stroke-width="2"/><path d="M16.5 16.5L21 21" stroke="#6B7280" stroke-width="2" stroke-linecap="round"/></svg>
+      <input type="text" id="search-input" placeholder="Search campaigns..." oninput="filterTable()">
     </div>
     <select class="filter-select" id="country-filter" onchange="filterTable()">
       <option value="">All Countries</option>
-      <option value="IT">🇮🇹 Italy</option>
-      <option value="AU">🇦🇺 Australia</option>
-      <option value="CA">🇨🇦 Canada</option>
-      <option value="US">🇺🇸 USA</option>
-      <option value="FR">🇫🇷 France</option>
-      <option value="DE">🇩🇪 Germany</option>
-      <option value="ES">🇪🇸 Spain</option>
-      <option value="AT">🇦🇹 Austria</option>
-      <option value="NL">🇳🇱 Netherlands</option>
-      <option value="PL">🇵🇱 Poland</option>
-      <option value="PT">🇵🇹 Portugal</option>
-      <option value="RO">🇷🇴 Romania</option>
-      <option value="BG">🇧🇬 Bulgaria</option>
-      <option value="HU">🇭🇺 Hungary</option>
+      <option value="IT">Italy</option>
+      <option value="AU">Australia</option>
+      <option value="CA">Canada</option>
+      <option value="US">USA</option>
+      <option value="FR">France</option>
+      <option value="DE">Germany</option>
+      <option value="ES">Spain</option>
+      <option value="AT">Austria</option>
+      <option value="NL">Netherlands</option>
+      <option value="PL">Poland</option>
+      <option value="PT">Portugal</option>
+      <option value="RO">Romania</option>
+      <option value="BG">Bulgaria</option>
+      <option value="HU">Hungary</option>
+      <option value="SE">Sweden</option>
+      <option value="BR">Brazil</option>
     </select>
     <select class="filter-select" id="type-filter" onchange="filterTable()">
       <option value="">All Types</option>
       <option value="Carousel">Carousel</option>
       <option value="Single">Single Image</option>
+      <option value="banner">Banner</option>
+      <option value="carousel_vertical">Carousel Vertical</option>
+      <option value="carousel_square">Carousel Square</option>
     </select>
   </div>
   <span class="campaign-count" id="campaign-count"></span>
+</div>
+
+<!-- PRODUCT TABS -->
+<div class="product-tabs">
+  <button class="product-tab active" data-product="all" onclick="setProductFilter('all')">All</button>
+  <button class="product-tab" data-product="Domination" onclick="setProductFilter('Domination')">Domination</button>
+  <button class="product-tab" data-product="Click2Go" onclick="setProductFilter('Click2Go')">Click2Go</button>
 </div>
 
 <!-- TABLE -->
@@ -398,17 +415,16 @@
       <tr>
         <th>Campaign</th>
         <th>Country</th>
+        <th>Product</th>
         <th>Type</th>
-        <th>Colours</th>
-        <th>Logo</th>
         <th>Date</th>
         <th>Actions</th>
       </tr>
     </thead>
     <tbody id="table-body">
       <tr class="state-row">
-        <td colspan="7">
-          <div class="spinner"></div><br>Loading campaigns…
+        <td colspan="6">
+          <div class="spinner"></div><br>Loading campaigns...
         </td>
       </tr>
     </tbody>
@@ -439,10 +455,12 @@ const WEBHOOKS = {
   submit:  'api/save.php',
 };
 const PROTOTYPE = 'domination-prototype.html';
-const FORM = 'domination-form.html';
+const FORM_DOM  = 'domination-form.html';
+const FORM_C2G  = 'click2go-form.html';
 
 let allCampaigns = [];
 let deleteTarget = null;
+let activeProduct = 'all';
 
 // ── DEBUG PANEL ───────────────────────────────────────────────────
 function showDebug(lines) {
@@ -457,7 +475,6 @@ async function loadCampaigns() {
   const debugLines = [];
   const fetchURL = new URL(WEBHOOKS.getAll, window.location.href).href;
   debugLines.push(`Fetch URL: ${fetchURL}`);
-  debugLines.push(`Page URL: ${window.location.href}`);
 
   try {
     const res = await fetch(WEBHOOKS.getAll);
@@ -469,12 +486,12 @@ async function loadCampaigns() {
     let data;
     try {
       data = JSON.parse(text);
-      debugLines.push(`JSON parse: ✓ success`);
+      debugLines.push(`JSON parse: success`);
     } catch (e) {
-      debugLines.push(`JSON parse: ✗ FAILED — ${e.message}`);
+      debugLines.push(`JSON parse: FAILED - ${e.message}`);
       showDebug(debugLines);
       document.getElementById('table-body').innerHTML = `
-        <tr class="state-row"><td colspan="7">Failed to load campaigns. <button onclick="loadCampaigns()" style="color:var(--red);background:none;border:none;cursor:pointer;font-weight:800;">Retry</button></td></tr>`;
+        <tr class="state-row"><td colspan="6">Failed to load campaigns. <button onclick="loadCampaigns()" style="color:var(--pink);background:none;border:none;cursor:pointer;font-weight:800;">Retry</button></td></tr>`;
       return;
     }
 
@@ -482,70 +499,78 @@ async function loadCampaigns() {
       debugLines.push(`Server error: ${data.error}`);
       showDebug(debugLines);
       document.getElementById('table-body').innerHTML = `
-        <tr class="state-row"><td colspan="7">Failed to load campaigns. <button onclick="loadCampaigns()" style="color:var(--red);background:none;border:none;cursor:pointer;font-weight:800;">Retry</button></td></tr>`;
+        <tr class="state-row"><td colspan="6">Failed to load campaigns. <button onclick="loadCampaigns()" style="color:var(--pink);background:none;border:none;cursor:pointer;font-weight:800;">Retry</button></td></tr>`;
       return;
     }
 
     if (Array.isArray(data)) {
       allCampaigns = data;
-      debugLines.push(`Data shape: array`);
     } else if (data && Array.isArray(data.campaigns)) {
       allCampaigns = data.campaigns;
-      debugLines.push(`Data shape: object with .campaigns array`);
     } else {
-      debugLines.push(`Data shape: UNEXPECTED — ${JSON.stringify(data).slice(0, 200)}`);
+      debugLines.push(`Data shape: UNEXPECTED`);
       showDebug(debugLines);
       document.getElementById('table-body').innerHTML = `
-        <tr class="state-row"><td colspan="7">Failed to load campaigns. <button onclick="loadCampaigns()" style="color:var(--red);background:none;border:none;cursor:pointer;font-weight:800;">Retry</button></td></tr>`;
+        <tr class="state-row"><td colspan="6">Failed to load campaigns. <button onclick="loadCampaigns()" style="color:var(--pink);background:none;border:none;cursor:pointer;font-weight:800;">Retry</button></td></tr>`;
       return;
     }
 
     debugLines.push(`Campaigns found: ${allCampaigns.length}`);
-    if (allCampaigns.length > 0) {
-      debugLines.push(`First campaign keys: ${Object.keys(allCampaigns[0]).join(', ')}`);
-      debugLines.push(`First campaign: ${JSON.stringify(allCampaigns[0]).slice(0, 200)}`);
-    }
     showDebug(debugLines);
-
-    renderTable(allCampaigns);
-
-    // Post-render verification — updates panel to show actual DOM state
-    const postBody = document.getElementById('table-body');
-    debugLines.push(`Post-render: tbody.rows.length = ${postBody ? postBody.rows.length : 'tbody not found'}`);
-    debugLines.push(`Post-render: innerHTML starts with: "${(postBody ? postBody.innerHTML : '').slice(0, 120).replace(/\n\s*/g, ' ')}"`);
-    showDebug(debugLines);
+    filterTable();
   } catch (err) {
     debugLines.push(`Fetch error: ${err.message}`);
     showDebug(debugLines);
     document.getElementById('table-body').innerHTML = `
-      <tr class="state-row"><td colspan="7">Failed to load campaigns. <button onclick="loadCampaigns()" style="color:var(--red);background:none;border:none;cursor:pointer;font-weight:800;">Retry</button></td></tr>`;
+      <tr class="state-row"><td colspan="6">Failed to load campaigns. <button onclick="loadCampaigns()" style="color:var(--pink);background:none;border:none;cursor:pointer;font-weight:800;">Retry</button></td></tr>`;
   }
 }
 
-// ── BUILD PROTOTYPE URL ───────────────────────────────────────────
-function buildURL(c) {
+// ── PRODUCT TYPE HELPERS ─────────────────────────────────────────
+function isC2G(c) {
+  return (c.productType || '').toLowerCase() === 'click2go' ||
+    (c.campaignID || '').startsWith('click2go-');
+}
+
+function getProductLabel(c) {
+  return isC2G(c) ? 'Click2Go' : 'Domination';
+}
+
+// ── BUILD URLS ──────────────────────────────────────────────────
+function buildDomURL(c) {
   const params = new URLSearchParams();
-  // Sheet stores country as 'location', prototype expects 'country'
   if (c.location) params.set('country', c.location);
-  const keys = ['templateType','claimText','buttonText',
-    'globalBkgColor','globalTextColor','buttonBkgColor','buttonTextColor',
-    'paginationBkgColor','paginationActiveColor','clientLogoURL','ghostoverURL',
-    'Img01URL','Img02URL','Img03URL','Img04URL','Img05URL','Img06URL'];
-  keys.forEach(k => { if (c[k]) params.set(k, c[k]); });
+  ['templateType','claimText','buttonText','globalBkgColor','globalTextColor',
+   'buttonBkgColor','buttonTextColor','paginationBkgColor','paginationActiveColor',
+   'clientLogoURL','ghostoverURL','Img01URL','Img02URL','Img03URL','Img04URL',
+   'Img05URL','Img06URL'].forEach(k => { if (c[k]) params.set(k, c[k]); });
   return `${PROTOTYPE}?${params.toString()}`;
+}
+
+function buildC2GURL(c, viewerType) {
+  return `click2go-viewer.html?id=${encodeURIComponent(c.campaignID)}&viewer=${encodeURIComponent(viewerType || c.viewer || 'marketplace')}`;
 }
 
 // ── FORMAT DATE ───────────────────────────────────────────────────
 function fmtDate(str) {
-  if (!str) return '—';
+  if (!str) return '-';
   const d = new Date(str);
   if (isNaN(d)) return str;
   return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
 }
 
 // ── COUNTRY FLAG ─────────────────────────────────────────────────
-const FLAGS = {IT:'🇮🇹',AU:'🇦🇺',CA:'🇨🇦',US:'🇺🇸',FR:'🇫🇷',DE:'🇩🇪',
-               ES:'🇪🇸',AT:'🇦🇹',NL:'🇳🇱',PL:'🇵🇱',PT:'🇵🇹',RO:'🇷🇴',BG:'🇧🇬',HU:'🇭🇺'};
+const FLAGS = {IT:'IT',AU:'AU',CA:'CA',US:'US',FR:'FR',DE:'DE',
+               ES:'ES',AT:'AT',NL:'NL',PL:'PL',PT:'PT',RO:'RO',BG:'BG',HU:'HU',SE:'SE',BR:'BR'};
+
+// ── PRODUCT FILTER ───────────────────────────────────────────────
+function setProductFilter(product) {
+  activeProduct = product;
+  document.querySelectorAll('.product-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.product === product);
+  });
+  filterTable();
+}
 
 // ── RENDER ───────────────────────────────────────────────────────
 function renderTable(campaigns) {
@@ -554,43 +579,54 @@ function renderTable(campaigns) {
     campaigns.length === 1 ? '1 campaign' : `${campaigns.length} campaigns`;
 
   if (!campaigns.length) {
-    tbody.innerHTML = `<tr class="state-row"><td colspan="7">No campaigns found.</td></tr>`;
+    tbody.innerHTML = `<tr class="state-row"><td colspan="6">No campaigns found.</td></tr>`;
     return;
   }
 
   tbody.innerHTML = campaigns.map((c, i) => {
-    const protoURL = buildURL(c);
-    const flag = FLAGS[c.location] || '';
-    const typeClass = c.templateType === 'Carousel' ? 'carousel' : 'single';
-    const swatches = [c.globalBkgColor, c.buttonBkgColor, c.paginationActiveColor]
-      .filter(Boolean)
-      .map(col => `<div class="swatch" style="background:${col}" title="${col}"></div>`)
-      .join('');
+    const idx = allCampaigns.indexOf(c);
+    const c2g = isC2G(c);
+    const prodLabel = getProductLabel(c);
+    const prodBadge = c2g
+      ? `<span class="prod-badge prod-c2g">Click2Go</span>`
+      : `<span class="prod-badge prod-dom">Domination</span>`;
+
+    const loc = c.location || '-';
+    const templateType = c.templateType || '-';
+    const meta = c2g && c.viewer
+      ? `${loc} · ${templateType} · ${c.viewer}`
+      : `${loc} · ${templateType}`;
+
+    let actions = '';
+    if (c2g) {
+      actions = `
+        <button class="btn-action btn-open" onclick="openC2G(${idx},'marketplace')">Marketplace</button>
+        <button class="btn-action btn-open-website" onclick="openC2G(${idx},'website')">Website</button>
+        <button class="btn-action btn-copy" onclick="copyC2GURL(${idx})">Copy</button>
+        <button class="btn-action btn-clone" onclick="cloneCampaign(${idx})">Clone</button>
+        <button class="btn-action btn-edit" onclick="editCampaign(${idx})">Edit</button>
+        <button class="btn-action btn-delete" onclick="askDelete(${idx})">Delete</button>`;
+    } else {
+      actions = `
+        <button class="btn-action btn-open" onclick="openProto(${idx})">Preview</button>
+        <button class="btn-action btn-copy" onclick="copyDomURL(${idx})">Copy</button>
+        <button class="btn-action btn-clone" onclick="cloneCampaign(${idx})">Clone</button>
+        <button class="btn-action btn-edit" onclick="editCampaign(${idx})">Edit</button>
+        <button class="btn-action btn-delete" onclick="askDelete(${idx})">Delete</button>`;
+    }
 
     return `
-      <tr data-index="${i}">
+      <tr data-index="${idx}">
         <td>
-          <div style="font-weight:800;font-size:13px;">${esc(c.campaignName || '—')}</div>
-          <div style="font-size:11px;color:var(--mid);margin-top:2px;">${esc(c.campaignID || '')}</div>
+          ${prodBadge}<br>
+          <div style="font-weight:800;font-size:13px;">${esc(c.campaignName || '-')}</div>
+          <div style="font-size:11px;color:var(--grey-500);margin-top:2px;">${meta}</div>
         </td>
-        <td><span class="badge">${flag} ${c.location || '—'}</span></td>
-        <td><span class="badge ${typeClass}">${c.templateType || '—'}</span></td>
-        <td><div class="swatch-row">${swatches}</div></td>
-        <td>
-          ${c.clientLogoURL
-            ? `<img class="logo-thumb" src="${esc(c.clientLogoURL)}" alt="" onerror="this.style.opacity='0'">`
-            : '<span style="color:var(--mid);font-size:12px;">—</span>'}
-        </td>
+        <td><span class="country-badge">${loc}</span></td>
+        <td>${prodLabel}</td>
+        <td>${templateType}</td>
         <td class="date-cell">${fmtDate(c.submittedAt)}</td>
-        <td>
-          <div class="actions">
-            <button class="btn-action btn-open"    onclick="openProto(${i})">Preview</button>
-            <button class="btn-action btn-copy"    onclick="copyURL(${i})">Copy URL</button>
-            <button class="btn-action btn-clone"   onclick="cloneCampaign(${i})">Clone</button>
-            <button class="btn-action btn-edit"    onclick="editCampaign(${i})">Edit</button>
-            <button class="btn-action btn-delete"  onclick="askDelete(${i})">Delete</button>
-          </div>
-        </td>
+        <td><div class="actions">${actions}</div></td>
       </tr>`;
   }).join('');
 }
@@ -611,7 +647,10 @@ function filterTable() {
       (c.campaignID || '').toLowerCase().includes(q);
     const matchCountry = !country || c.location === country;
     const matchType = !type || c.templateType === type;
-    return matchQ && matchCountry && matchType;
+    const matchProduct = activeProduct === 'all' ||
+      (c.productType || '').toLowerCase() === activeProduct.toLowerCase() ||
+      (activeProduct === 'Domination' && !(c.productType || '').toLowerCase().includes('click2go') && !(c.campaignID || '').startsWith('click2go-'));
+    return matchQ && matchCountry && matchType && matchProduct;
   });
 
   renderTable(filtered);
@@ -619,27 +658,36 @@ function filterTable() {
 
 // ── ACTIONS ──────────────────────────────────────────────────────
 function openProto(i) {
-  window.open(buildURL(allCampaigns[i]), '_blank');
+  window.open(buildDomURL(allCampaigns[i]), '_blank');
 }
 
-function copyURL(i) {
-  const url = buildURL(allCampaigns[i]);
-  navigator.clipboard.writeText(url).then(() => showToast('URL copied to clipboard ✓'));
+function openC2G(i, viewerType) {
+  window.open(buildC2GURL(allCampaigns[i], viewerType), '_blank');
+}
+
+function copyDomURL(i) {
+  navigator.clipboard.writeText(buildDomURL(allCampaigns[i]))
+    .then(() => showToast('URL copied to clipboard'));
+}
+
+function copyC2GURL(i) {
+  navigator.clipboard.writeText(buildC2GURL(allCampaigns[i], 'marketplace'))
+    .then(() => showToast('URL copied to clipboard'));
 }
 
 async function cloneCampaign(i) {
   const original = allCampaigns[i];
   const clone = { ...original };
+  const c2g = isC2G(original);
 
-  // New ID + name
   const now = new Date();
   const pad = n => String(n).padStart(2,'0');
   const ts = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-  clone.campaignID = `domination-${ts}`;
+  clone.campaignID = c2g ? `click2go-${ts}` : `domination-${ts}`;
   clone.campaignName = `${original.campaignName} (Copy)`;
   clone.submittedAt = new Date().toISOString();
 
-  showToast('Cloning campaign…');
+  showToast('Cloning campaign...');
 
   try {
     const res = await fetch(WEBHOOKS.submit, {
@@ -648,18 +696,20 @@ async function cloneCampaign(i) {
       body: JSON.stringify(clone)
     });
     if (!res.ok) throw new Error(res.status);
-    showToast(`Cloned as "${clone.campaignName}" ✓`);
+    showToast(`Cloned as "${clone.campaignName}"`);
     setTimeout(loadCampaigns, 1200);
   } catch (err) {
-    showToast('Clone failed — try again');
+    showToast('Clone failed - try again');
   }
 }
 
 function editCampaign(i) {
   const c = allCampaigns[i];
-  // Pass campaignID to domination-form.html via URL so it can pre-fill
-  const params = new URLSearchParams({ edit: c.campaignID });
-  window.location.href = `${FORM}?${params.toString()}`;
+  if (isC2G(c)) {
+    window.location.href = `${FORM_C2G}?id=${encodeURIComponent(c.campaignID)}`;
+  } else {
+    window.location.href = `${FORM_DOM}?edit=${encodeURIComponent(c.campaignID)}`;
+  }
 }
 
 function askDelete(i) {
@@ -679,7 +729,7 @@ async function confirmDelete() {
   if (deleteTarget === null) return;
   const c = allCampaigns[deleteTarget];
   closeDeleteDialog();
-  showToast('Deleting…');
+  showToast('Deleting...');
 
   try {
     const res = await fetch(WEBHOOKS.delete, {
@@ -688,10 +738,10 @@ async function confirmDelete() {
       body: JSON.stringify({ campaignID: c.campaignID })
     });
     if (!res.ok) throw new Error(res.status);
-    showToast(`"${c.campaignName}" deleted ✓`);
+    showToast(`"${c.campaignName}" deleted`);
     setTimeout(loadCampaigns, 1000);
   } catch (err) {
-    showToast('Delete failed — try again');
+    showToast('Delete failed - try again');
   }
 }
 
