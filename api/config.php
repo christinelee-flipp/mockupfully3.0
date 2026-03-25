@@ -5,8 +5,9 @@
 
 // Data directories by product prefix
 const DATA_DIRS = [
-    'domination' => __DIR__ . '/../data/domination/',
-    'click2go'   => __DIR__ . '/../data/click2go/',
+    'domination'      => __DIR__ . '/../data/domination/',
+    'click2go'        => __DIR__ . '/../data/click2go/',
+    'shoppernetwork'  => __DIR__ . '/../data/shoppernetwork/',
 ];
 
 // ── CORS + JSON headers ────────────────────────────────────────────
@@ -50,7 +51,7 @@ function get_json_body(): array {
  * Accepts: domination-YYYYMMDDHHMMSS  or  click2go-YYYYMMDDHHMMSS
  */
 function validate_campaign_id(string $id): bool {
-    return (bool) preg_match('/^(domination|click2go)-\d{14}$/', $id);
+    return (bool) preg_match('/^(domination|click2go|shoppernetwork)-\d{14}$/', $id);
 }
 
 // ── File I/O ───────────────────────────────────────────────────────

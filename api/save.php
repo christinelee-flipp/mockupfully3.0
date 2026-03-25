@@ -27,7 +27,7 @@ if (!$id) {
 }
 
 if (!validate_campaign_id($id)) {
-    error('Invalid campaignID format — expected domination-YYYYMMDDHHMMSS', 400);
+    error('Invalid campaignID format — expected {product}-YYYYMMDDHHMMSS', 400);
 }
 
 // Ensure required fields are present
@@ -35,9 +35,11 @@ if (empty($data['campaignName'])) {
     error('campaignName is required');
 }
 
-// Ensure data directory exists
-if (!is_dir(DATA_DIR)) {
-    mkdir(DATA_DIR, 0755, true);
+// Ensure data directory exists for this product
+$prefix = explode('-', $id)[0];
+$dir = DATA_DIRS[$prefix] ?? DATA_DIRS['domination'];
+if (!is_dir($dir)) {
+    mkdir($dir, 0755, true);
 }
 
 if (!write_campaign($data)) {
