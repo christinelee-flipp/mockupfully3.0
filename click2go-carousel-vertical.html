@@ -2,32 +2,43 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=430, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Click2Go Carousel Vertical</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
+  html {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
   body {
-    background: #888;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: #e5e5e5;
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    min-height: 100vh;
-    padding: 20px;
     font-family: 'Montserrat', sans-serif;
+    /* Height and overflow set by JS per device */
   }
 
   /* ── PHONE FRAME ── */
-  .phone {
-    width: 430px;
-    height: 932px;
+  #phone, .phone {
+    width: 390px;
+    height: 844px;
     background: white;
     overflow: hidden;
     position: relative;
     display: flex;
     flex-direction: column;
+    flex-shrink: 0;
+    transform-origin: top center;
   }
 
   /* ── LOADING ── */
@@ -786,5 +797,58 @@ init();
 </script>
 
 <script src="click2go-pass2.js"></script>
+
+<script>
+(function () {
+  var DESIGN_W = 390;
+  var DESIGN_H = 844;
+  var MOBILE_BREAKPOINT = 500;
+
+  function scalePhone() {
+    var phone = document.getElementById('phone')
+      || document.querySelector('.phone');
+    if (!phone) return;
+
+    var vw = window.innerWidth;
+    var vh = window.innerHeight;
+    var isMobile = vw <= MOBILE_BREAKPOINT;
+
+    if (isMobile) {
+      var scale = vw / DESIGN_W;
+      phone.style.transform = 'scale(' + scale + ')';
+      phone.style.transformOrigin = 'top center';
+
+      var scaledH = Math.round(DESIGN_H * scale);
+      document.body.style.minHeight = scaledH + 'px';
+      document.body.style.height = 'auto';
+      document.body.style.overflow = 'auto';
+      document.body.style.background = 'white';
+      document.documentElement.style.overflow = 'auto';
+      document.documentElement.style.height = 'auto';
+
+    } else {
+      var scaleX = vw  / DESIGN_W;
+      var scaleY = vh  / DESIGN_H;
+      var scale  = Math.min(scaleX, scaleY) * 0.92;
+      phone.style.transform = 'scale(' + scale + ')';
+      phone.style.transformOrigin = 'top center';
+
+      document.body.style.minHeight = '100vh';
+      document.body.style.height    = '100vh';
+      document.body.style.overflow  = 'hidden';
+      document.body.style.background = '#e5e5e5';
+      document.documentElement.style.overflow = 'hidden';
+      document.documentElement.style.height   = '100%';
+    }
+  }
+
+  scalePhone();
+  window.addEventListener('resize', scalePhone);
+
+  window.addEventListener('orientationchange', function() {
+    setTimeout(scalePhone, 300);
+  });
+})();
+</script>
 </body>
 </html>
