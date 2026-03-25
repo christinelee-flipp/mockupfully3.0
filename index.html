@@ -5,6 +5,7 @@
 <!-- v2 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mockupfully — Campaigns</title>
+<!-- cache-bust: v3 -->
 <link rel="stylesheet" href="brand.css">
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <style>
@@ -624,8 +625,10 @@
     <thead>
       <tr>
         <th>Campaign</th>
-        <th onclick="sortCampaigns('country')" style="cursor:pointer;user-select:none" id="th-country">Country <span class="sort-icon"></span></th>
         <th onclick="sortCampaigns('product')" style="cursor:pointer;user-select:none" id="th-product">Product <span class="sort-icon"></span></th>
+        <th onclick="sortCampaigns('country')" style="cursor:pointer;user-select:none" id="th-country">Country <span class="sort-icon"></span></th>
+        <th>Client</th>
+        <th>Article</th>
         <th>Type</th>
         <th onclick="sortCampaigns('date')" style="cursor:pointer;user-select:none" id="th-date">Date <span class="sort-icon">&darr;</span></th>
         <th>Actions</th>
@@ -633,7 +636,7 @@
     </thead>
     <tbody id="table-body">
       <tr class="state-row">
-        <td colspan="6">
+        <td colspan="8">
           <div class="spinner"></div><br>Loading campaigns...
         </td>
       </tr>
@@ -719,13 +722,13 @@ async function loadCampaigns() {
       data = JSON.parse(text);
     } catch (e) {
       document.getElementById('table-body').innerHTML = `
-        <tr class="state-row"><td colspan="6">Failed to load campaigns. <button onclick="loadCampaigns()" style="color:var(--pink);background:none;border:none;cursor:pointer;font-weight:800;">Retry</button></td></tr>`;
+        <tr class="state-row"><td colspan="8">Failed to load campaigns. <button onclick="loadCampaigns()" style="color:var(--pink);background:none;border:none;cursor:pointer;font-weight:800;">Retry</button></td></tr>`;
       return;
     }
 
     if (data && data.error) {
       document.getElementById('table-body').innerHTML = `
-        <tr class="state-row"><td colspan="6">Failed to load campaigns. <button onclick="loadCampaigns()" style="color:var(--pink);background:none;border:none;cursor:pointer;font-weight:800;">Retry</button></td></tr>`;
+        <tr class="state-row"><td colspan="8">Failed to load campaigns. <button onclick="loadCampaigns()" style="color:var(--pink);background:none;border:none;cursor:pointer;font-weight:800;">Retry</button></td></tr>`;
       return;
     }
 
@@ -735,14 +738,14 @@ async function loadCampaigns() {
       allCampaigns = data.campaigns;
     } else {
       document.getElementById('table-body').innerHTML = `
-        <tr class="state-row"><td colspan="6">Failed to load campaigns. <button onclick="loadCampaigns()" style="color:var(--pink);background:none;border:none;cursor:pointer;font-weight:800;">Retry</button></td></tr>`;
+        <tr class="state-row"><td colspan="8">Failed to load campaigns. <button onclick="loadCampaigns()" style="color:var(--pink);background:none;border:none;cursor:pointer;font-weight:800;">Retry</button></td></tr>`;
       return;
     }
 
     filterTable();
   } catch (err) {
     document.getElementById('table-body').innerHTML = `
-      <tr class="state-row"><td colspan="6">Failed to load campaigns. <button onclick="loadCampaigns()" style="color:var(--pink);background:none;border:none;cursor:pointer;font-weight:800;">Retry</button></td></tr>`;
+      <tr class="state-row"><td colspan="8">Failed to load campaigns. <button onclick="loadCampaigns()" style="color:var(--pink);background:none;border:none;cursor:pointer;font-weight:800;">Retry</button></td></tr>`;
   }
 }
 
@@ -884,7 +887,7 @@ function renderTable(campaigns) {
     campaigns.length === 1 ? '1 campaign' : `${campaigns.length} campaigns`;
 
   if (!campaigns.length) {
-    tbody.innerHTML = `<tr class="state-row"><td colspan="6">No campaigns found.</td></tr>`;
+    tbody.innerHTML = `<tr class="state-row"><td colspan="8">No campaigns found.</td></tr>`;
     renderCards(campaigns);
     return;
   }
@@ -929,14 +932,14 @@ function renderTable(campaigns) {
         <button class="btn-action btn-delete" onclick="askDelete(${idx})">Delete</button>`;
     }
 
-    const typeDisplay = sn ? esc(c.publisher || '-') : formatType(c.templateType);
-
     return `
       <tr data-index="${idx}">
-        <td><div style="font-weight:800;font-size:13px;">${esc(c.campaignName || '-')}</div></td>
-        <td><span class="country-badge">${flag} ${loc}</span></td>
+        <td><div style="font-weight:700;font-size:13px;">${esc(c.campaignName || '\u2014')}</div></td>
         <td>${prodBadge}</td>
-        <td>${typeDisplay}</td>
+        <td><span class="badge">${flag} ${c.location || '\u2014'}</span></td>
+        <td>${esc(c.clientName || '\u2014')}</td>
+        <td>${sn ? esc(c.publisher || '\u2014') : '\u2014'}</td>
+        <td>${sn ? '\u2014' : formatType(c.templateType)}</td>
         <td class="date-cell">${fmtDate(c.submittedAt)}</td>
         <td><div class="actions">${actions}</div></td>
       </tr>`;
@@ -963,7 +966,6 @@ function renderCards(campaigns) {
     if (sn) { badgeClass = 'prod-sn'; badgeLabel = 'ShopperNetwork'; }
     else if (c2g) { badgeClass = 'prod-c2g'; badgeLabel = 'Click2Go'; }
     else { badgeClass = 'prod-dom'; badgeLabel = 'Domination'; }
-    const typeLabel = sn ? esc(c.publisher || '-') : formatType(c.templateType);
     const date = fmtDate(c.submittedAt);
     const menuID = 'more-menu-' + i;
 
@@ -992,7 +994,8 @@ function renderCards(campaigns) {
         </div>
         <div class="m-card-meta">
           <span class="m-card-meta-item">${flag} ${c.location || '\u2014'}</span>
-          <span class="m-card-meta-item">${typeLabel}</span>
+          ${c.clientName ? `<span class="m-card-meta-item">${esc(c.clientName)}</span>` : ''}
+          <span class="m-card-meta-item">${sn ? (c.publisher || '\u2014') : formatType(c.templateType)}</span>
           ${c2g && c.viewer ? `<span class="m-card-meta-item">${esc(c.viewer)}</span>` : ''}
           <span class="m-card-meta-item">${date}</span>
         </div>
