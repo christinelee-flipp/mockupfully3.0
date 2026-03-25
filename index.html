@@ -218,6 +218,7 @@
   }
   .prod-dom { background: var(--navy); color: white; }
   .prod-c2g { background: var(--sky); color: var(--navy); }
+  .prod-sn  { background: #760FCA; color: white; }
 
   /* Country badge */
   .country-badge {
@@ -613,6 +614,7 @@
   <button class="product-tab active" data-product="all" onclick="setProductFilter('all')">All</button>
   <button class="product-tab" data-product="Domination" onclick="setProductFilter('Domination')">Domination</button>
   <button class="product-tab" data-product="Click2Go" onclick="setProductFilter('Click2Go')">Click2Go</button>
+  <button class="product-tab" data-product="ShopperNetwork" onclick="setProductFilter('ShopperNetwork')">ShopperNetwork</button>
 </div>
 
 <!-- TABLE -->
@@ -695,6 +697,7 @@ const WEBHOOKS = {
 const PROTOTYPE = 'domination-prototype.html';
 const FORM_DOM  = 'domination-form.html';
 const FORM_C2G  = 'click2go-form.html';
+const FORM_SN   = 'shoppernetwork-form.html';
 
 let allCampaigns = [];
 let deleteTarget = null;
@@ -748,8 +751,15 @@ function isC2G(c) {
     (c.campaignID || '').startsWith('click2go-');
 }
 
+function isSN(c) {
+  return (c.productType || '').toLowerCase() === 'shoppernetwork' ||
+    (c.campaignID || '').startsWith('shoppernetwork-');
+}
+
 function getProductLabel(c) {
-  return isC2G(c) ? 'Click2Go' : 'Domination';
+  if (isSN(c)) return 'ShopperNetwork';
+  if (isC2G(c)) return 'Click2Go';
+  return 'Domination';
 }
 
 // ── BUILD URLS ──────────────────────────────────────────────────
@@ -881,16 +891,26 @@ function renderTable(campaigns) {
   tbody.innerHTML = campaigns.map((c, i) => {
     const idx = allCampaigns.indexOf(c);
     const c2g = isC2G(c);
+    const sn = isSN(c);
     const prodLabel = getProductLabel(c);
-    const prodBadge = c2g
-      ? `<span class="prod-badge prod-c2g">Click2Go</span>`
-      : `<span class="prod-badge prod-dom">Domination</span>`;
+    let prodBadge;
+    if (sn) prodBadge = `<span class="prod-badge prod-sn">ShopperNetwork</span>`;
+    else if (c2g) prodBadge = `<span class="prod-badge prod-c2g">Click2Go</span>`;
+    else prodBadge = `<span class="prod-badge prod-dom">Domination</span>`;
 
     const loc = c.location || '-';
     const flag = FLAGS[c.location] || '';
 
     let actions = '';
-    if (c2g) {
+    if (sn) {
+      const urlPath = 'shoppernetwork-prototype.html?id=' + encodeURIComponent(c.campaignID);
+      actions = `
+        <button class="btn-action btn-open" onclick="window.open('${esc(urlPath)}','_blank')">Preview</button>
+        <button class="btn-action btn-copy" onclick="openURLModal('${esc(urlPath)}','${esc(c.campaignName)}')">URL</button>
+        <button class="btn-action btn-clone" onclick="cloneCampaign(${idx})">Clone</button>
+        <button class="btn-action btn-edit" onclick="editCampaign(${idx})">Edit</button>
+        <button class="btn-action btn-delete" onclick="askDelete(${idx})">Delete</button>`;
+    } else if (c2g) {
       const urlPath = 'click2go-viewer.html?id=' + encodeURIComponent(c.campaignID) + '&viewer=marketplace';
       actions = `
         <button class="btn-action btn-open" onclick="openPreviewDialog('${esc(c.campaignID)}','${esc(c.campaignName)}')">Preview</button>
@@ -908,12 +928,14 @@ function renderTable(campaigns) {
         <button class="btn-action btn-delete" onclick="askDelete(${idx})">Delete</button>`;
     }
 
+    const typeDisplay = sn ? esc(c.publisher || '-') : formatType(c.templateType);
+
     return `
       <tr data-index="${idx}">
         <td><div style="font-weight:800;font-size:13px;">${esc(c.campaignName || '-')}</div></td>
         <td><span class="country-badge">${flag} ${loc}</span></td>
         <td>${prodBadge}</td>
-        <td>${formatType(c.templateType)}</td>
+        <td>${typeDisplay}</td>
         <td class="date-cell">${fmtDate(c.submittedAt)}</td>
         <td><div class="actions">${actions}</div></td>
       </tr>`;
@@ -935,21 +957,31 @@ function renderCards(campaigns) {
     const idx = allCampaigns.indexOf(c);
     const flag = FLAGS[c.location] || '';
     const c2g = isC2G(c);
-    const badgeClass = c2g ? 'prod-c2g' : 'prod-dom';
-    const badgeLabel = c2g ? 'Click2Go' : 'Domination';
-    const typeLabel = formatType(c.templateType);
+    const sn = isSN(c);
+    let badgeClass, badgeLabel;
+    if (sn) { badgeClass = 'prod-sn'; badgeLabel = 'ShopperNetwork'; }
+    else if (c2g) { badgeClass = 'prod-c2g'; badgeLabel = 'Click2Go'; }
+    else { badgeClass = 'prod-dom'; badgeLabel = 'Domination'; }
+    const typeLabel = sn ? esc(c.publisher || '-') : formatType(c.templateType);
     const date = fmtDate(c.submittedAt);
     const menuID = 'more-menu-' + i;
 
-    const primaryActions = c2g
-      ? `<button class="btn-action btn-open" onclick="openPreviewDialog('${esc(c.campaignID)}','${esc(c.campaignName)}')">Preview</button>
-         <button class="btn-action btn-edit" onclick="window.location.href='click2go-form.html?id=${esc(c.campaignID)}'">Edit</button>`
-      : `<button class="btn-action btn-open" onclick="window.open(buildDomURL(allCampaigns[${idx}]),'_blank')">Preview</button>
+    let primaryActions;
+    if (sn) {
+      primaryActions = `<button class="btn-action btn-open" onclick="window.open('shoppernetwork-prototype.html?id=${esc(c.campaignID)}','_blank')">Preview</button>
+         <button class="btn-action btn-edit" onclick="window.location.href='shoppernetwork-form.html?id=${esc(c.campaignID)}'">Edit</button>`;
+    } else if (c2g) {
+      primaryActions = `<button class="btn-action btn-open" onclick="openPreviewDialog('${esc(c.campaignID)}','${esc(c.campaignName)}')">Preview</button>
+         <button class="btn-action btn-edit" onclick="window.location.href='click2go-form.html?id=${esc(c.campaignID)}'">Edit</button>`;
+    } else {
+      primaryActions = `<button class="btn-action btn-open" onclick="window.open(buildDomURL(allCampaigns[${idx}]),'_blank')">Preview</button>
          <button class="btn-action btn-edit" onclick="window.location.href='domination-form.html?edit=${esc(c.campaignID)}'">Edit</button>`;
+    }
 
-    const urlPath = c2g
-      ? 'click2go-viewer.html?id=' + esc(c.campaignID) + '&viewer=marketplace'
-      : 'domination-prototype.html?id=' + esc(c.campaignID);
+    let urlPath;
+    if (sn) urlPath = 'shoppernetwork-prototype.html?id=' + esc(c.campaignID);
+    else if (c2g) urlPath = 'click2go-viewer.html?id=' + esc(c.campaignID) + '&viewer=marketplace';
+    else urlPath = 'domination-prototype.html?id=' + esc(c.campaignID);
 
     return `
       <div class="m-card">
@@ -997,7 +1029,7 @@ function filterTable() {
     const matchType = !type || c.templateType === type;
     const matchProduct = activeProduct === 'all' ||
       (c.productType || '').toLowerCase() === activeProduct.toLowerCase() ||
-      (activeProduct === 'Domination' && !(c.productType || '').toLowerCase().includes('click2go') && !(c.campaignID || '').startsWith('click2go-'));
+      (activeProduct === 'Domination' && !isC2G(c) && !isSN(c));
     return matchQ && matchCountry && matchType && matchProduct;
   });
 
@@ -1048,11 +1080,12 @@ async function cloneCampaign(i) {
   const original = allCampaigns[i];
   const clone = { ...original };
   const c2g = isC2G(original);
+  const sn = isSN(original);
 
   const now = new Date();
   const pad = n => String(n).padStart(2,'0');
   const ts = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-  clone.campaignID = c2g ? `click2go-${ts}` : `domination-${ts}`;
+  clone.campaignID = sn ? `shoppernetwork-${ts}` : c2g ? `click2go-${ts}` : `domination-${ts}`;
   clone.campaignName = `${original.campaignName} (Copy)`;
   clone.submittedAt = new Date().toISOString();
 
@@ -1074,7 +1107,9 @@ async function cloneCampaign(i) {
 
 function editCampaign(i) {
   const c = allCampaigns[i];
-  if (isC2G(c)) {
+  if (isSN(c)) {
+    window.location.href = `${FORM_SN}?id=${encodeURIComponent(c.campaignID)}`;
+  } else if (isC2G(c)) {
     window.location.href = `${FORM_C2G}?id=${encodeURIComponent(c.campaignID)}`;
   } else {
     window.location.href = `${FORM_DOM}?edit=${encodeURIComponent(c.campaignID)}`;
@@ -1169,6 +1204,11 @@ loadCampaigns();
         <div style="font-size:28px;margin-bottom:8px">&#128205;</div>
         <div style="font-weight:700;font-size:15px;margin-bottom:4px">Click2Go</div>
         <div style="font-size:12px;color:var(--grey-500);font-weight:400;line-height:1.4">Store-finder ad with map experience</div>
+      </button>
+      <button class="preview-opt" onclick="window.location.href='shoppernetwork-form.html'">
+        <div style="font-size:28px;margin-bottom:8px">&#128240;</div>
+        <div style="font-weight:700;font-size:15px;margin-bottom:4px">ShopperNetwork</div>
+        <div style="font-size:12px;color:var(--grey-500);font-weight:400;line-height:1.4">Flyer carousel embedded in a news article</div>
       </button>
     </div>
     <div class="dialog-actions" style="justify-content:center;margin-top:24px">

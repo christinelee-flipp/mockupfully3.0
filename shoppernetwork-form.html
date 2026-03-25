@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New ShopperNetwork Campaign</title>
+<link rel="stylesheet" href="brand.css">
+<style>
+  :root {
+    --red: #D1233E;
+    --dark: #282832;
+    --mid: #777794;
+    --light: #EBEBF5;
+    --white: #FFFFFF;
+    --radius: 10px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+
+  body {
+    font-family: var(--font-base);
+    background: var(--color-cream);
+    color: var(--dark);
+    min-height: 100vh;
+    padding: 40px 20px 80px;
+  }
+
+  .page-header {
+    max-width: 680px;
+    margin: 0 auto 32px;
+  }
+  .page-header .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .logo-text {
+    font-weight: 800;
+    font-size: 15px;
+    color: var(--dark);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .page-header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--dark);
+    line-height: 1.2;
+  }
+  .page-header p {
+    margin-top: 8px;
+    font-size: 14px;
+    color: var(--mid);
+    font-weight: 400;
+  }
+
+  .form-card {
+    max-width: 680px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .form-section {
+    padding: 28px 32px;
+    border-bottom: 1px solid var(--light);
+  }
+  .form-section:last-of-type { border-bottom: none; }
+  .section-title {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--mid);
+    margin-bottom: 20px;
+  }
+
+  .field-row {
+    display: grid;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .field-row.cols-2 { grid-template-columns: 1fr 1fr; }
+  .field-row.cols-1 { grid-template-columns: 1fr; }
+  .field-row:last-child { margin-bottom: 0; }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  label {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--dark);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  label .required { color: var(--red); margin-left: 2px; }
+  label .hint {
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--mid);
+    margin-left: 4px;
+  }
+
+  input[type="text"],
+  input[type="url"],
+  select {
+    height: 42px;
+    border: 1.5px solid var(--light);
+    border-radius: var(--radius);
+    padding: 0 14px;
+    font-family: var(--font-base);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--dark);
+    background: white;
+    outline: none;
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  input[type="text"]:focus,
+  input[type="url"]:focus,
+  select:focus { border-color: var(--color-sky); }
+  input::placeholder { color: #b0b0c0; font-weight: 400; }
+  select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23777794' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+
+  .img-label-row { display: flex; align-items: center; justify-content: space-between; }
+  .img-mode-toggle {
+    display: flex; border: 1.5px solid var(--light);
+    border-radius: 6px; overflow: hidden; flex-shrink: 0;
+  }
+  .mode-btn {
+    height: 22px; padding: 0 8px;
+    font-family: var(--font-base); font-size: 10px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.3px;
+    border: none; background: transparent; color: var(--mid); cursor: pointer;
+  }
+  .mode-btn.active { background: var(--dark); color: white; }
+
+  .url-with-preview { display: flex; align-items: center; gap: 8px; }
+  .url-with-preview input { flex: 1; }
+  .url-mode-wrap, .upload-mode-wrap { flex: 1; }
+  .url-mode-wrap input[type="url"] { width: 100%; }
+
+  .img-preview {
+    width: 42px; height: 42px; border-radius: 8px;
+    border: 1.5px solid var(--light); background: var(--light);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; flex-shrink: 0;
+  }
+  .img-preview img { width: 100%; height: 100%; object-fit: cover; display: none; }
+  .img-preview .placeholder-icon { width: 16px; height: 16px; opacity: 0.3; }
+
+  .upload-area {
+    height: 42px; border: 1.5px solid var(--light);
+    border-radius: var(--radius); display: flex;
+    align-items: center; padding: 0 12px; gap: 8px;
+    cursor: pointer; transition: border-color 0.15s;
+  }
+  .upload-area:hover { border-color: var(--mid); }
+  .upload-filename { font-size: 13px; font-weight: 600; color: var(--mid); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+  .upload-status { font-size: 11px; font-weight: 800; white-space: nowrap; flex-shrink: 0; }
+  .upload-status.uploading { color: var(--mid); }
+  .upload-status.done  { color: #27ae60; }
+  .upload-status.error { color: var(--red); }
+
+  .form-footer {
+    padding: 24px 32px; display: flex;
+    align-items: center; justify-content: space-between;
+    gap: 16px; border-top: 1px solid var(--light);
+  }
+  .footer-note { font-size: 12px; color: var(--mid); font-weight: 400; }
+
+  .btn-submit {
+    height: 46px; padding: 0 28px;
+    background: var(--color-navy); color: white;
+    border: none; border-radius: var(--radius);
+    font-family: var(--font-base); font-weight: 800;
+    font-size: 14px; text-transform: uppercase;
+    letter-spacing: 0.5px; cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s; white-space: nowrap;
+  }
+  .btn-submit:hover { opacity: 0.9; }
+  .btn-submit:active { transform: scale(0.98); }
+  .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .success-panel {
+    display: none; max-width: 680px; margin: 0 auto;
+    background: white; border-radius: 16px;
+    box-shadow: var(--shadow); padding: 40px 32px; text-align: center;
+  }
+  .success-panel.visible { display: block; }
+  .success-icon {
+    width: 56px; height: 56px; background: #f0faf3;
+    border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; margin: 0 auto 20px; font-size: 24px;
+  }
+  .success-panel h2 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+  .success-panel p { font-size: 14px; color: var(--mid); margin-bottom: 28px; }
+  .prototype-url-box {
+    background: var(--light); border-radius: var(--radius);
+    padding: 14px 16px; margin-bottom: 20px; text-align: left;
+  }
+  .prototype-url-box .url-label {
+    font-size: 11px; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--mid); margin-bottom: 6px;
+  }
+  .prototype-url-box .url-text {
+    font-size: 12px; font-weight: 600; color: var(--dark);
+    word-break: break-all; line-height: 1.5;
+  }
+  .success-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+  .image-slot {
+    padding: 16px 0;
+    border-bottom: 1px solid var(--light);
+  }
+  .image-slot:last-child { border-bottom: none; }
+  .image-slot-title {
+    font-size: 12px; font-weight: 800; color: var(--color-sky);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin-bottom: 12px;
+  }
+
+  @media (max-width: 560px) {
+    .field-row.cols-2 { grid-template-columns: 1fr; }
+    .form-section { padding: 20px; }
+    .form-footer { flex-direction: column; align-items: stretch; }
+    .btn-submit { text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header brand-page">
+  <div class="logo">
+    <img src="assets/flipp-sf-logo.svg" alt="Flipp x Shopfully" style="height: 28px; width: auto; display: block;">
+    <span class="logo-text">Mockupfully</span>
+  </div>
+  <h1 class="brand-page-title" id="page-title">New ShopperNetwork Campaign</h1>
+  <p id="page-subtitle">Fill in the details below to generate a live prototype URL.</p>
+</div>
+
+<!-- FORM -->
+<div class="form-card brand-card" id="form-card">
+
+  <!-- 1. Campaign -->
+  <div class="form-section">
+    <div class="section-title form-section-label">Campaign</div>
+    <div class="field-row cols-2">
+      <div class="field">
+        <label>Campaign Name <span class="required">*</span></label>
+        <input type="text" id="campaignName" placeholder="e.g. ALDI Austria Week 12" required>
+      </div>
+      <div class="field">
+        <label>Country <span class="required">*</span></label>
+        <select id="location" onchange="updatePublishers(this.value)">
+          <option value="AT">\ud83c\udde6\ud83c\uddf9 Austria</option>
+          <option value="AU">\ud83c\udde6\ud83c\uddfa Australia</option>
+          <option value="BG">\ud83c\udde7\ud83c\uddec Bulgaria</option>
+          <option value="DE">\ud83c\udde9\ud83c\uddea Germany</option>
+          <option value="ES">\ud83c\uddea\ud83c\uddf8 Spain</option>
+          <option value="FR">\ud83c\uddeb\ud83c\uddf7 France</option>
+          <option value="HU">\ud83c\udded\ud83c\uddfa Hungary</option>
+          <option value="IT">\ud83c\uddee\ud83c\uddf9 Italy</option>
+          <option value="NL">\ud83c\uddf3\ud83c\uddf1 Netherlands</option>
+          <option value="PL">\ud83c\uddf5\ud83c\uddf1 Poland</option>
+          <option value="PT">\ud83c\uddf5\ud83c\uddf9 Portugal</option>
+          <option value="RO">\ud83c\uddf7\ud83c\uddf4 Romania</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row cols-1">
+      <div class="field">
+        <label>Client Name <span class="required">*</span></label>
+        <input type="text" id="clientName" placeholder="e.g. ALDI" required>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Publisher -->
+  <div class="form-section">
+    <div class="section-title form-section-label">Publisher</div>
+    <p style="font-size:12px;color:var(--mid);margin-bottom:16px;">Choose the news site where the flyer carousel will appear.</p>
+    <div class="field-row cols-1">
+      <div class="field">
+        <label>Publisher <span class="required">*</span></label>
+        <select id="publisher">
+          <option value="">Select publisher</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Flyer Images -->
+  <div class="form-section">
+    <div class="section-title form-section-label">Flyer Images</div>
+    <p style="font-size:12px;color:var(--mid);margin-bottom:16px;">Upload between 1 and 9 flyer pages. These appear in the scrollable carousel.</p>
+    <div id="image-fields"></div>
+  </div>
+
+  <!-- Footer -->
+  <div class="form-footer">
+    <span class="footer-note" id="footer-note">All fields marked <span style="color:var(--red)">*</span> are required.</span>
+    <button class="btn-submit btn btn-primary" id="btn-submit" onclick="submitForm()">Generate Prototype &rarr;</button>
+  </div>
+
+</div>
+
+<!-- SUCCESS -->
+<div class="success-panel brand-card" id="success-panel">
+  <div class="success-icon">&#10003;</div>
+  <h2>Campaign Created!</h2>
+  <p id="success-campaign-name">Your prototype is ready.</p>
+  <div class="prototype-url-box">
+    <div class="url-label">Preview URL</div>
+    <div class="url-text" id="success-url"></div>
+  </div>
+  <div class="success-actions">
+    <a class="btn btn-primary" id="btn-preview" href="#" target="_blank">Preview</a>
+    <button class="btn btn-secondary" onclick="copyURL()">Copy URL</button>
+    <button class="btn btn-secondary" onclick="resetForm()">New Campaign</button>
+  </div>
+</div>
+
+<script>
+const UPLOAD_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke="#777794" stroke-width="1.8" stroke-linecap="round"/><polyline points="17 8 12 3 7 8" stroke="#777794" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="3" x2="12" y2="15" stroke="#777794" stroke-width="1.8" stroke-linecap="round"/></svg>';
+const PLACEHOLDER_SVG = '<svg class="placeholder-icon" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" stroke="#777794" stroke-width="1.5"/><circle cx="8.5" cy="8.5" r="1.5" fill="#777794"/><path d="M3 15l5-4 4 3 3-2 6 5" stroke="#777794" stroke-width="1.5" stroke-linecap="round"/></svg>';
+
+let editMode = false;
+let editCampaignID = null;
+let generatedURL = '';
+
+// ─── PUBLISHERS ──────────────────────────────────────────────────
+const PUBLISHERS = {
+  AT: ['kurier','laola','meinbezirk'],
+  AU: ['news','nine','SMH','taste','yahoo'],
+  BG: ['24chasa','btvnovinite','nova'],
+  DE: ['bild','einfachTasty','merkur'],
+  ES: ['20minutos','elEspa\u00f1ol','marca','milAnuncios','xataka'],
+  FR: ['leMonde','lequipe','marieClaire','parents','sudOuest'],
+  HU: ['24','hvg','index'],
+  IT: ['ansa','momentoCasa','myPersonalTrainer','salvatoreAranzulla','sienaFree'],
+  NL: ['algemeenDagblad','deTelegraf','nu','omroepStichting'],
+  PL: ['plejada','rmf','WPabczdrowie'],
+  PT: ['aBola','correioDaManha','noticiasAoMinuto','olx','sapo'],
+  RO: ['a1','deparinti','observatorNews']
+};
+
+function updatePublishers(country) {
+  const select = document.getElementById('publisher');
+  const list = PUBLISHERS[country] || [];
+  select.innerHTML = '<option value="">Select publisher</option>';
+  list.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p;
+    opt.textContent = p;
+    select.appendChild(opt);
+  });
+}
+
+// ─── BUILD IMAGE FIELDS ─────────────────────────────────────────
+function buildImageFields() {
+  const container = document.getElementById('image-fields');
+  container.innerHTML = '';
+  for (let i = 1; i <= 9; i++) {
+    const fieldId = 'image' + i;
+    const required = i === 1 ? '<span class="required">*</span>' : '';
+    const slot = document.createElement('div');
+    slot.className = 'image-slot';
+    slot.innerHTML = `
+      <div class="image-slot-title">Page ${i}</div>
+      <div class="field">
+        <div class="img-label-row">
+          <label>Image ${i} ${required}</label>
+          <div class="img-mode-toggle toggle-group">
+            <button type="button" class="mode-btn toggle-btn" data-mode="url" data-field="${fieldId}">URL</button>
+            <button type="button" class="mode-btn toggle-btn active" data-mode="upload" data-field="${fieldId}">Upload</button>
+          </div>
+        </div>
+        <div class="url-with-preview">
+          <div class="url-mode-wrap" id="url-wrap-${fieldId}" style="display:none">
+            <input type="url" id="${fieldId}" placeholder="https://...">
+          </div>
+          <div class="upload-mode-wrap" id="upload-wrap-${fieldId}">
+            <div class="upload-area" id="upload-area-${fieldId}">
+              <input type="file" id="file-${fieldId}" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none">
+              ${UPLOAD_ICON}
+              <span class="upload-filename" id="upload-filename-${fieldId}">Choose file...</span>
+              <span class="upload-status" id="upload-status-${fieldId}"></span>
+            </div>
+          </div>
+          <div class="img-preview" id="preview-${fieldId}">
+            <img id="img-${fieldId}" src="" alt="">
+            ${PLACEHOLDER_SVG}
+          </div>
+        </div>
+      </div>
+    `;
+    container.appendChild(slot);
+    setupUploadField(fieldId, 'img-' + fieldId, 'preview-' + fieldId);
+  }
+}
+
+// ─── UPLOAD FIELD WIRING ────────────────────────────────────────
+function setupUploadField(fieldId, imgId, previewId) {
+  const previewImg  = document.getElementById(imgId);
+  const previewIcon = document.querySelector('#' + previewId + ' .placeholder-icon');
+  const uploadArea  = document.getElementById('upload-area-' + fieldId);
+  const fileInput   = document.getElementById('file-' + fieldId);
+  const urlInput    = document.getElementById(fieldId);
+
+  document.querySelectorAll('.mode-btn[data-field="' + fieldId + '"]').forEach(btn =>
+    btn.addEventListener('click', () => switchImgMode(fieldId, btn.dataset.mode))
+  );
+  if (uploadArea && fileInput) {
+    uploadArea.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => handleFileUpload(fileInput, fieldId, previewImg, previewIcon));
+  }
+  if (urlInput) {
+    urlInput.addEventListener('input', () => updateImgPreview(urlInput, previewImg, previewIcon));
+  }
+}
+
+function switchImgMode(fieldId, mode) {
+  const urlWrap    = document.getElementById('url-wrap-' + fieldId);
+  const uploadWrap = document.getElementById('upload-wrap-' + fieldId);
+  document.querySelectorAll('.mode-btn[data-field="' + fieldId + '"]').forEach(b =>
+    b.classList.toggle('active', b.dataset.mode === mode)
+  );
+  if (urlWrap)    urlWrap.style.display    = mode === 'url'    ? '' : 'none';
+  if (uploadWrap) uploadWrap.style.display = mode === 'upload' ? '' : 'none';
+}
+
+function updateImgPreview(input, imgEl, iconEl) {
+  const url = input.value.trim();
+  if (url) {
+    imgEl.src = url;
+    imgEl.style.display = 'block';
+    if (iconEl) iconEl.style.display = 'none';
+    imgEl.onerror = () => {
+      imgEl.style.display = 'none';
+      if (iconEl) iconEl.style.display = 'block';
+    };
+  } else {
+    imgEl.style.display = 'none';
+    if (iconEl) iconEl.style.display = 'block';
+  }
+}
+
+async function handleFileUpload(fileInput, fieldId, previewImg, previewIcon) {
+  const file = fileInput.files[0];
+  if (!file) return;
+  const filenameEl = document.getElementById('upload-filename-' + fieldId);
+  const statusEl   = document.getElementById('upload-status-' + fieldId);
+  const urlInput   = document.getElementById(fieldId);
+
+  filenameEl.textContent = file.name;
+  const objectURL = URL.createObjectURL(file);
+  previewImg.src = objectURL;
+  previewImg.style.display = 'block';
+  if (previewIcon) previewIcon.style.display = 'none';
+
+  statusEl.textContent = 'Uploading...';
+  statusEl.className = 'upload-status uploading';
+
+  const formData = new FormData();
+  formData.append('image', file);
+
+  try {
+    const res  = await fetch('api/upload.php', { method: 'POST', body: formData });
+    const json = await res.json();
+    if (json.success) {
+      urlInput.value = json.url;
+      previewImg.src = json.url;
+      statusEl.textContent = '\u2713';
+      statusEl.className = 'upload-status done';
+    } else {
+      urlInput.value = '';
+      statusEl.textContent = json.error || 'Upload failed';
+      statusEl.className = 'upload-status error';
+    }
+  } catch {
+    urlInput.value = '';
+    statusEl.textContent = 'Upload failed';
+    statusEl.className = 'upload-status error';
+  } finally {
+    URL.revokeObjectURL(objectURL);
+  }
+}
+
+function applyValueMode(fieldId, value) {
+  if (!value) return;
+  if (value.startsWith('http')) {
+    switchImgMode(fieldId, 'url');
+    const input = document.getElementById(fieldId);
+    if (input) input.value = value;
+  } else if (value.startsWith('uploads/')) {
+    switchImgMode(fieldId, 'upload');
+    const input = document.getElementById(fieldId);
+    if (input) input.value = value;
+    const filename = value.split('/').pop();
+    const filenameEl = document.getElementById('upload-filename-' + fieldId);
+    const statusEl   = document.getElementById('upload-status-' + fieldId);
+    if (filenameEl) filenameEl.textContent = filename;
+    if (statusEl) { statusEl.textContent = '\u2713'; statusEl.className = 'upload-status done'; }
+  }
+}
+
+// ─── CAMPAIGN ID ────────────────────────────────────────────────
+function generateCampaignID() {
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  return 'shoppernetwork-' + now.getFullYear() + pad(now.getMonth()+1) + pad(now.getDate()) + pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds());
+}
+
+// ─── COLLECT DATA ───────────────────────────────────────────────
+function collectData() {
+  const get = id => (document.getElementById(id)?.value || '').trim();
+  return {
+    submittedAt: new Date().toISOString(),
+    campaignID: editMode && editCampaignID ? editCampaignID : generateCampaignID(),
+    productType: 'ShopperNetwork',
+    campaignName: get('campaignName'),
+    location: get('location'),
+    clientName: get('clientName'),
+    publisher: get('publisher'),
+    image1: get('image1'),
+    image2: get('image2'),
+    image3: get('image3'),
+    image4: get('image4'),
+    image5: get('image5'),
+    image6: get('image6'),
+    image7: get('image7'),
+    image8: get('image8'),
+    image9: get('image9'),
+  };
+}
+
+// ─── VALIDATE ───────────────────────────────────────────────────
+function validate(data) {
+  if (!data.campaignName) return 'Campaign Name is required.';
+  if (!data.clientName) return 'Client Name is required.';
+  if (!data.publisher) return 'Publisher is required.';
+  if (!data.image1) return 'At least one flyer image is required.';
+  return null;
+}
+
+// ─── SUBMIT ─────────────────────────────────────────────────────
+async function submitForm() {
+  const btn = document.getElementById('btn-submit');
+  const footerNote = document.getElementById('footer-note');
+
+  const data = collectData();
+  const error = validate(data);
+  if (error) {
+    footerNote.innerHTML = '<span style="color:var(--red)">' + error + '</span>';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  footerNote.innerHTML = 'Saving...';
+
+  try {
+    const res = await fetch('api/save.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error('Server returned ' + res.status);
+
+    generatedURL = 'shoppernetwork-prototype.html?id=' + encodeURIComponent(data.campaignID);
+
+    document.getElementById('form-card').style.display = 'none';
+    const panel = document.getElementById('success-panel');
+    panel.classList.add('visible');
+    const verb = editMode ? 'updated' : 'ready to preview';
+    document.getElementById('success-campaign-name').textContent = '"' + data.campaignName + '" has been ' + verb + '.';
+    document.getElementById('success-url').textContent = generatedURL;
+    document.getElementById('btn-preview').href = generatedURL;
+
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Generate Prototype \u2192';
+    footerNote.innerHTML = '<span style="color:var(--red)">Error: ' + err.message + '. Please try again.</span>';
+  }
+}
+
+function copyURL() {
+  navigator.clipboard.writeText(generatedURL).then(() => {
+    const btn = document.querySelector('.success-actions .btn-secondary');
+    if (btn) { btn.textContent = 'Copied \u2713'; setTimeout(() => btn.textContent = 'Copy URL', 2000); }
+  });
+}
+
+function resetForm() {
+  document.getElementById('success-panel').classList.remove('visible');
+  document.getElementById('form-card').style.display = 'block';
+  document.getElementById('btn-submit').disabled = false;
+  document.getElementById('btn-submit').textContent = 'Generate Prototype \u2192';
+  document.getElementById('footer-note').innerHTML = 'All fields marked <span style="color:var(--red)">*</span> are required.';
+}
+
+// ─── PREFILL (edit mode) ────────────────────────────────────────
+function prefillForm(c) {
+  const set = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.value = val; };
+
+  set('campaignName', c.campaignName);
+  set('location', c.location);
+  set('clientName', c.clientName);
+
+  // Update publisher dropdown then set value
+  updatePublishers(c.location);
+  set('publisher', c.publisher);
+
+  // Image fields
+  for (let i = 1; i <= 9; i++) {
+    const fieldId = 'image' + i;
+    if (c[fieldId]) {
+      applyValueMode(fieldId, c[fieldId]);
+      const img = document.getElementById('img-' + fieldId);
+      const icon = document.querySelector('#preview-' + fieldId + ' .placeholder-icon');
+      if (img) updateImgPreview(document.getElementById(fieldId), img, icon);
+    }
+  }
+}
+
+// ─── INIT ───────────────────────────────────────────────────────
+async function init() {
+  buildImageFields();
+  updatePublishers(document.getElementById('location').value);
+
+  const p = new URLSearchParams(window.location.search);
+  const campaignID = p.get('id') || p.get('edit');
+
+  if (campaignID) {
+    editMode = true;
+    editCampaignID = campaignID;
+    document.getElementById('page-title').textContent = 'Edit ShopperNetwork Campaign';
+    document.getElementById('page-subtitle').textContent = 'Update the campaign details below.';
+    document.getElementById('btn-submit').textContent = 'Save Changes \u2192';
+
+    try {
+      const res = await fetch('api/get.php?id=' + encodeURIComponent(campaignID));
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      if (data) prefillForm(data);
+    } catch (err) {
+      console.error('Failed to load campaign:', err);
+    }
+  }
+}
+
+init();
+</script>
+
+</body>
+</html>

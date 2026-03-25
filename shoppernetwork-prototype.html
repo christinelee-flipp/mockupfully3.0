@@ -290,7 +290,7 @@
           <rect x="1" y="6" width="10" height="7" rx="1.5" stroke="#000" stroke-width="1.2"/>
           <path d="M3 6V4a3 3 0 016 0v2" stroke="#000" stroke-width="1.2" stroke-linecap="round"/>
         </svg>
-        <span>kurier.at</span>
+        <span id="safari-domain">kurier.at</span>
       </div>
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
         <path d="M13.5 8A5.5 5.5 0 113.5 5" stroke="#555" stroke-width="1.3" stroke-linecap="round"/>
@@ -327,21 +327,37 @@
 </div>
 
 <script>
-// ── CAROUSEL ──────────────────────────────────────────────────────
-(function () {
+// ── PUBLISHER DOMAINS ─────────────────────────────────────────────
+var PUBLISHER_DOMAINS = {
+  kurier:'kurier.at', laola:'laola1.at', meinbezirk:'meinbezirk.at',
+  news:'news.com.au', nine:'nine.com.au', SMH:'smh.com.au', taste:'taste.com.au', yahoo:'au.yahoo.com',
+  '24chasa':'24chasa.bg', btvnovinite:'btvnovinite.bg', nova:'nova.bg',
+  bild:'bild.de', einfachTasty:'einfachtasty.de', merkur:'merkur.de',
+  '20minutos':'20minutos.es', 'elEspa\u00f1ol':'elespanol.com', marca:'marca.com', milAnuncios:'milanuncios.com', xataka:'xataka.com',
+  leMonde:'lemonde.fr', lequipe:'lequipe.fr', marieClaire:'marieclaire.fr', parents:'parents.fr', sudOuest:'sudouest.fr',
+  '24':'24.hu', hvg:'hvg.hu', index:'index.hu',
+  ansa:'ansa.it', momentoCasa:'momentocasa.it', myPersonalTrainer:'mypersonaltrainer.it', salvatoreAranzulla:'aranzulla.it', sienaFree:'sienafree.it',
+  algemeenDagblad:'ad.nl', deTelegraf:'telegraaf.nl', nu:'nu.nl', omroepStichting:'nos.nl',
+  plejada:'plejada.pl', rmf:'rmf24.pl', WPabczdrowie:'abczdrowie.pl',
+  aBola:'abola.pt', correioDaManha:'cmjornal.pt', noticiasAoMinuto:'noticiasaominuto.com', olx:'olx.pt', sapo:'sapo.pt',
+  a1:'a1.ro', deparinti:'deparinti.ro', observatorNews:'observatornews.ro'
+};
+
+// ── CAROUSEL INIT ─────────────────────────────────────────────────
+function initCarousel() {
   var track = document.getElementById('carousel-track');
   var slider = document.getElementById('carousel-slider');
+  if (!track) return;
   var slides = track.querySelectorAll('.carousel-slide');
   var totalSlides = slides.length;
+  if (totalSlides === 0) return;
   var currentSlide = 0;
 
-  // Slide offsets: first slide 388px, rest 351px
   var SLIDE_OFFSETS = [0];
   for (var i = 1; i < totalSlides; i++) {
     SLIDE_OFFSETS.push(SLIDE_OFFSETS[i - 1] + (i === 1 ? 388 : 351));
   }
 
-  // Build dots
   slider.innerHTML = '';
   for (var i = 0; i < totalSlides; i++) {
     var dot = document.createElement('div');
@@ -362,52 +378,73 @@
     updateDots();
   }
 
-  // Drag logic
-  var isDragging = false;
-  var startX = 0;
-  var dragOffset = 0;
+  var isDragging = false, startX = 0, dragOffset = 0;
 
-  function onStart(x) {
-    isDragging = true;
-    startX = x;
-    dragOffset = 0;
-    track.style.transition = 'none';
-  }
+  function onStart(x) { isDragging = true; startX = x; dragOffset = 0; track.style.transition = 'none'; }
+  function onMove(x) { if (!isDragging) return; dragOffset = x - startX; track.style.transform = 'translateX(' + (-SLIDE_OFFSETS[currentSlide] + dragOffset) + 'px)'; }
+  function onEnd() { if (!isDragging) return; isDragging = false; if (dragOffset < -40 && currentSlide < totalSlides - 1) currentSlide++; else if (dragOffset > 40 && currentSlide > 0) currentSlide--; snapToSlide(); }
 
-  function onMove(x) {
-    if (!isDragging) return;
-    dragOffset = x - startX;
-    track.style.transform = 'translateX(' + (-SLIDE_OFFSETS[currentSlide] + dragOffset) + 'px)';
-  }
-
-  function onEnd() {
-    if (!isDragging) return;
-    isDragging = false;
-    if (dragOffset < -40 && currentSlide < totalSlides - 1) currentSlide++;
-    else if (dragOffset > 40 && currentSlide > 0) currentSlide--;
-    snapToSlide();
-  }
-
-  // Touch events
-  track.addEventListener('touchstart', function (e) {
-    onStart(e.touches[0].clientX);
-  }, { passive: true });
-  track.addEventListener('touchmove', function (e) {
-    onMove(e.touches[0].clientX);
-  }, { passive: true });
+  track.addEventListener('touchstart', function (e) { onStart(e.touches[0].clientX); }, { passive: true });
+  track.addEventListener('touchmove', function (e) { onMove(e.touches[0].clientX); }, { passive: true });
   track.addEventListener('touchend', onEnd);
-
-  // Mouse events
-  track.addEventListener('mousedown', function (e) {
-    onStart(e.clientX);
-    e.preventDefault();
-  });
-  window.addEventListener('mousemove', function (e) {
-    onMove(e.clientX);
-  });
+  track.addEventListener('mousedown', function (e) { onStart(e.clientX); e.preventDefault(); });
+  window.addEventListener('mousemove', function (e) { onMove(e.clientX); });
   window.addEventListener('mouseup', onEnd);
 
   snapToSlide();
+}
+
+// ── DYNAMIC LOADING ───────────────────────────────────────────────
+(function () {
+  var params = new URLSearchParams(window.location.search);
+  var id = params.get('id');
+
+  if (id) {
+    fetch('api/get.php?id=' + encodeURIComponent(id))
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (!data) return initCarousel();
+
+        var loc = data.location || 'AT';
+        var pub = data.publisher || 'kurier';
+        var basePath = 'assets/shoppernetwork-assets/website/' + loc + '/' + pub + '/';
+
+        document.getElementById('top-img').src = basePath + 'top.png';
+        document.getElementById('bottom-img').src = basePath + 'bottom.png';
+
+        var domain = PUBLISHER_DOMAINS[pub] || (pub + '.com');
+        document.getElementById('safari-domain').textContent = domain;
+
+        // Build carousel slides from image1..image9
+        var images = [];
+        for (var i = 1; i <= 9; i++) {
+          var url = data['image' + i];
+          if (url && url.trim()) images.push(url.trim());
+        }
+
+        if (images.length > 0) {
+          var track = document.getElementById('carousel-track');
+          track.innerHTML = '';
+          images.forEach(function (url, idx) {
+            var slide = document.createElement('div');
+            slide.className = 'carousel-slide';
+            var img = document.createElement('img');
+            img.src = url;
+            img.alt = 'Flyer page ' + (idx + 1);
+            img.draggable = false;
+            slide.appendChild(img);
+            track.appendChild(slide);
+          });
+        }
+
+        initCarousel();
+      })
+      .catch(function () {
+        initCarousel();
+      });
+  } else {
+    initCarousel();
+  }
 })();
 </script>
 
