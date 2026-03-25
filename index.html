@@ -366,12 +366,194 @@
     margin-left: 2px;
   }
 
-  @media (max-width: 600px) {
-    .header { padding: 0 16px; }
-    .toolbar { padding: 16px 16px 0; }
-    .product-tabs { padding: 12px 16px 0; }
-    .table-wrap { padding: 12px 16px 40px; }
-    .search-wrap input { width: 180px; }
+  /* ── MOBILE CARDS (hidden on desktop) ── */
+  .campaign-cards { display: none; }
+
+  /* ── MOBILE CARD STYLES ── */
+  .m-card {
+    background: white;
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 2px 12px rgba(0,12,82,0.07);
+  }
+  .m-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+  .m-card-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--navy);
+    flex: 1;
+    min-width: 0;
+    padding-right: 8px;
+  }
+  .m-card-badge {
+    flex-shrink: 0;
+  }
+  .m-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .m-card-meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--grey-500);
+    background: var(--grey-100);
+    border-radius: 6px;
+    padding: 3px 8px;
+  }
+  .m-card-actions-main {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .m-card-actions-main .btn-action {
+    flex: 1;
+    height: 36px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .m-card-actions-more {
+    display: flex;
+    gap: 8px;
+  }
+  .m-card-actions-more .btn-action {
+    flex: 1;
+    height: 32px;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .m-more-wrap {
+    position: relative;
+  }
+  .btn-more {
+    height: 36px;
+    width: 36px;
+    border-radius: 8px;
+    border: 1.5px solid var(--grey-300);
+    background: white;
+    font-size: 18px;
+    color: var(--navy);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  .m-more-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,12,82,0.15);
+    min-width: 160px;
+    z-index: 50;
+    overflow: hidden;
+  }
+  .m-more-menu.open { display: block; }
+  .m-more-item {
+    display: block;
+    width: 100%;
+    padding: 13px 16px;
+    text-align: left;
+    background: none;
+    border: none;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--navy);
+    cursor: pointer;
+    border-bottom: 1px solid var(--grey-100);
+    transition: background 0.1s;
+  }
+  .m-more-item:last-child { border-bottom: none; }
+  .m-more-item:hover { background: var(--grey-100); }
+  .m-more-item.danger { color: var(--pink); }
+
+  @media (max-width: 768px) {
+    /* HEADER */
+    .header {
+      padding: 0 16px;
+      height: auto;
+      min-height: 56px;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
+    .header-divider { display: none; }
+    .header-page    { display: none; }
+    .logo-text      { font-size: 13px; }
+    .btn-new-campaign {
+      font-size: 12px;
+      padding: 0 12px;
+      height: 32px;
+    }
+
+    /* TOOLBAR */
+    .toolbar {
+      padding: 12px 16px 0;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+    }
+    .toolbar-left {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+    .search-wrap input {
+      width: 100%;
+    }
+    .filter-select {
+      width: 100%;
+    }
+    .campaign-count {
+      text-align: right;
+    }
+
+    /* PRODUCT TABS */
+    .product-tabs {
+      padding: 12px 16px 0;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      flex-wrap: nowrap;
+      scrollbar-width: none;
+    }
+    .product-tabs::-webkit-scrollbar { display: none; }
+    .product-tab {
+      flex-shrink: 0;
+      font-size: 12px;
+      padding: 0 14px;
+      height: 30px;
+    }
+
+    /* TABLE / CARDS */
+    .table-wrap {
+      padding: 12px 16px 40px;
+    }
+    .table-wrap table { display: none; }
+    .campaign-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 12px 16px 40px;
+    }
   }
 </style>
 </head>
@@ -455,6 +637,9 @@
     </tbody>
   </table>
 </div>
+
+<!-- MOBILE CARD LIST -->
+<div class="campaign-cards" id="campaign-cards"></div>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
@@ -689,6 +874,7 @@ function renderTable(campaigns) {
 
   if (!campaigns.length) {
     tbody.innerHTML = `<tr class="state-row"><td colspan="6">No campaigns found.</td></tr>`;
+    renderCards(campaigns);
     return;
   }
 
@@ -731,6 +917,65 @@ function renderTable(campaigns) {
         <td class="date-cell">${fmtDate(c.submittedAt)}</td>
         <td><div class="actions">${actions}</div></td>
       </tr>`;
+  }).join('');
+
+  renderCards(campaigns);
+}
+
+function renderCards(campaigns) {
+  const container = document.getElementById('campaign-cards');
+  if (!container) return;
+
+  if (!campaigns.length) {
+    container.innerHTML = '<p style="text-align:center;color:var(--grey-500);padding:40px 0;">No campaigns found.</p>';
+    return;
+  }
+
+  container.innerHTML = campaigns.map((c, i) => {
+    const idx = allCampaigns.indexOf(c);
+    const flag = FLAGS[c.location] || '';
+    const c2g = isC2G(c);
+    const badgeClass = c2g ? 'prod-c2g' : 'prod-dom';
+    const badgeLabel = c2g ? 'Click2Go' : 'Domination';
+    const typeLabel = formatType(c.templateType);
+    const date = fmtDate(c.submittedAt);
+    const menuID = 'more-menu-' + i;
+
+    const primaryActions = c2g
+      ? `<button class="btn-action btn-open" onclick="openPreviewDialog('${esc(c.campaignID)}','${esc(c.campaignName)}')">Preview</button>
+         <button class="btn-action btn-edit" onclick="window.location.href='click2go-form.html?id=${esc(c.campaignID)}'">Edit</button>`
+      : `<button class="btn-action btn-open" onclick="window.open(buildDomURL(allCampaigns[${idx}]),'_blank')">Preview</button>
+         <button class="btn-action btn-edit" onclick="window.location.href='domination-form.html?edit=${esc(c.campaignID)}'">Edit</button>`;
+
+    const urlPath = c2g
+      ? 'click2go-viewer.html?id=' + esc(c.campaignID) + '&viewer=marketplace'
+      : 'domination-prototype.html?id=' + esc(c.campaignID);
+
+    return `
+      <div class="m-card">
+        <div class="m-card-top">
+          <div class="m-card-name">${esc(c.campaignName || '\u2014')}</div>
+          <span class="prod-badge m-card-badge ${badgeClass}">${badgeLabel}</span>
+        </div>
+        <div class="m-card-meta">
+          <span class="m-card-meta-item">${flag} ${c.location || '\u2014'}</span>
+          <span class="m-card-meta-item">${typeLabel}</span>
+          ${c2g && c.viewer ? `<span class="m-card-meta-item">${esc(c.viewer)}</span>` : ''}
+          <span class="m-card-meta-item">${date}</span>
+        </div>
+        <div class="m-card-actions-main">
+          ${primaryActions}
+          <div class="m-more-wrap">
+            <button class="btn-more" onclick="toggleMoreMenu('${menuID}',event)">\u22EF</button>
+            <div class="m-more-menu" id="${menuID}">
+              <button class="m-more-item" onclick="openURLModal('${urlPath}','${esc(c.campaignName)}');closeMoreMenus()">\uD83D\uDD17 Copy URL</button>
+              <button class="m-more-item" onclick="cloneCampaign(${idx});closeMoreMenus()">\uD83D\uDCCB Clone</button>
+              <button class="m-more-item danger" onclick="askDelete(${idx});closeMoreMenus()">\uD83D\uDDD1 Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
   }).join('');
 }
 
@@ -886,6 +1131,23 @@ function openNewCampaignModal() {
 function closeNewCampaignModal() {
   document.getElementById('new-campaign-overlay').classList.remove('show');
 }
+
+// ── MORE MENU (mobile cards) ─────────────────────────────────────
+function toggleMoreMenu(menuID, event) {
+  event.stopPropagation();
+  closeMoreMenus();
+  const menu = document.getElementById(menuID);
+  if (menu) menu.classList.toggle('open');
+}
+
+function closeMoreMenus() {
+  document.querySelectorAll('.m-more-menu.open')
+    .forEach(m => m.classList.remove('open'));
+}
+
+document.addEventListener('click', function() {
+  closeMoreMenus();
+});
 
 // ── INIT ──────────────────────────────────────────────────────────
 updateSortIndicators();
