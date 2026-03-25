@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ShopperNetwork Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background: #e5e5e5;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* ── PHONE FRAME ── */
+  .phone {
+    width: 375px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    flex-shrink: 0;
+  }
+
+  /* ── STATUS BAR ── */
+  .status-bar {
+    width: 375px;
+    height: 38px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    flex-shrink: 0;
+  }
+  .status-time {
+    font-family: 'SF Pro Text', 'Plus Jakarta Sans', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    color: #000;
+  }
+  .status-icons {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  /* ── SCROLLABLE CONTENT ── */
+  .article-content {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
+  }
+  .article-img {
+    width: 375px;
+    display: block;
+    margin: 0;
+    padding: 0;
+    line-height: 0;
+  }
+  .article-img img {
+    width: 100%;
+    display: block;
+  }
+
+  /* ── CAROUSEL BOX ── */
+  .carousel-box {
+    width: 375px;
+    height: 554px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 0;
+    background: #f5f5f5;
+    position: relative;
+  }
+
+  .carousel-rectangular {
+    width: 375px;
+    height: 530px;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .carousel-track {
+    display: flex;
+    flex-direction: row;
+    height: 530px;
+    transition: transform 0.35s ease;
+    will-change: transform;
+    cursor: grab;
+  }
+  .carousel-track:active { cursor: grabbing; }
+
+  .carousel-slide {
+    height: 530px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .carousel-slide:first-child { width: 388px; }
+  .carousel-slide:not(:first-child) { width: 351px; }
+
+  .carousel-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* Slider bar */
+  .carousel-slider {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 351px;
+    height: 34px;
+    background: rgba(0, 0, 0, 0.24);
+    border-radius: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 16px;
+  }
+  .carousel-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.4);
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+  .carousel-dot.active {
+    background: rgba(255,255,255,1);
+  }
+
+  /* ── SAFARI FOOTER ── */
+  .safari-footer {
+    width: 375px;
+    height: 83px;
+    background: #f7f7f7;
+    border-top: 0.5px solid #c8c8c8;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 8px;
+    gap: 8px;
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+  }
+  .safari-address-bar {
+    width: 321px;
+    height: 42px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+  }
+  .safari-aa {
+    font-size: 12px;
+    font-weight: 600;
+    color: #555;
+  }
+  .safari-url {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    justify-content: center;
+    font-size: 13px;
+    color: #000;
+  }
+  .safari-nav {
+    width: 321px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .safari-nav svg {
+    width: 24px;
+    height: 24px;
+    display: block;
+  }
+  .safari-home-indicator {
+    width: 134px;
+    height: 5px;
+    background: #000;
+    border-radius: 100px;
+    margin: 0 auto;
+  }
+</style>
+</head>
+<body>
+
+<div class="phone" id="phone">
+
+  <!-- Status bar -->
+  <div class="status-bar">
+    <span class="status-time">10:10</span>
+    <div class="status-icons">
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="none">
+        <rect x="0" y="7" width="3" height="5" rx="0.5" fill="#000"/>
+        <rect x="4.5" y="5" width="3" height="7" rx="0.5" fill="#000"/>
+        <rect x="9" y="2.5" width="3" height="9.5" rx="0.5" fill="#000"/>
+        <rect x="13.5" y="0" width="3" height="12" rx="0.5" fill="#000"/>
+      </svg>
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+        <path d="M8 9.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3z" fill="#000"/>
+        <path d="M4.1 7.1C5.1 6.1 6.5 5.5 8 5.5s2.9.6 3.9 1.6" stroke="#000" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        <path d="M1.3 4.3C3 2.6 5.4 1.5 8 1.5s5 1.1 6.7 2.8" stroke="#000" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+      </svg>
+      <svg width="28" height="13" viewBox="0 0 28 13" fill="none">
+        <rect x="0.5" y="0.5" width="23" height="12" rx="2.5" stroke="#000" stroke-opacity="0.35"/>
+        <rect x="2" y="2" width="18" height="9" rx="1.5" fill="#000"/>
+        <path d="M24.5 4.5V8.5" stroke="#000" stroke-opacity="0.4" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Scrollable article content -->
+  <div class="article-content" id="article-content">
+
+    <!-- Top of article -->
+    <div class="article-img">
+      <img src="assets/shoppernetwork-assets/website/AT/kurier/top.png" alt="" id="top-img">
+    </div>
+
+    <!-- Carousel box (embedded ad) -->
+    <div class="carousel-box">
+      <div class="carousel-rectangular" id="carousel-rect">
+        <div class="carousel-track" id="carousel-track">
+          <div class="carousel-slide">
+            <img src="uploads/image-1.png" alt="Flyer page 1">
+          </div>
+          <div class="carousel-slide">
+            <img src="uploads/image-2.png" alt="Flyer page 2">
+          </div>
+          <div class="carousel-slide">
+            <img src="uploads/image-3.png" alt="Flyer page 3">
+          </div>
+          <div class="carousel-slide">
+            <img src="uploads/image-4.png" alt="Flyer page 4">
+          </div>
+        </div>
+        <!-- Slider / dots -->
+        <div class="carousel-slider" id="carousel-slider">
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom of article -->
+    <div class="article-img">
+      <img src="assets/shoppernetwork-assets/website/AT/kurier/bottom.png" alt="" id="bottom-img">
+    </div>
+
+  </div>
+
+  <!-- Safari footer -->
+  <div class="safari-footer">
+    <div class="safari-address-bar">
+      <span class="safari-aa">AA</span>
+      <div class="safari-url">
+        <svg width="12" height="14" viewBox="0 0 12 14" fill="none">
+          <rect x="1" y="6" width="10" height="7" rx="1.5" stroke="#000" stroke-width="1.2"/>
+          <path d="M3 6V4a3 3 0 016 0v2" stroke="#000" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+        <span>kurier.at</span>
+      </div>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M13.5 8A5.5 5.5 0 113.5 5" stroke="#555" stroke-width="1.3" stroke-linecap="round"/>
+        <path d="M1.5 5h3.5v3.5" stroke="#555" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="safari-nav">
+      <!-- Back -->
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M15 5l-7 7 7 7" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <!-- Forward (grey/disabled) -->
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M9 5l7 7-7 7" stroke="#C7C7CC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <!-- Share -->
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M12 3v12" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M8 7l4-4 4 4" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M4 14v4a2 2 0 002 2h12a2 2 0 002-2v-4" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      <!-- Bookmark -->
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M6 4h12a1 1 0 011 1v15l-7-4-7 4V5a1 1 0 011-1z" stroke="#007AFF" stroke-width="1.8" stroke-linejoin="round"/>
+      </svg>
+      <!-- Tabs -->
+      <svg viewBox="0 0 24 24" fill="none">
+        <rect x="4" y="4" width="16" height="16" rx="2" stroke="#007AFF" stroke-width="1.8"/>
+        <rect x="7" y="7" width="10" height="10" rx="1.5" stroke="#007AFF" stroke-width="1.3"/>
+      </svg>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── CAROUSEL ──────────────────────────────────────────────────────
+(function () {
+  var track = document.getElementById('carousel-track');
+  var slider = document.getElementById('carousel-slider');
+  var slides = track.querySelectorAll('.carousel-slide');
+  var totalSlides = slides.length;
+  var currentSlide = 0;
+
+  // Slide offsets: first slide 388px, rest 351px
+  var SLIDE_OFFSETS = [0];
+  for (var i = 1; i < totalSlides; i++) {
+    SLIDE_OFFSETS.push(SLIDE_OFFSETS[i - 1] + (i === 1 ? 388 : 351));
+  }
+
+  // Build dots
+  slider.innerHTML = '';
+  for (var i = 0; i < totalSlides; i++) {
+    var dot = document.createElement('div');
+    dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+    slider.appendChild(dot);
+  }
+
+  function updateDots() {
+    var dots = slider.querySelectorAll('.carousel-dot');
+    for (var i = 0; i < dots.length; i++) {
+      dots[i].classList.toggle('active', i === currentSlide);
+    }
+  }
+
+  function snapToSlide() {
+    track.style.transition = 'transform 0.35s ease';
+    track.style.transform = 'translateX(-' + SLIDE_OFFSETS[currentSlide] + 'px)';
+    updateDots();
+  }
+
+  // Drag logic
+  var isDragging = false;
+  var startX = 0;
+  var dragOffset = 0;
+
+  function onStart(x) {
+    isDragging = true;
+    startX = x;
+    dragOffset = 0;
+    track.style.transition = 'none';
+  }
+
+  function onMove(x) {
+    if (!isDragging) return;
+    dragOffset = x - startX;
+    track.style.transform = 'translateX(' + (-SLIDE_OFFSETS[currentSlide] + dragOffset) + 'px)';
+  }
+
+  function onEnd() {
+    if (!isDragging) return;
+    isDragging = false;
+    if (dragOffset < -40 && currentSlide < totalSlides - 1) currentSlide++;
+    else if (dragOffset > 40 && currentSlide > 0) currentSlide--;
+    snapToSlide();
+  }
+
+  // Touch events
+  track.addEventListener('touchstart', function (e) {
+    onStart(e.touches[0].clientX);
+  }, { passive: true });
+  track.addEventListener('touchmove', function (e) {
+    onMove(e.touches[0].clientX);
+  }, { passive: true });
+  track.addEventListener('touchend', onEnd);
+
+  // Mouse events
+  track.addEventListener('mousedown', function (e) {
+    onStart(e.clientX);
+    e.preventDefault();
+  });
+  window.addEventListener('mousemove', function (e) {
+    onMove(e.clientX);
+  });
+  window.addEventListener('mouseup', onEnd);
+
+  snapToSlide();
+})();
+</script>
+
+<script>
+// ── CSS ZOOM SCALING ──────────────────────────────────────────────
+(function () {
+  var DESIGN_W = 375;
+
+  function applyZoom() {
+    var el = document.getElementById('phone');
+    if (!el) return;
+
+    var vw = window.innerWidth;
+    var isMobile = vw < 768;
+
+    if (isMobile) {
+      el.style.zoom = vw / DESIGN_W;
+      document.body.style.background = 'white';
+    } else {
+      el.style.zoom = Math.min(vw / DESIGN_W, 1);
+      document.body.style.background = '#e5e5e5';
+    }
+  }
+
+  applyZoom();
+  window.addEventListener('resize', applyZoom);
+  window.addEventListener('orientationchange', function () {
+    setTimeout(applyZoom, 300);
+  });
+})();
+</script>
+</body>
+</html>
