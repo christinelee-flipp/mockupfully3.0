@@ -19,12 +19,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 
 $campaigns = [];
 $skipped   = [];
+$debug_dirs = [];
 
 // Read from all product data directories
 foreach (DATA_DIRS as $prefix => $data_dir) {
-    if (!is_dir($data_dir)) continue;
+    if (!is_dir($data_dir)) {
+        $debug_dirs[] = "$prefix: $data_dir (NOT FOUND)";
+        continue;
+    }
     $pattern = $data_dir . $prefix . '-*.json';
     $files   = glob($pattern) ?: [];
+    $debug_dirs[] = "$prefix: $data_dir (" . count($files) . " files)";
 
     foreach ($files as $file) {
         $json = file_get_contents($file);
@@ -52,4 +57,9 @@ if (!empty($skipped)) {
     error('Some campaign files could not be loaded: ' . implode(', ', $skipped), 500);
 }
 
-respond($campaigns);
+// Add debug info if ?debug=1 is passed
+if (isset($_GET['debug'])) {
+    respond(['campaigns' => $campaigns, '_debug' => $debug_dirs, '_count' => count($campaigns)]);
+} else {
+    respond($campaigns);
+}

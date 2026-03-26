@@ -390,12 +390,8 @@
   <!-- 2. Viewer -->
   <div class="form-section">
     <div class="section-title form-section-label">Viewer</div>
-    <div class="viewer-toggle-group">
-      <button type="button" class="viewer-toggle-btn active" data-viewer="marketplace">Marketplace</button>
-      <button type="button" class="viewer-toggle-btn" data-viewer="website">Website</button>
-    </div>
     <input type="hidden" id="viewer" value="marketplace">
-    <div id="viewer-marketplace-field" class="field-row cols-1">
+    <div class="field-row cols-2">
       <div class="field">
         <label>Marketplace</label>
         <select id="marketplace">
@@ -403,57 +399,9 @@
           <option value="coles">Coles</option>
         </select>
       </div>
-    </div>
-    <div id="viewer-website-field" class="field-row cols-1" style="display:none">
       <div class="field">
         <label>Website</label>
-        <select id="website">
-          <optgroup label="Austria (AT)">
-            <option value="kurier">Kurier</option>
-            <option value="laola">Laola</option>
-            <option value="meinbezirk">Meinbezirk</option>
-          </optgroup>
-          <optgroup label="Australia (AU)">
-            <option value="SMH">SMH</option>
-            <option value="news">News</option>
-            <option value="nine">Nine</option>
-            <option value="taste">Taste</option>
-            <option value="yahoo">Yahoo</option>
-          </optgroup>
-          <optgroup label="Germany (DE)">
-            <option value="bild">Bild</option>
-            <option value="einfachTasty">Einfach Tasty</option>
-            <option value="merkur">Merkur</option>
-          </optgroup>
-          <optgroup label="Spain (ES)">
-            <option value="20minutos">20 Minutos</option>
-            <option value="elEspanol">El Espanol</option>
-            <option value="marca">Marca</option>
-            <option value="milAnuncios">Mil Anuncios</option>
-            <option value="xataka">Xataka</option>
-          </optgroup>
-          <optgroup label="France (FR)">
-            <option value="leMonde">Le Monde</option>
-            <option value="lequipe">L'Equipe</option>
-            <option value="marieClaire">Marie Claire</option>
-            <option value="parents">Parents</option>
-            <option value="sudOuest">Sud Ouest</option>
-          </optgroup>
-          <optgroup label="Italy (IT)">
-            <option value="ansa">Ansa</option>
-            <option value="momentoCasa">Momento Casa</option>
-            <option value="myPersonalTrainer">My Personal Trainer</option>
-            <option value="salvatoreAranzulla">Salvatore Aranzulla</option>
-            <option value="sienaFree">Siena Free</option>
-          </optgroup>
-          <optgroup label="Portugal (PT)">
-            <option value="aBola">A Bola</option>
-            <option value="correioDaManha">Correio da Manha</option>
-            <option value="noticiasAoMinuto">Noticias ao Minuto</option>
-            <option value="olx">OLX</option>
-            <option value="sapo">Sapo</option>
-          </optgroup>
-        </select>
+        <select id="website"></select>
       </div>
     </div>
   </div>
@@ -744,7 +692,7 @@ setupBkgToggle('productBkgToggle', 'productBkgType', 'productBkgSolid', 'product
 function buildProductFields() {
   const container = document.getElementById('product-fields');
   container.innerHTML = '';
-  for (let i = 1; i <= 3; i++) {
+  for (let i = 1; i <= 10; i++) {
     const pad = String(i).padStart(2, '0');
     const slot = document.createElement('div');
     slot.className = 'product-slot';
@@ -802,7 +750,7 @@ function buildProductFields() {
 function buildStoreFields() {
   const container = document.getElementById('store-fields');
   container.innerHTML = '';
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= 10; i++) {
     const pad = String(i).padStart(2, '0');
     const slot = document.createElement('div');
     slot.className = 'product-slot';
@@ -1017,15 +965,28 @@ function collectData() {
     productCardBtnBkgColor: get('productCardBtnBkgColor'),
     productCardBtnTextColor: get('productCardBtnTextColor'),
     bannerURL: get('bannerURL'),
-    Prod01Name: get('Prod01Name'), Prod01ImageURL: get('Prod01ImageURL'), Prod01LinkURL: get('Prod01LinkURL'),
-    Prod02Name: get('Prod02Name'), Prod02ImageURL: get('Prod02ImageURL'), Prod02LinkURL: get('Prod02LinkURL'),
-    Prod03Name: get('Prod03Name'), Prod03ImageURL: get('Prod03ImageURL'), Prod03LinkURL: get('Prod03LinkURL'),
-    Store01Name: get('Store01Name'), Store01LogoURL: get('Store01LogoURL'),
-    Store02Name: get('Store02Name'), Store02LogoURL: get('Store02LogoURL'),
-    Store03Name: get('Store03Name'), Store03LogoURL: get('Store03LogoURL'),
-    Store04Name: get('Store04Name'), Store04LogoURL: get('Store04LogoURL'),
-    Store05Name: get('Store05Name'), Store05LogoURL: get('Store05LogoURL'),
+    ...collectProducts(get),
+    ...collectStores(get),
   };
+}
+function collectProducts(get) {
+  const o = {};
+  for (let i = 1; i <= 10; i++) {
+    const p = ('0'+i).slice(-2);
+    o['Prod'+p+'Name'] = get('Prod'+p+'Name');
+    o['Prod'+p+'ImageURL'] = get('Prod'+p+'ImageURL');
+    o['Prod'+p+'LinkURL'] = get('Prod'+p+'LinkURL');
+  }
+  return o;
+}
+function collectStores(get) {
+  const o = {};
+  for (let i = 1; i <= 10; i++) {
+    const p = ('0'+i).slice(-2);
+    o['Store'+p+'Name'] = get('Store'+p+'Name');
+    o['Store'+p+'LogoURL'] = get('Store'+p+'LogoURL');
+  }
+  return o;
 }
 
 // ─── VALIDATE ───────────────────────────────────────────────────
@@ -1155,7 +1116,7 @@ function prefillForm(c) {
   });
 
   // Products
-  for (let i = 1; i <= 3; i++) {
+  for (let i = 1; i <= 10; i++) {
     const pad = String(i).padStart(2, '0');
     ['Prod' + pad + 'Name', 'Prod' + pad + 'LinkURL'].forEach(fid => set(fid, c[fid]));
     const imgField = 'Prod' + pad + 'ImageURL';
@@ -1168,7 +1129,7 @@ function prefillForm(c) {
   }
 
   // Stores
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= 10; i++) {
     const pad = String(i).padStart(2, '0');
     set('Store' + pad + 'Name', c['Store' + pad + 'Name']);
     const logoField = 'Store' + pad + 'LogoURL';
@@ -1182,10 +1143,44 @@ function prefillForm(c) {
 }
 
 // ─── INIT ───────────────────────────────────────────────────────
+// ─── WEBSITE OPTIONS BY COUNTRY ──────────────────────────────────
+const WEBSITE_OPTIONS = {
+  AT: [['kurier','Kurier'],['laola','Laola'],['meinbezirk','Meinbezirk']],
+  AU: [['SMH','SMH'],['news','News'],['nine','Nine'],['taste','Taste'],['yahoo','Yahoo']],
+  DE: [['bild','Bild'],['einfachTasty','Einfach Tasty'],['merkur','Merkur']],
+  ES: [['20minutos','20 Minutos'],['elEspanol','El Espanol'],['marca','Marca'],['milAnuncios','Mil Anuncios'],['xataka','Xataka']],
+  FR: [['leMonde','Le Monde'],['lequipe',"L'Equipe"],['marieClaire','Marie Claire'],['parents','Parents'],['sudOuest','Sud Ouest']],
+  IT: [['ansa','Ansa'],['momentoCasa','Momento Casa'],['myPersonalTrainer','My Personal Trainer'],['salvatoreAranzulla','Salvatore Aranzulla'],['sienaFree','Siena Free']],
+  PT: [['aBola','A Bola'],['correioDaManha','Correio da Manha'],['noticiasAoMinuto','Noticias ao Minuto'],['olx','OLX'],['sapo','Sapo']],
+};
+
+function updateWebsiteDropdown() {
+  const loc = document.getElementById('location').value;
+  const sel = document.getElementById('website');
+  const prev = sel.value;
+  sel.innerHTML = '';
+  const opts = WEBSITE_OPTIONS[loc] || [];
+  if (opts.length === 0) {
+    sel.innerHTML = '<option value="">No websites for this country</option>';
+    return;
+  }
+  opts.forEach(([val, label]) => {
+    const o = document.createElement('option');
+    o.value = val; o.textContent = label;
+    sel.appendChild(o);
+  });
+  // Restore previous value if still valid
+  if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
+}
+
 async function init() {
   buildProductFields();
   buildStoreFields();
   onTemplateChange();
+
+  // Wire up country → website dropdown
+  document.getElementById('location').addEventListener('change', updateWebsiteDropdown);
+  updateWebsiteDropdown();
 
   // Wire up static upload fields
   setupUploadField('clientLogoURL', 'img-clientLogoURL', 'preview-clientLogoURL');

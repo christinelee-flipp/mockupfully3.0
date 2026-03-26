@@ -825,7 +825,7 @@
       var img = document.createElement('img');
       img.src = pinSrc;
       img.alt = '';
-      img.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;border-radius:50%;';
+      img.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;border-radius:50%;background:#fff;';
       img.onerror = function () {
         // Fallback to pin.png if logo fails to load
         img.style.borderRadius = '0';
@@ -855,7 +855,7 @@
 
     // Collect stores
     var stores = [];
-    for (var i = 1; i <= 5; i++) {
+    for (var i = 1; i <= 10; i++) {
       var pad = ('0' + i).slice(-2);
       var name = campaignData['Store' + pad + 'Name'];
       var logo = campaignData['Store' + pad + 'LogoURL'];
@@ -893,17 +893,6 @@
     header.className = 'step3-header';
     header.style.background = bkg;
     header.style.flexShrink = '0';
-
-    // Status bar (clock + icons)
-    var statusBar = document.createElement('div');
-    statusBar.style.cssText = 'width:100%;height:54px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:12px 16px 0;';
-    statusBar.innerHTML = '<span style="font-family:\'SF Pro Text\',Montserrat,sans-serif;font-weight:600;font-size:16px;color:' + iconStroke + '">10:10</span>'
-      + '<div style="display:flex;align-items:center;gap:2px">'
-      + '<div style="display:flex;align-items:flex-end;gap:1.5px;height:12px;margin-right:2px"><span style="border-radius:1px;width:3px;height:4px;background:' + iconStroke + ';display:block"></span><span style="border-radius:1px;width:3px;height:6px;background:' + iconStroke + ';display:block"></span><span style="border-radius:1px;width:3px;height:9px;background:' + iconStroke + ';display:block"></span><span style="border-radius:1px;width:3px;height:12px;background:' + iconStroke + ';display:block"></span></div>'
-      + '<svg width="16" height="12" viewBox="0 0 16 12" fill="none" style="margin-right:2px"><path d="M8 9.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3z" fill="' + iconStroke + '"/><path d="M4.1 7.1C5.1 6.1 6.5 5.5 8 5.5s2.9.6 3.9 1.6" stroke="' + iconStroke + '" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M1.3 4.3C3 2.6 5.4 1.5 8 1.5s5 1.1 6.7 2.8" stroke="' + iconStroke + '" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>'
-      + '<div style="width:28px;height:14px;border:1.5px solid ' + iconStroke + ';border-radius:3px;position:relative"><div style="position:absolute;top:1px;left:1px;bottom:1px;width:70%;background:' + iconStroke + ';border-radius:1px"></div></div>'
-      + '</div>';
-    header.appendChild(statusBar);
 
     // Top app bar: [spacer]  [DTS_Logo]  [close X]
     var topbar = document.createElement('div');
@@ -1032,7 +1021,7 @@
         var logoImg = document.createElement('img');
         logoImg.src = retailerLogoSrc;
         logoImg.alt = '';
-        logoImg.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;border-radius:50%;';
+        logoImg.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;border-radius:50%;background:#fff;';
         logoImg.onerror = function () {
           logoImg.style.borderRadius = '0';
           logoImg.src = 'assets/click2go-assets/map/pin.png';
@@ -1151,17 +1140,6 @@
     screen.className = 'pass2-step4';
     screen.id = 'pass2-step4';
 
-    // Status bar (white bg, black text)
-    var statusBar = document.createElement('div');
-    statusBar.className = 'step4-statusbar';
-    statusBar.innerHTML = '<span style="font-family:\'SF Pro Text\',Montserrat,sans-serif;font-weight:600;font-size:16px;color:#000">10:10</span>'
-      + '<div style="display:flex;align-items:center;gap:2px">'
-      + '<div style="display:flex;align-items:flex-end;gap:1.5px;height:12px;margin-right:2px"><span style="border-radius:1px;width:3px;height:4px;background:#000;display:block"></span><span style="border-radius:1px;width:3px;height:6px;background:#000;display:block"></span><span style="border-radius:1px;width:3px;height:9px;background:#000;display:block"></span><span style="border-radius:1px;width:3px;height:12px;background:#000;display:block"></span></div>'
-      + '<svg width="16" height="12" viewBox="0 0 16 12" fill="none" style="margin-right:2px"><path d="M8 9.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3z" fill="#000"/><path d="M4.1 7.1C5.1 6.1 6.5 5.5 8 5.5s2.9.6 3.9 1.6" stroke="#000" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M1.3 4.3C3 2.6 5.4 1.5 8 1.5s5 1.1 6.7 2.8" stroke="#000" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>'
-      + '<div style="width:28px;height:14px;border:1.5px solid #000;border-radius:3px;position:relative"><div style="position:absolute;top:1px;left:1px;bottom:1px;width:70%;background:#000;border-radius:1px"></div></div>'
-      + '</div>';
-    screen.appendChild(statusBar);
-
     // Google Maps area (header + content + footer images)
     var mapsArea = document.createElement('div');
     mapsArea.className = 'step4-maps-area';
@@ -1238,7 +1216,7 @@
 
     // Collect stores
     var stores = [];
-    for (var i = 1; i <= 5; i++) {
+    for (var i = 1; i <= 10; i++) {
       var pad = ('0' + i).slice(-2);
       var name = campaignData['Store' + pad + 'Name'];
       var logo = campaignData['Store' + pad + 'LogoURL'];
@@ -1257,17 +1235,6 @@
     header.className = 'step3-header';
     header.style.background = bkg;
     header.style.flexShrink = '0';
-
-    // Status bar
-    var statusBar = document.createElement('div');
-    statusBar.style.cssText = 'width:100%;height:54px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:12px 16px 0;';
-    statusBar.innerHTML = '<span style="font-family:\'SF Pro Text\',Montserrat,sans-serif;font-weight:600;font-size:16px;color:' + iconStroke + '">10:10</span>'
-      + '<div style="display:flex;align-items:center;gap:2px">'
-      + '<div style="display:flex;align-items:flex-end;gap:1.5px;height:12px;margin-right:2px"><span style="border-radius:1px;width:3px;height:4px;background:' + iconStroke + ';display:block"></span><span style="border-radius:1px;width:3px;height:6px;background:' + iconStroke + ';display:block"></span><span style="border-radius:1px;width:3px;height:9px;background:' + iconStroke + ';display:block"></span><span style="border-radius:1px;width:3px;height:12px;background:' + iconStroke + ';display:block"></span></div>'
-      + '<svg width="16" height="12" viewBox="0 0 16 12" fill="none" style="margin-right:2px"><path d="M8 9.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3z" fill="' + iconStroke + '"/><path d="M4.1 7.1C5.1 6.1 6.5 5.5 8 5.5s2.9.6 3.9 1.6" stroke="' + iconStroke + '" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M1.3 4.3C3 2.6 5.4 1.5 8 1.5s5 1.1 6.7 2.8" stroke="' + iconStroke + '" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>'
-      + '<div style="width:28px;height:14px;border:1.5px solid ' + iconStroke + ';border-radius:3px;position:relative"><div style="position:absolute;top:1px;left:1px;bottom:1px;width:70%;background:' + iconStroke + ';border-radius:1px"></div></div>'
-      + '</div>';
-    header.appendChild(statusBar);
 
     // Top app bar: [back] [DTS_Logo] [close X]
     var topbar = document.createElement('div');
@@ -1355,7 +1322,7 @@
         var logoImg = document.createElement('img');
         logoImg.src = retailerLogoSrc;
         logoImg.alt = '';
-        logoImg.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;border-radius:50%;';
+        logoImg.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;border-radius:50%;background:#fff;';
         logoImg.onerror = function () {
           logoImg.style.borderRadius = '0';
           logoImg.src = 'assets/click2go-assets/map/pin.png';

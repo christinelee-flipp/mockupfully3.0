@@ -942,7 +942,7 @@ function renderTable(campaigns) {
         <td>${prodBadge}</td>
         <td><span class="badge">${flag} ${c.location || '\u2014'}</span></td>
         <td>${esc(c.clientName || '\u2014')}</td>
-        <td>${sn ? esc(c.publisher || '\u2014') : '\u2014'}</td>
+        <td>${sn ? esc(c.publisher || '\u2014') : c2g ? esc((c.marketplace || '\u2014') + ' / ' + (c.website || '\u2014')) : '\u2014'}</td>
         <td>${sn ? '\u2014' : formatType(c.templateType)}</td>
         <td class="date-cell">${fmtDate(c.submittedAt)}</td>
         <td><div class="actions">${actions}</div></td>
