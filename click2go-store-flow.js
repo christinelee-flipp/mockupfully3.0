@@ -1120,6 +1120,11 @@
     ctaBtn.style.background = campaignData.buttonBkgColor || '#000';
     ctaBtn.style.color = campaignData.buttonTextColor || '#fff';
     ctaBtn.style.borderColor = campaignData.buttonBkgColor || '#000';
+    if (campaignData.clientURL) {
+      ctaBtn.addEventListener('click', function () {
+        window.open(campaignData.clientURL.startsWith('http') ? campaignData.clientURL : 'https://' + campaignData.clientURL, '_blank');
+      });
+    }
     footer.appendChild(ctaBtn);
     screen.appendChild(footer);
 
@@ -1422,6 +1427,11 @@
     ctaBtn.style.background = campaignData.buttonBkgColor || '#000';
     ctaBtn.style.color = campaignData.buttonTextColor || '#fff';
     ctaBtn.style.borderColor = campaignData.buttonBkgColor || '#000';
+    if (campaignData.clientURL) {
+      ctaBtn.addEventListener('click', function () {
+        window.open(campaignData.clientURL.startsWith('http') ? campaignData.clientURL : 'https://' + campaignData.clientURL, '_blank');
+      });
+    }
     footer.appendChild(ctaBtn);
     screen.appendChild(footer);
 

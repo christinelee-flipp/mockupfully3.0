@@ -359,12 +359,6 @@
     </div>
     <div class="field-row cols-1">
       <div class="field">
-        <label>Website URL <span class="hint">(shown in the Safari address bar on the ad)</span></label>
-        <input type="text" id="websiteURL" placeholder="https://www.client.com">
-      </div>
-    </div>
-    <div class="field-row cols-1">
-      <div class="field">
         <div class="img-label-row">
           <label>Client Logo <span class="required">*</span></label>
           <div class="img-mode-toggle toggle-group">
@@ -403,14 +397,63 @@
     <input type="hidden" id="viewer" value="marketplace">
     <div id="viewer-marketplace-field" class="field-row cols-1">
       <div class="field">
-        <label>Marketplace <span class="hint">(catalog folder name)</span></label>
-        <input type="text" id="marketplace" placeholder="e.g. coles or ansa">
+        <label>Marketplace</label>
+        <select id="marketplace">
+          <option value="ansa">Ansa</option>
+          <option value="coles">Coles</option>
+        </select>
       </div>
     </div>
     <div id="viewer-website-field" class="field-row cols-1" style="display:none">
       <div class="field">
-        <label>Website <span class="hint">(publisher site folder name)</span></label>
-        <input type="text" id="website" placeholder="e.g. ansa, marca, leMonde">
+        <label>Website</label>
+        <select id="website">
+          <optgroup label="Austria (AT)">
+            <option value="kurier">Kurier</option>
+            <option value="laola">Laola</option>
+            <option value="meinbezirk">Meinbezirk</option>
+          </optgroup>
+          <optgroup label="Australia (AU)">
+            <option value="SMH">SMH</option>
+            <option value="news">News</option>
+            <option value="nine">Nine</option>
+            <option value="taste">Taste</option>
+            <option value="yahoo">Yahoo</option>
+          </optgroup>
+          <optgroup label="Germany (DE)">
+            <option value="bild">Bild</option>
+            <option value="einfachTasty">Einfach Tasty</option>
+            <option value="merkur">Merkur</option>
+          </optgroup>
+          <optgroup label="Spain (ES)">
+            <option value="20minutos">20 Minutos</option>
+            <option value="elEspanol">El Espanol</option>
+            <option value="marca">Marca</option>
+            <option value="milAnuncios">Mil Anuncios</option>
+            <option value="xataka">Xataka</option>
+          </optgroup>
+          <optgroup label="France (FR)">
+            <option value="leMonde">Le Monde</option>
+            <option value="lequipe">L'Equipe</option>
+            <option value="marieClaire">Marie Claire</option>
+            <option value="parents">Parents</option>
+            <option value="sudOuest">Sud Ouest</option>
+          </optgroup>
+          <optgroup label="Italy (IT)">
+            <option value="ansa">Ansa</option>
+            <option value="momentoCasa">Momento Casa</option>
+            <option value="myPersonalTrainer">My Personal Trainer</option>
+            <option value="salvatoreAranzulla">Salvatore Aranzulla</option>
+            <option value="sienaFree">Siena Free</option>
+          </optgroup>
+          <optgroup label="Portugal (PT)">
+            <option value="aBola">A Bola</option>
+            <option value="correioDaManha">Correio da Manha</option>
+            <option value="noticiasAoMinuto">Noticias ao Minuto</option>
+            <option value="olx">OLX</option>
+            <option value="sapo">Sapo</option>
+          </optgroup>
+        </select>
       </div>
     </div>
   </div>
@@ -620,7 +663,7 @@
   <!-- 6. Store Logos -->
   <div class="form-section">
     <div class="section-title form-section-label">Store Logos</div>
-    <p class="hint" style="font-size:12px;color:var(--mid);margin-bottom:16px;">Store logos appear in the map and store list steps of the ad experience.</p>
+    <p class="hint" style="font-size:12px;color:var(--mid);margin-bottom:16px;">Store logos appear in the map and store list steps of the ad experience. If no logo is uploaded, the client logo will be used by default.</p>
     <div id="store-fields"></div>
   </div>
 
@@ -646,8 +689,10 @@
     <a class="btn btn-primary" id="btn-preview-marketplace" href="#" target="_blank">Preview Marketplace</a>
     <a class="btn btn-secondary" id="btn-preview-website" href="#" target="_blank">Preview Website</a>
     <button class="btn btn-secondary" onclick="copyURL()">Copy URL</button>
-    <button class="btn btn-secondary" onclick="resetForm()">New Campaign</button>
-    <a class="btn btn-secondary" href="index.html">Dashboard</a>
+  </div>
+  <div style="display:flex;gap:12px;justify-content:center;margin-top:8px">
+    <button style="background:none;border:none;color:#888;font-size:13px;cursor:pointer;text-decoration:underline" onclick="resetForm()">New Campaign</button>
+    <a href="index.html" style="color:#888;font-size:13px;text-decoration:underline">Dashboard</a>
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
@@ -980,7 +1025,6 @@ function collectData() {
     Store03Name: get('Store03Name'), Store03LogoURL: get('Store03LogoURL'),
     Store04Name: get('Store04Name'), Store04LogoURL: get('Store04LogoURL'),
     Store05Name: get('Store05Name'), Store05LogoURL: get('Store05LogoURL'),
-    websiteURL: get('websiteURL'),
   };
 }
 
@@ -1065,7 +1109,6 @@ function prefillForm(c) {
   set('clientName', c.clientName);
   set('clientType', c.clientType);
   set('clientURL', c.clientURL);
-  set('websiteURL', c.websiteURL);
   set('claimText', c.claimText);
   set('templateType', c.templateType);
 
