@@ -778,7 +778,7 @@ function buildDomURL(c) {
 }
 
 function buildC2GURL(c, viewerType) {
-  return `click2go-viewer.html?id=${encodeURIComponent(c.campaignID)}&viewer=${encodeURIComponent(viewerType || c.viewer || 'marketplace')}`;
+  return `click2go-prototype.html?id=${encodeURIComponent(c.campaignID)}&viewer=${encodeURIComponent(viewerType || c.viewer || 'marketplace')}`;
 }
 
 // ── FORMAT DATE ───────────────────────────────────────────────────
@@ -837,11 +837,11 @@ function openPreviewDialog(campaignID, campaignName) {
   previewTargetID = campaignID;
   document.getElementById('preview-campaign-name').textContent = campaignName;
   document.getElementById('preview-marketplace-btn').onclick = function() {
-    window.open('click2go-viewer.html?id=' + encodeURIComponent(campaignID) + '&viewer=marketplace', '_blank');
+    window.open('click2go-prototype.html?id=' + encodeURIComponent(campaignID) + '&viewer=marketplace', '_blank');
     closePreviewDialog();
   };
   document.getElementById('preview-website-btn').onclick = function() {
-    window.open('click2go-viewer.html?id=' + encodeURIComponent(campaignID) + '&viewer=website', '_blank');
+    window.open('click2go-prototype.html?id=' + encodeURIComponent(campaignID) + '&viewer=website', '_blank');
     closePreviewDialog();
   };
   document.getElementById('preview-overlay').classList.add('show');
@@ -919,7 +919,7 @@ function renderTable(campaigns) {
         <button class="btn-action btn-edit" onclick="editCampaign(${idx})">Edit</button>
         <button class="btn-action btn-delete" onclick="askDelete(${idx})">Delete</button>`;
     } else if (c2g) {
-      const urlPath = 'click2go-viewer.html?id=' + encodeURIComponent(c.campaignID) + '&viewer=marketplace';
+      const urlPath = 'click2go-prototype.html?id=' + encodeURIComponent(c.campaignID) + '&viewer=marketplace';
       actions = `
         <button class="btn-action btn-open" onclick="openPreviewDialog('${esc(c.campaignID)}','${esc(c.campaignName)}')">Preview</button>
         <button class="btn-action btn-copy" onclick="openURLModal('${esc(urlPath)}','${esc(c.campaignName)}')">URL</button>
@@ -987,7 +987,7 @@ function renderCards(campaigns) {
 
     let urlPath;
     if (sn) urlPath = 'shoppernetwork-prototype.html?id=' + esc(c.campaignID);
-    else if (c2g) urlPath = 'click2go-viewer.html?id=' + esc(c.campaignID) + '&viewer=marketplace';
+    else if (c2g) urlPath = 'click2go-prototype.html?id=' + esc(c.campaignID) + '&viewer=marketplace';
     else urlPath = 'domination-prototype.html?id=' + esc(c.campaignID);
 
     return `

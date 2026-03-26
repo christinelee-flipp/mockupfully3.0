@@ -1014,7 +1014,7 @@ async function submitForm() {
     if (!res.ok) throw new Error('Server returned ' + res.status);
 
     const viewerVal = data.viewer || 'marketplace';
-    generatedURL = 'click2go-viewer.html?id=' + encodeURIComponent(data.campaignID) + '&viewer=' + encodeURIComponent(viewerVal);
+    generatedURL = 'click2go-prototype.html?id=' + encodeURIComponent(data.campaignID) + '&viewer=' + encodeURIComponent(viewerVal);
 
     document.getElementById('form-card').style.display = 'none';
     const panel = document.getElementById('success-panel');
@@ -1022,8 +1022,8 @@ async function submitForm() {
     const verb = editMode ? 'updated' : 'ready to preview';
     document.getElementById('success-campaign-name').textContent = '"' + data.campaignName + '" has been ' + verb + '.';
     document.getElementById('success-url').textContent = generatedURL;
-    document.getElementById('btn-preview-marketplace').href = 'click2go-viewer.html?id=' + encodeURIComponent(data.campaignID) + '&viewer=marketplace';
-    document.getElementById('btn-preview-website').href = 'click2go-viewer.html?id=' + encodeURIComponent(data.campaignID) + '&viewer=website';
+    document.getElementById('btn-preview-marketplace').href = 'click2go-prototype.html?id=' + encodeURIComponent(data.campaignID) + '&viewer=marketplace';
+    document.getElementById('btn-preview-website').href = 'click2go-prototype.html?id=' + encodeURIComponent(data.campaignID) + '&viewer=website';
 
   } catch (err) {
     btn.disabled = false;

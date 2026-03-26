@@ -2,31 +2,39 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=430, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Click2Go Prototype</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
+  html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
   body {
-    background: #888;
+    background: #e5e5e5;
     display: flex;
     justify-content: center;
     align-items: flex-start;
     min-height: 100vh;
-    padding: 20px;
     font-family: 'Montserrat', sans-serif;
   }
 
   /* ── PHONE FRAME ── */
-  .phone {
-    width: 430px;
-    height: 932px;
+  #phone, .phone {
+    width: 390px;
+    height: 844px;
     background: white;
     overflow: hidden;
     position: relative;
     display: flex;
     flex-direction: column;
+    flex-shrink: 0;
   }
 
   /* ── LOADING ── */
@@ -71,6 +79,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 12px 16px 0;
+    z-index: 50;
   }
   .status-time {
     font-family: 'SF Pro Text', 'Montserrat', sans-serif;
@@ -121,6 +130,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 6px 16px;
+    z-index: 50;
   }
   .close-btn {
     width: 38px; height: 38px;
@@ -138,6 +148,10 @@
     min-height: 0;
     overflow: hidden;
     position: relative;
+    margin-top: -126px; /* pull up behind status+top bars */
+    padding-top: 126px; /* push content below bars */
+    margin-bottom: -80px; /* pull down behind safari footer */
+    padding-bottom: 80px; /* push content above footer */
   }
 
   /* ── AD BODY — one shown at a time ── */
@@ -178,8 +192,8 @@
     object-fit: contain;
   }
   .image-area {
-    width: 430px;
-    height: 430px;
+    width: 390px;
+    height: 390px;
     flex-shrink: 0;
     overflow: hidden;
   }
@@ -202,7 +216,7 @@
     position: relative;
   }
   .carousel-left {
-    width: 246px;
+    width: 220px;
     flex-shrink: 0;
     padding-left: 24px;
     padding-right: 24px;
@@ -400,62 +414,82 @@
     font-size: 12px;
   }
 
-  /* ── SAFARI FOOTER ── */
+  /* ── SAFARI FOOTER (iOS 26 Liquid Glass) ── */
   .safari-footer {
-    height: 128px;
-    background: #f7f7f7;
+    height: 80px;
     flex-shrink: 0;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 12px;
-    padding-top: 8px;
-  }
-  .safari-bar {
-    width: 376px;
-    height: 42px;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 2px 12px 0 rgba(0,0,0,0.13);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 12px;
-    flex-shrink: 0;
-  }
-  .safari-bar-aa {
-    font-family: 'SF Pro Text', sans-serif;
-    font-size: 12px;
-    font-weight: 600;
-    color: #555;
-    width: 24px;
-    text-align: center;
-  }
-  .safari-bar-url {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    flex: 1;
     justify-content: center;
-    overflow: hidden;
+    padding: 0 12px 16px;
+    gap: 10px;
+    background: transparent;
+    z-index: 50;
   }
-  .safari-bar-url span {
-    font-family: 'SF Pro Display', sans-serif;
-    font-size: 15px;
-    color: #202124;
+  .safari-glass-btn {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 24px;
+    background: rgba(250,250,250,0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.9);
+    box-shadow: 0 2px 40px 0 rgba(0,0,0,0.1);
+  }
+  .safari-glass-btn svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+  }
+  .safari-glass-bar {
+    flex: 1;
+    height: 48px;
+    border-radius: 24px;
+    background: rgba(250,250,250,0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.9);
+    box-shadow: 0 2px 42px 0 rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 14px;
+    position: relative;
+  }
+  .safari-glass-bar-url {
+    font-family: 'SF Pro Text', -apple-system, sans-serif;
+    font-weight: 500;
+    font-size: 17px;
+    color: #1b1b1b;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .safari-nav {
-    width: 395px;
+  .safari-glass-bar .bar-icon-left {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    flex-shrink: 0;
-    padding: 0 2px;
   }
-  .safari-nav svg { width: 24px; height: 24px; display: block; }
+  .safari-glass-bar .bar-icon-right {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+  }
+  .safari-glass-bar svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+  }
 
   /* ── DEMO BADGE ── */
   .demo-badge {
@@ -475,6 +509,95 @@
     display: none;
   }
   .demo-badge.visible { display: block; }
+
+  /* ════════════════════════════════════════════
+     VIEWER CONTEXT (marketplace / website)
+  ════════════════════════════════════════════ */
+  #viewer-layer {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    z-index: 60;
+    display: none;
+    overflow: hidden;
+  }
+  #viewer-layer.active { display: block; }
+
+  /* ── WEBSITE VIEW ── */
+  #website-view {
+    width: 100%; height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    display: none;
+  }
+  #website-view img { width: 100%; display: block; }
+
+  /* ── MARKETPLACE: HOME ── */
+  #market-home {
+    position: absolute; inset: 0;
+    flex-direction: column;
+    background: #fff;
+    overflow: hidden;
+    display: none;
+  }
+  .mh-header { flex-shrink: 0; }
+  .mh-header img { width: 100%; display: block; }
+  .mh-scroll {
+    flex: 1; min-height: 200px;
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+  }
+  .mh-content {
+    display: flex; flex-wrap: wrap;
+    justify-content: center; gap: 8px; padding: 8px;
+  }
+  .mh-flyer {
+    display: flex; flex-direction: column; gap: 8px;
+    width: calc(50% - 8px); cursor: pointer;
+  }
+  .mh-flyer img { width: 100%; display: block; }
+  .mh-cover-home {
+    width: 100%; min-height: 240px;
+    background-color: #ebebf5;
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+  }
+  .mh-flyer-img { width: calc(50% - 8px); }
+  .mh-flyer-img img { width: 100%; display: block; }
+  .mh-footer { flex-shrink: 0; }
+  .mh-footer img { width: 100%; display: block; }
+
+  /* ── MARKETPLACE: VIEWER ── */
+  #market-viewer {
+    position: absolute; inset: 0;
+    flex-direction: column;
+    background: #282832;
+    overflow: hidden;
+    display: none;
+  }
+  .mv-header { flex-shrink: 0; }
+  .mv-header img { width: 100%; display: block; }
+  .mv-info-bar {
+    flex-shrink: 0; display: flex;
+    align-items: center; justify-content: space-between;
+    padding: 6px 12px;
+  }
+  .mv-info-badge {
+    background: rgba(0,0,0,0.55); color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px; font-weight: 600;
+    padding: 4px 10px; border-radius: 10px; white-space: nowrap;
+  }
+  .mv-swiper { flex: 1; min-height: 0; overflow: hidden; }
+  .mv-swiper .swiper { width: 100%; height: 100%; }
+  .mv-slide {
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: #282832;
+  }
+  .mv-footer { flex-shrink: 0; cursor: pointer; }
+  .mv-footer img { width: 100%; display: block; }
 </style>
 </head>
 <body>
@@ -498,6 +621,13 @@
     <p id="error-msg">The campaign could not be loaded.</p>
   </div>
 
+  <!-- VIEWER CONTEXT (marketplace / website) -->
+  <div id="viewer-layer">
+    <div id="website-view"></div>
+    <div id="market-home"></div>
+    <div id="market-viewer"></div>
+  </div>
+
   <!-- PROTOTYPE -->
   <div id="proto" style="display:none; flex-direction:column; flex:1">
 
@@ -518,7 +648,7 @@
     <!-- TOP BAR -->
     <div class="top-bar" id="top-bar">
       <div style="width:56px;height:56px;flex-shrink:0"></div>
-      <div class="close-btn" onclick="window.parent.postMessage('closeAd','*')">
+      <div class="close-btn" onclick="history.back()">
         <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
           <circle cx="19" cy="19" r="18" stroke-width="1.5" id="close-circle"/>
           <path d="M13 13l12 12M25 13L13 25" stroke-width="1.8" stroke-linecap="round" id="close-x"/>
@@ -588,36 +718,37 @@
 
     </div><!-- /ad-content -->
 
-    <!-- SAFARI FOOTER -->
+    <!-- SAFARI FOOTER (iOS 26 Liquid Glass) -->
     <div class="safari-footer">
-      <div class="safari-bar">
-        <span class="safari-bar-aa">AA</span>
-        <div class="safari-bar-url">
-          <svg width="14" height="16" viewBox="0 0 14 16" fill="none">
-            <path d="M3.5 7V5a3.5 3.5 0 017 0v2" stroke="#555" stroke-width="1.3" stroke-linecap="round"/>
-            <rect x="1" y="7" width="12" height="8" rx="2" stroke="#555" stroke-width="1.3"/>
-          </svg>
-          <span id="safari-url">designlab.shopfully.com</span>
-        </div>
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <path d="M16 10a6 6 0 11-1.76-4.24" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
-          <path d="M14 5.5l.5 1.5 1.5-.5" stroke="#555" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Back button -->
+      <div class="safari-glass-btn">
+        <svg viewBox="0 0 22 22" fill="none">
+          <path d="M14 5L8 11l6 6" stroke="#1b1b1b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </div>
-      <div class="safari-nav">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <svg viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="#C7C7CC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <svg viewBox="0 0 24 24" fill="none">
-          <path d="M8.5 8.5L12 5l3.5 3.5" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M12 5v10" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round"/>
-          <path d="M5 14v4a1 1 0 001 1h12a1 1 0 001-1v-4" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round"/>
-        </svg>
-        <svg viewBox="0 0 24 24" fill="none">
-          <path d="M5 4h14a1 1 0 011 1v15l-7-4-7 4V5a1 1 0 011-1z" stroke="#007AFF" stroke-width="1.8" stroke-linejoin="round"/>
-        </svg>
-        <svg viewBox="0 0 24 24" fill="none">
-          <rect x="4" y="7" width="13" height="13" rx="2" stroke="#007AFF" stroke-width="1.8"/>
-          <path d="M8 7V5a2 2 0 012-2h9a2 2 0 012 2v11a2 2 0 01-2 2h-2" stroke="#007AFF" stroke-width="1.5"/>
+      <!-- URL bar -->
+      <div class="safari-glass-bar">
+        <div class="bar-icon-left">
+          <svg viewBox="0 0 16 16" fill="none">
+            <rect x="2" y="3" width="12" height="1.5" rx="0.75" fill="#1b1b1b"/>
+            <rect x="2" y="7.25" width="12" height="1.5" rx="0.75" fill="#1b1b1b"/>
+            <rect x="2" y="11.5" width="12" height="1.5" rx="0.75" fill="#1b1b1b"/>
+          </svg>
+        </div>
+        <span class="safari-glass-bar-url" id="safari-url">designlab.shopfully.com</span>
+        <div class="bar-icon-right">
+          <svg viewBox="0 0 16 16" fill="none">
+            <path d="M13.5 8a5.5 5.5 0 11-1.6-3.9" stroke="#1b1b1b" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M12 4l.5 1.5 1.5-.5" stroke="#1b1b1b" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      <!-- More button -->
+      <div class="safari-glass-btn">
+        <svg viewBox="0 0 22 22" fill="none">
+          <circle cx="5" cy="11" r="1.8" fill="#1b1b1b"/>
+          <circle cx="11" cy="11" r="1.8" fill="#1b1b1b"/>
+          <circle cx="17" cy="11" r="1.8" fill="#1b1b1b"/>
         </svg>
       </div>
     </div><!-- /safari-footer -->
@@ -643,6 +774,12 @@ const DEMO_DATA = {
     buttonTextColor:'#FFF200',
     bannerURL:      'https://imgproxy.leaflets.schwarz/KYBNoNidpjcQ0C-NMiT9AklCO7DEHcSsIcBRYEByxXI/rs:fit:1200:1200:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5YTRmNzQtMzZhNC03OTlmLWI4NWEtMmRhNmI4ZWVhODdjL3BhZ2UtMV9hMGM1MjcxNmUzMTlkOTQxMTNlZmJjZTYwNDg3YjU5OS5wbmc.jpg',
     websiteURL:     '',
+    Store01Name:    'LIDL Navalcarnero',
+    Store01LogoURL: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Lidl-Logo.svg/2048px-Lidl-Logo.svg.png',
+    Store02Name:    'LIDL Madrid Centro',
+    Store02LogoURL: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Lidl-Logo.svg/2048px-Lidl-Logo.svg.png',
+    Store03Name:    'LIDL Getafe',
+    Store03LogoURL: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Lidl-Logo.svg/2048px-Lidl-Logo.svg.png',
   },
   carousel_vertical: {
     campaignID:              'click2go-demo-cv',
@@ -671,6 +808,12 @@ const DEMO_DATA = {
     Prod03ImageURL: 'https://cdn.royalcanin-weshare-online.io/iX6UZmwBGYYl5D-lAixj/v2/16-in-l-packshot-of-bhn-shn-ccn-range-vdiet-canine-nutrition',
     Prod03LinkURL:  'https://www.billa.at/',
     websiteURL:     '',
+    Store01Name:    'BILLA Wien Mitte',
+    Store01LogoURL: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Billa_Logo.svg/2048px-Billa_Logo.svg.png',
+    Store02Name:    'BILLA Stephansplatz',
+    Store02LogoURL: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Billa_Logo.svg/2048px-Billa_Logo.svg.png',
+    Store03Name:    'BILLA Mariahilfer',
+    Store03LogoURL: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Billa_Logo.svg/2048px-Billa_Logo.svg.png',
   },
   carousel_square: {
     campaignID:              'click2go-demo-cs',
@@ -699,6 +842,12 @@ const DEMO_DATA = {
     Prod03ImageURL: 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=400',
     Prod03LinkURL:  'https://www.lidl.it/',
     websiteURL:     '',
+    Store01Name:    'LIDL Milano Centro',
+    Store01LogoURL: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Lidl-Logo.svg/2048px-Lidl-Logo.svg.png',
+    Store02Name:    'LIDL Milano Navigli',
+    Store02LogoURL: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Lidl-Logo.svg/2048px-Lidl-Logo.svg.png',
+    Store03Name:    'LIDL Milano Garibaldi',
+    Store03LogoURL: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Lidl-Logo.svg/2048px-Lidl-Logo.svg.png',
   },
 };
 
@@ -852,7 +1001,10 @@ function render(d) {
   phone.style.setProperty('--button-text-color', d.buttonTextColor || '#ffffff');
   phone.style.setProperty('--icon-color', iconColor);
 
-  document.getElementById('proto').style.background      = bg;
+  // Set background once on the phone wrapper only
+  document.getElementById('phone').style.background = bg;
+
+  // Make individual sections transparent
   document.getElementById('status-bar').style.background = 'transparent';
   document.getElementById('top-bar').style.background    = 'transparent';
   document.getElementById('ad-content').style.background = 'transparent';
@@ -966,12 +1118,206 @@ function render(d) {
   }
 }
 
+// ─── SHOW AD (transition from viewer to ad) ─────────────────────────
+function showAd() {
+  document.getElementById('viewer-layer').classList.remove('active');
+  render(window._campaignData);
+}
+
+// ─── VIEWER: HELPERS ─────────────────────────────────────────────────
+function assetBase() { return 'assets/click2go-assets/'; }
+
+var PAGE_FORMAT = { IT: 'di', ES: 'de', FR: 'sur', DE: 'von', PT: 'de' };
+function pageLabel(current, total) {
+  var d = window._campaignData;
+  var loc = d ? (d.location || '').toUpperCase() : '';
+  var word = PAGE_FORMAT[loc] || 'of';
+  return current + ' ' + word + ' ' + total;
+}
+
+// ─── VIEWER: WEBSITE ─────────────────────────────────────────────────
+function initWebsite(d) {
+  var loc = (d.location || 'IT').toUpperCase();
+  var pub = d.website || 'ansa';
+  var base = assetBase() + 'website/' + loc + '/' + pub + '/';
+
+  var container = document.getElementById('website-view');
+  var topImg = document.createElement('img');
+  topImg.src = base + 'top.png';
+  topImg.alt = '';
+  container.appendChild(topImg);
+
+  var bottomImg = document.createElement('img');
+  bottomImg.src = base + 'bottom.png';
+  bottomImg.alt = '';
+  container.appendChild(bottomImg);
+
+  document.getElementById('state-loading').style.display = 'none';
+  var layer = document.getElementById('viewer-layer');
+  layer.classList.add('active');
+  document.getElementById('website-view').style.display = 'block';
+
+  setTimeout(function () { showAd(); }, 9000);
+}
+
+// ─── VIEWER: MARKETPLACE ─────────────────────────────────────────────
+var screen2Built = false;
+var swiperInstance = null;
+
+function initMarketplace(d) {
+  var loc = (d.location || 'IT').toUpperCase();
+  var cat = d.marketplace || 'coles';
+  var appBase = assetBase() + 'app/' + loc + '/';
+  var catBase = assetBase() + 'catalogs/' + loc + '/' + cat + '/';
+
+  buildScreen1(appBase, catBase);
+  document.getElementById('state-loading').style.display = 'none';
+  var layer = document.getElementById('viewer-layer');
+  layer.classList.add('active');
+  document.getElementById('market-home').style.display = 'flex';
+}
+
+function buildScreen1(appBase, catBase) {
+  var container = document.getElementById('market-home');
+
+  var header = document.createElement('div');
+  header.className = 'mh-header';
+  var headerImg = document.createElement('img');
+  headerImg.src = appBase + 'headerHome.png';
+  headerImg.alt = '';
+  header.appendChild(headerImg);
+  container.appendChild(header);
+
+  var scroll = document.createElement('div');
+  scroll.className = 'mh-scroll';
+  var content = document.createElement('div');
+  content.className = 'mh-content';
+
+  var cover = document.createElement('div');
+  cover.className = 'mh-flyer';
+  cover.addEventListener('click', function () {
+    document.getElementById('market-home').style.display = 'none';
+    buildScreen2(appBase, catBase);
+    document.getElementById('market-viewer').style.display = 'flex';
+  });
+
+  var coverImg = document.createElement('div');
+  coverImg.className = 'mh-cover-home';
+  coverImg.style.backgroundImage = 'url(' + catBase + '1.png)';
+  cover.appendChild(coverImg);
+
+  var footerFlyerImg = document.createElement('img');
+  footerFlyerImg.src = appBase + 'footerFlyer.png';
+  footerFlyerImg.alt = '';
+  cover.appendChild(footerFlyerImg);
+  content.appendChild(cover);
+
+  for (var i = 1; i <= 3; i++) {
+    var flyerWrap = document.createElement('div');
+    flyerWrap.className = 'mh-flyer-img';
+    var flyerImg = document.createElement('img');
+    flyerImg.src = appBase + 'flyer0' + i + '.png';
+    flyerImg.alt = '';
+    flyerWrap.appendChild(flyerImg);
+    content.appendChild(flyerWrap);
+  }
+
+  scroll.appendChild(content);
+  container.appendChild(scroll);
+
+  var footer = document.createElement('div');
+  footer.className = 'mh-footer';
+  var footerImg = document.createElement('img');
+  footerImg.src = appBase + 'footerHome.png';
+  footerImg.alt = '';
+  footer.appendChild(footerImg);
+  container.appendChild(footer);
+}
+
+function buildScreen2(appBase, catBase) {
+  if (screen2Built) return;
+  screen2Built = true;
+
+  var container = document.getElementById('market-viewer');
+
+  var header = document.createElement('div');
+  header.className = 'mv-header';
+  var headerImg = document.createElement('img');
+  headerImg.src = appBase + 'headerViewer.png';
+  headerImg.alt = '';
+  header.appendChild(headerImg);
+  container.appendChild(header);
+
+  var infoBar = document.createElement('div');
+  infoBar.className = 'mv-info-bar';
+  var pageBadge = document.createElement('div');
+  pageBadge.className = 'mv-info-badge';
+  pageBadge.id = 'page-badge';
+  pageBadge.textContent = pageLabel(1, 3);
+  infoBar.appendChild(pageBadge);
+  var validBadge = document.createElement('div');
+  validBadge.className = 'mv-info-badge';
+  validBadge.textContent = 'V\u00e1lido hasta el martes';
+  infoBar.appendChild(validBadge);
+  container.appendChild(infoBar);
+
+  var swiperWrap = document.createElement('div');
+  swiperWrap.className = 'mv-swiper';
+  var swiperEl = document.createElement('div');
+  swiperEl.className = 'swiper';
+  var wrapper = document.createElement('div');
+  wrapper.className = 'swiper-wrapper';
+
+  for (var i = 1; i <= 3; i++) {
+    var slide = document.createElement('div');
+    slide.className = 'swiper-slide mv-slide';
+    slide.style.backgroundImage = 'url(' + catBase + i + '.png)';
+    wrapper.appendChild(slide);
+  }
+
+  swiperEl.appendChild(wrapper);
+  swiperWrap.appendChild(swiperEl);
+  container.appendChild(swiperWrap);
+
+  var footer = document.createElement('div');
+  footer.className = 'mv-footer';
+  var footerImg = document.createElement('img');
+  footerImg.src = appBase + 'footerViewer.png';
+  footerImg.alt = '';
+  footer.appendChild(footerImg);
+  footer.addEventListener('click', function () { showAd(); });
+  container.appendChild(footer);
+
+  var reachedEnd = false;
+  swiperInstance = new Swiper(swiperEl, {
+    slidesPerView: 1,
+    spaceBetween: 0,
+    resistanceRatio: 0.65,
+    on: {
+      slideChange: function (sw) {
+        document.getElementById('page-badge').textContent =
+          pageLabel(sw.activeIndex + 1, 3);
+        if (sw.activeIndex < 2) reachedEnd = false;
+      },
+      reachEnd: function () { reachedEnd = true; },
+      touchEnd: function (sw) {
+        if (reachedEnd && sw.touches.diff < -30) {
+          reachedEnd = false;
+          showAd();
+        }
+      }
+    }
+  });
+}
+
 // ─── LOAD DATA ────────────────────────────────────────────────────────
 async function init() {
   const params = new URLSearchParams(window.location.search);
-  const id   = params.get('id');
-  const type = params.get('type'); // demo shortcut: ?type=carousel_vertical etc.
+  const id     = params.get('id');
+  const type   = params.get('type');   // demo shortcut: ?type=carousel_vertical
+  const viewer = params.get('viewer'); // marketplace | website
 
+  // Demo mode (no id)
   if (!id) {
     document.getElementById('demo-badge').classList.add('visible');
     const demoKey = (type && DEMO_DATA[type]) ? type : 'banner';
@@ -979,6 +1325,7 @@ async function init() {
     return;
   }
 
+  // Fetch campaign data
   let data;
   try {
     const res = await fetch('api/get.php?id=' + encodeURIComponent(id));
@@ -994,12 +1341,64 @@ async function init() {
     return;
   }
 
-  render(data);
+  // Store data globally for viewer → ad transition
+  window._campaignData = data;
+
+  // If viewer context requested, show viewer first; otherwise show ad directly
+  if (viewer === 'website') {
+    initWebsite(data);
+  } else if (viewer === 'marketplace') {
+    initMarketplace(data);
+  } else {
+    render(data);
+  }
 }
 
 init();
 </script>
 
-<script src="click2go-pass2.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script src="click2go-store-flow.js"></script>
+
+<script>
+(function () {
+  var DESIGN_W = 390;
+  var DESIGN_H = 844;
+
+  function applyZoom() {
+    var el = document.getElementById('phone')
+      || document.getElementById('viewer-container')
+      || document.querySelector('.phone');
+    if (!el) return;
+
+    var vw = window.innerWidth;
+    var vh = window.innerHeight;
+    var isMobile = vw < 768;
+
+    if (isMobile) {
+      var z = vw / DESIGN_W;
+      el.style.zoom = z;
+      document.body.style.background = 'white';
+      document.body.style.minHeight = '100vh';
+      document.body.style.overflow = 'visible';
+      document.body.style.alignItems = 'flex-start';
+    } else {
+      var zx = vw / DESIGN_W;
+      var zy = vh / DESIGN_H;
+      var z = Math.min(zx, zy) * 0.92;
+      el.style.zoom = z;
+      document.body.style.background = '#e5e5e5';
+      document.body.style.minHeight = '100vh';
+      document.body.style.alignItems = zy < zx ? 'flex-start' : 'center';
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  applyZoom();
+  window.addEventListener('resize', applyZoom);
+  window.addEventListener('orientationchange',
+    function () { setTimeout(applyZoom, 300); });
+})();
+</script>
 </body>
 </html>
