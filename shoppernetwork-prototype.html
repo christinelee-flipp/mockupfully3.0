@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>ShopperNetwork Prototype</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -394,6 +395,60 @@ function initCarousel() {
   snapToSlide();
 }
 
+// ── PDF.js worker setup ──────────────────────────────────────────────
+if (window.pdfjsLib) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+// ── Render a single PDF page to a canvas, return as an img element ──
+function renderPdfPage(page, slideWidth) {
+  var viewport = page.getViewport({ scale: 1 });
+  var scale = slideWidth / viewport.width;
+  var scaledViewport = page.getViewport({ scale: scale });
+
+  var canvas = document.createElement('canvas');
+  canvas.width = scaledViewport.width;
+  canvas.height = scaledViewport.height;
+
+  return page.render({
+    canvasContext: canvas.getContext('2d'),
+    viewport: scaledViewport
+  }).promise.then(function () {
+    var img = document.createElement('img');
+    img.src = canvas.toDataURL('image/png');
+    img.alt = 'PDF page';
+    img.draggable = false;
+    return img;
+  });
+}
+
+// ── Render all pages of a PDF into carousel slides ──────────────────
+function renderPdfSlides(pdfUrl, track, slideWidth) {
+  return pdfjsLib.getDocument(pdfUrl).promise.then(function (pdf) {
+    var pages = [];
+    for (var p = 1; p <= pdf.numPages; p++) {
+      pages.push(p);
+    }
+    return pages.reduce(function (chain, pageNum) {
+      return chain.then(function () {
+        return pdf.getPage(pageNum).then(function (page) {
+          return renderPdfPage(page, slideWidth).then(function (img) {
+            var slide = document.createElement('div');
+            slide.className = 'carousel-slide';
+            slide.appendChild(img);
+            track.appendChild(slide);
+          });
+        });
+      });
+    }, Promise.resolve());
+  });
+}
+
+// ── Check if a URL is a PDF ─────────────────────────────────────────
+function isPdfUrl(url) {
+  return url.toLowerCase().endsWith('.pdf');
+}
+
 // ── DYNAMIC LOADING ───────────────────────────────────────────────
 (function () {
   var params = new URLSearchParams(window.location.search);
@@ -415,29 +470,44 @@ function initCarousel() {
         var domain = PUBLISHER_DOMAINS[pub] || (pub + '.com');
         document.getElementById('safari-domain').textContent = domain;
 
-        // Build carousel slides from image1..image9
-        var images = [];
+        // Collect image/PDF URLs from image1..image9
+        var urls = [];
         for (var i = 1; i <= 9; i++) {
           var url = data['image' + i];
-          if (url && url.trim()) images.push(url.trim());
+          if (url && url.trim()) urls.push(url.trim());
         }
 
-        if (images.length > 0) {
+        if (urls.length > 0) {
           var track = document.getElementById('carousel-track');
           track.innerHTML = '';
-          images.forEach(function (url, idx) {
-            var slide = document.createElement('div');
-            slide.className = 'carousel-slide';
-            var img = document.createElement('img');
-            img.src = url;
-            img.alt = 'Flyer page ' + (idx + 1);
-            img.draggable = false;
-            slide.appendChild(img);
-            track.appendChild(slide);
-          });
-        }
+          var slideWidth = 375; // match phone design width
 
-        initCarousel();
+          // Process each URL sequentially — PDFs expand to multiple slides
+          var chain = Promise.resolve();
+          urls.forEach(function (url) {
+            chain = chain.then(function () {
+              if (isPdfUrl(url) && window.pdfjsLib) {
+                return renderPdfSlides(url, track, slideWidth);
+              } else {
+                var slide = document.createElement('div');
+                slide.className = 'carousel-slide';
+                var img = document.createElement('img');
+                img.src = url;
+                img.alt = 'Flyer page';
+                img.draggable = false;
+                slide.appendChild(img);
+                track.appendChild(slide);
+                return Promise.resolve();
+              }
+            });
+          });
+
+          chain.then(function () {
+            initCarousel();
+          });
+        } else {
+          initCarousel();
+        }
       })
       .catch(function () {
         initCarousel();

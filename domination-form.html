@@ -634,6 +634,7 @@
   <div class="success-icon">✓</div>
   <h2>Campaign Created!</h2>
   <p id="success-campaign-name">Your prototype is ready.</p>
+  <div id="qr-code" style="display:flex;justify-content:center;margin:16px 0"></div>
   <div class="prototype-url-box">
     <div class="url-label">Prototype URL</div>
     <div class="url-text" id="success-url"></div>
@@ -644,6 +645,7 @@
     <button class="btn-new btn btn-secondary" onclick="resetForm()">New Campaign</button>
   </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 
 <script>
 const WEBHOOKS = {
@@ -1151,6 +1153,12 @@ async function submitForm() {
     document.getElementById('success-campaign-name').textContent = `"${data.campaignName}" has been ${verb}.`;
     document.getElementById('success-url').textContent = generatedURL;
     document.getElementById('btn-preview').href = generatedURL;
+
+    // QR code
+    var qrEl = document.getElementById('qr-code');
+    qrEl.innerHTML = '';
+    var fullURL = new URL(generatedURL, window.location.href).href;
+    new QRCode(qrEl, { text: fullURL, width: 180, height: 180, correctLevel: QRCode.CorrectLevel.M });
 
   } catch (err) {
     btn.disabled = false;

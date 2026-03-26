@@ -323,6 +323,7 @@
   <div class="success-icon">&#10003;</div>
   <h2>Campaign Created!</h2>
   <p id="success-campaign-name">Your prototype is ready.</p>
+  <div id="qr-code" style="display:flex;justify-content:center;margin:16px 0"></div>
   <div class="prototype-url-box">
     <div class="url-label">Preview URL</div>
     <div class="url-text" id="success-url"></div>
@@ -333,6 +334,7 @@
     <button class="btn btn-secondary" onclick="resetForm()">New Campaign</button>
   </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 
 <script>
 const UPLOAD_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke="#777794" stroke-width="1.8" stroke-linecap="round"/><polyline points="17 8 12 3 7 8" stroke="#777794" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="3" x2="12" y2="15" stroke="#777794" stroke-width="1.8" stroke-linecap="round"/></svg>';
@@ -386,7 +388,8 @@ function buildImageFields() {
           <label>Image ${i} ${required}</label>
           <div class="img-mode-toggle toggle-group">
             <button type="button" class="mode-btn toggle-btn" data-mode="url" data-field="${fieldId}">URL</button>
-            <button type="button" class="mode-btn toggle-btn active" data-mode="upload" data-field="${fieldId}">Upload</button>
+            <button type="button" class="mode-btn toggle-btn active" data-mode="upload" data-field="${fieldId}">Image</button>
+            <button type="button" class="mode-btn toggle-btn" data-mode="pdf" data-field="${fieldId}">PDF</button>
           </div>
         </div>
         <div class="url-with-preview">
@@ -399,6 +402,14 @@ function buildImageFields() {
               ${UPLOAD_ICON}
               <span class="upload-filename" id="upload-filename-${fieldId}">Choose file...</span>
               <span class="upload-status" id="upload-status-${fieldId}"></span>
+            </div>
+          </div>
+          <div class="pdf-mode-wrap" id="pdf-wrap-${fieldId}" style="display:none">
+            <div class="upload-area" id="pdf-area-${fieldId}">
+              <input type="file" id="pdf-file-${fieldId}" accept="application/pdf" style="display:none">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="#888" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 2v6h6M9 15h6M9 11h2" stroke="#888" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="upload-filename" id="pdf-filename-${fieldId}">Choose PDF...</span>
+              <span class="upload-status" id="pdf-status-${fieldId}"></span>
             </div>
           </div>
           <div class="img-preview" id="preview-${fieldId}">
@@ -431,16 +442,25 @@ function setupUploadField(fieldId, imgId, previewId) {
   if (urlInput) {
     urlInput.addEventListener('input', () => updateImgPreview(urlInput, previewImg, previewIcon));
   }
+  // PDF upload wiring
+  const pdfArea  = document.getElementById('pdf-area-' + fieldId);
+  const pdfInput = document.getElementById('pdf-file-' + fieldId);
+  if (pdfArea && pdfInput) {
+    pdfArea.addEventListener('click', () => pdfInput.click());
+    pdfInput.addEventListener('change', () => handlePdfUpload(pdfInput, fieldId, previewImg, previewIcon));
+  }
 }
 
 function switchImgMode(fieldId, mode) {
   const urlWrap    = document.getElementById('url-wrap-' + fieldId);
   const uploadWrap = document.getElementById('upload-wrap-' + fieldId);
+  const pdfWrap    = document.getElementById('pdf-wrap-' + fieldId);
   document.querySelectorAll('.mode-btn[data-field="' + fieldId + '"]').forEach(b =>
     b.classList.toggle('active', b.dataset.mode === mode)
   );
   if (urlWrap)    urlWrap.style.display    = mode === 'url'    ? '' : 'none';
   if (uploadWrap) uploadWrap.style.display = mode === 'upload' ? '' : 'none';
+  if (pdfWrap)    pdfWrap.style.display    = mode === 'pdf'    ? '' : 'none';
 }
 
 function updateImgPreview(input, imgEl, iconEl) {
@@ -500,9 +520,59 @@ async function handleFileUpload(fileInput, fieldId, previewImg, previewIcon) {
   }
 }
 
+async function handlePdfUpload(fileInput, fieldId, previewImg, previewIcon) {
+  const file = fileInput.files[0];
+  if (!file) return;
+  const filenameEl = document.getElementById('pdf-filename-' + fieldId);
+  const statusEl   = document.getElementById('pdf-status-' + fieldId);
+  const urlInput   = document.getElementById(fieldId);
+
+  filenameEl.textContent = file.name;
+  // Show PDF icon in preview
+  previewImg.style.display = 'none';
+  if (previewIcon) {
+    previewIcon.style.display = 'block';
+    previewIcon.innerHTML = '<svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="8" y="4" width="32" height="40" rx="4" stroke="#e53935" stroke-width="2" fill="#fff5f5"/><text x="24" y="30" text-anchor="middle" font-size="12" font-weight="700" fill="#e53935" font-family="sans-serif">PDF</text></svg>';
+  }
+
+  statusEl.textContent = 'Uploading...';
+  statusEl.className = 'upload-status uploading';
+
+  const formData = new FormData();
+  formData.append('image', file);
+
+  try {
+    const res  = await fetch('api/upload.php', { method: 'POST', body: formData });
+    const json = await res.json();
+    if (json.success) {
+      urlInput.value = json.url;
+      statusEl.textContent = '\u2713';
+      statusEl.className = 'upload-status done';
+    } else {
+      urlInput.value = '';
+      statusEl.textContent = json.error || 'Upload failed';
+      statusEl.className = 'upload-status error';
+    }
+  } catch {
+    urlInput.value = '';
+    statusEl.textContent = 'Upload failed';
+    statusEl.className = 'upload-status error';
+  }
+}
+
 function applyValueMode(fieldId, value) {
   if (!value) return;
-  if (value.startsWith('http')) {
+  const isPdf = value.toLowerCase().endsWith('.pdf');
+  if (isPdf) {
+    switchImgMode(fieldId, 'pdf');
+    const input = document.getElementById(fieldId);
+    if (input) input.value = value;
+    const filename = value.split('/').pop();
+    const filenameEl = document.getElementById('pdf-filename-' + fieldId);
+    const statusEl   = document.getElementById('pdf-status-' + fieldId);
+    if (filenameEl) filenameEl.textContent = filename;
+    if (statusEl) { statusEl.textContent = '\u2713'; statusEl.className = 'upload-status done'; }
+  } else if (value.startsWith('http')) {
     switchImgMode(fieldId, 'url');
     const input = document.getElementById(fieldId);
     if (input) input.value = value;
@@ -590,6 +660,12 @@ async function submitForm() {
     document.getElementById('success-campaign-name').textContent = '"' + data.campaignName + '" has been ' + verb + '.';
     document.getElementById('success-url').textContent = generatedURL;
     document.getElementById('btn-preview').href = generatedURL;
+
+    // QR code
+    var qrEl = document.getElementById('qr-code');
+    qrEl.innerHTML = '';
+    var fullURL = new URL(generatedURL, window.location.href).href;
+    new QRCode(qrEl, { text: fullURL, width: 180, height: 180, correctLevel: QRCode.CorrectLevel.M });
 
   } catch (err) {
     btn.disabled = false;

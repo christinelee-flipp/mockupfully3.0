@@ -637,6 +637,7 @@
   <div class="success-icon">&#10003;</div>
   <h2>Campaign Created!</h2>
   <p id="success-campaign-name">Your prototype is ready.</p>
+  <div id="qr-code" style="display:flex;justify-content:center;margin:16px 0"></div>
   <div class="prototype-url-box">
     <div class="url-label">Preview URL</div>
     <div class="url-text" id="success-url"></div>
@@ -648,6 +649,7 @@
     <button class="btn btn-secondary" onclick="resetForm()">New Campaign</button>
   </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 
 <script>
 const UPLOAD_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke="#777794" stroke-width="1.8" stroke-linecap="round"/><polyline points="17 8 12 3 7 8" stroke="#777794" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="3" x2="12" y2="15" stroke="#777794" stroke-width="1.8" stroke-linecap="round"/></svg>';
@@ -1024,6 +1026,12 @@ async function submitForm() {
     document.getElementById('success-url').textContent = generatedURL;
     document.getElementById('btn-preview-marketplace').href = 'click2go-prototype.html?id=' + encodeURIComponent(data.campaignID) + '&viewer=marketplace';
     document.getElementById('btn-preview-website').href = 'click2go-prototype.html?id=' + encodeURIComponent(data.campaignID) + '&viewer=website';
+
+    // QR code
+    var qrEl = document.getElementById('qr-code');
+    qrEl.innerHTML = '';
+    var fullURL = new URL(generatedURL, window.location.href).href;
+    new QRCode(qrEl, { text: fullURL, width: 180, height: 180, correctLevel: QRCode.CorrectLevel.M });
 
   } catch (err) {
     btn.disabled = false;

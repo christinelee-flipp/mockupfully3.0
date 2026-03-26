@@ -47,9 +47,9 @@ if ($file['error'] !== UPLOAD_ERR_OK) {
     fail($uploadErrors[$file['error']] ?? 'Unknown upload error');
 }
 
-// 5 MB limit
-if ($file['size'] > 5 * 1024 * 1024) {
-    fail('File must be under 5 MB');
+// 10 MB limit
+if ($file['size'] > 10 * 1024 * 1024) {
+    fail('File must be under 10 MB');
 }
 
 // Validate actual MIME type from file contents — do not trust $_FILES['type']
@@ -57,14 +57,15 @@ $finfo = new finfo(FILEINFO_MIME_TYPE);
 $mime  = $finfo->file($file['tmp_name']);
 
 $allowed = [
-    'image/jpeg' => 'jpg',
-    'image/png'  => 'png',
-    'image/gif'  => 'gif',
-    'image/webp' => 'webp',
+    'image/jpeg'      => 'jpg',
+    'image/png'       => 'png',
+    'image/gif'       => 'gif',
+    'image/webp'      => 'webp',
+    'application/pdf' => 'pdf',
 ];
 
 if (!isset($allowed[$mime])) {
-    fail('Only JPG, PNG, GIF, and WEBP images are allowed');
+    fail('Only JPG, PNG, GIF, WEBP, and PDF files are allowed');
 }
 
 $ext       = $allowed[$mime];
@@ -75,7 +76,8 @@ if (!is_dir($uploadDir)) {
     mkdir($uploadDir, 0755, true);
 }
 
-$filename = uniqid('img_', true) . '.' . $ext;
+$prefix   = $ext === 'pdf' ? 'pdf_' : 'img_';
+$filename = uniqid($prefix, true) . '.' . $ext;
 $dest     = $uploadDir . $filename;
 
 if (!move_uploaded_file($file['tmp_name'], $dest)) {
