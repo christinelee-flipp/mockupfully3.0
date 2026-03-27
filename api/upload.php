@@ -168,54 +168,116 @@ if (!move_uploaded_file($file['tmp_name'], $tempPath)) {
     fail('Could not save the uploaded file', 500);
 }
 
-$mp4Name = uniqid('video_', true) . '.mp4';
-$mp4Path = $uploadDir . $mp4Name;
-
 $ffmpeg = '/usr/local/bin/ffmpeg';
 
-/* Convert to MP4 using mpeg4 encoder (MPEG-4 Part 2).
-   libx264 is NOT available on this server.
-   -y              = overwrite output without asking
-   -c:v mpeg4      = use MPEG-4 Part 2 encoder (available)
-   -q:v 5          = quality 1-31, lower=better, 5=good balance
-   -c:a aac        = AAC audio (confirmed available)
-   -b:a 128k       = 128kbps audio bitrate
-   -movflags +faststart = web-optimised, starts playing
-                    before fully downloaded */
+/* Check available encoders */
+$encoders = shell_exec($ffmpeg . ' -encoders 2>&1');
+$hasVP8  = strpos($encoders, 'libvpx ') !== false;
+$hasVP9  = strpos($encoders, 'libvpx-vp9') !== false;
 
-$cmd = $ffmpeg
-    . ' -y'
-    . ' -i ' . escapeshellarg($tempPath)
-    . ' -c:v mpeg4'
-    . ' -q:v 5'
-    . ' -c:a aac'
-    . ' -b:a 128k'
-    . ' -movflags +faststart'
-    . ' ' . escapeshellarg($mp4Path)
-    . ' 2>&1';
+$converted = false;
+$output    = '';
+$outName   = '';
+$outPath   = '';
+$codec     = '';
 
-$output = shell_exec($cmd);
+/* Try VP8 → .webm first (best Chrome support) */
+if ($hasVP8) {
+    $outName = uniqid('video_') . '.webm';
+    $outPath = $uploadDir . $outName;
+    $codec   = 'vp8';
+
+    $cmd = $ffmpeg
+        . ' -y'
+        . ' -i ' . escapeshellarg($tempPath)
+        . ' -c:v libvpx'
+        . ' -crf 10'
+        . ' -b:v 1M'
+        . ' -c:a libvorbis'
+        . ' ' . escapeshellarg($outPath)
+        . ' 2>&1';
+
+    $output = shell_exec($cmd);
+
+    if (file_exists($outPath) && filesize($outPath) > 0) {
+        $converted = true;
+    } else {
+        if (file_exists($outPath)) unlink($outPath);
+    }
+}
+
+/* Try VP9 → .webm if VP8 failed or unavailable */
+if (!$converted && $hasVP9) {
+    $outName = uniqid('video_') . '.webm';
+    $outPath = $uploadDir . $outName;
+    $codec   = 'vp9';
+
+    $cmd = $ffmpeg
+        . ' -y'
+        . ' -i ' . escapeshellarg($tempPath)
+        . ' -c:v libvpx-vp9'
+        . ' -crf 30'
+        . ' -b:v 1M'
+        . ' -c:a libvorbis'
+        . ' ' . escapeshellarg($outPath)
+        . ' 2>&1';
+
+    $output = shell_exec($cmd);
+
+    if (file_exists($outPath) && filesize($outPath) > 0) {
+        $converted = true;
+    } else {
+        if (file_exists($outPath)) unlink($outPath);
+    }
+}
+
+/* Fall back to mpeg4 → .mp4 */
+if (!$converted) {
+    $outName = uniqid('video_', true) . '.mp4';
+    $outPath = $uploadDir . $outName;
+    $codec   = 'mpeg4';
+
+    $cmd = $ffmpeg
+        . ' -y'
+        . ' -i ' . escapeshellarg($tempPath)
+        . ' -c:v mpeg4'
+        . ' -q:v 5'
+        . ' -c:a aac'
+        . ' -b:a 128k'
+        . ' -movflags +faststart'
+        . ' ' . escapeshellarg($outPath)
+        . ' 2>&1';
+
+    $output = shell_exec($cmd);
+
+    if (file_exists($outPath) && filesize($outPath) > 0) {
+        $converted = true;
+    }
+}
 
 // Log ffmpeg output for debugging
 file_put_contents($debugLog,
     date('Y-m-d H:i:s') . " FFMPEG\n"
+    . "CODEC: $codec\n"
     . "CMD: $cmd\n"
     . "OUTPUT: $output\n"
+    . "HAS_VP8: " . ($hasVP8 ? 'true' : 'false') . "\n"
+    . "HAS_VP9: " . ($hasVP9 ? 'true' : 'false') . "\n"
     . "---\n",
     FILE_APPEND
 );
 
-/* Check if output file was created and has content */
-if (file_exists($mp4Path) && filesize($mp4Path) > 0) {
+if ($converted) {
     unlink($tempPath);
     echo json_encode([
         'success'   => true,
-        'url'       => $urlPrefix . $mp4Name,
-        'converted' => true
+        'url'       => $urlPrefix . $outName,
+        'converted' => true,
+        'codec'     => $codec
     ]);
 } else {
     /* Conversion failed — return detailed error info */
-    if (file_exists($mp4Path)) unlink($mp4Path);
+    if (file_exists($outPath)) unlink($outPath);
     if (file_exists($tempPath)) unlink($tempPath);
     echo json_encode([
         'success'        => false,
@@ -223,9 +285,11 @@ if (file_exists($mp4Path) && filesize($mp4Path) > 0) {
         'ffmpeg_cmd'     => $cmd,
         'ffmpeg_output'  => $output,
         'input_exists'   => file_exists($tempPath),
-        'output_exists'  => file_exists($mp4Path),
+        'output_exists'  => file_exists($outPath),
         'php_user'       => get_current_user(),
-        'upload_dir'     => $uploadDir
+        'upload_dir'     => $uploadDir,
+        'has_vp8'        => $hasVP8,
+        'has_vp9'        => $hasVP9
     ]);
 }
 exit;

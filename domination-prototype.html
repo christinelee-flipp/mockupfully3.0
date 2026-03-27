@@ -673,7 +673,7 @@
     <div class="ghostover-bg" onclick="closeGhostover()"></div>
     <div class="ghostover-content">
       <button class="ghostover-close" onclick="closeGhostover()">✕</button>
-      <video id="ghostover-video" class="ghostover-img" playsinline muted autoplay loop style="width:100%;display:block;border-radius:12px;"></video>
+      <video id="ghostover-video" class="ghostover-img" playsinline muted autoplay loop style="width:100%;height:auto;display:block;border-radius:12px;min-height:100px;"></video>
     </div>
   </div>
 
@@ -1103,8 +1103,14 @@ async function init() {
       var video = document.getElementById('ghostover-video');
       if (!g || !video) return;
 
-      video.src = resolveURL(ghostoverURL);
+      video.setAttribute('src', resolveURL(ghostoverURL));
       video.load();
+
+      /* Force display */
+      video.style.display = 'block';
+      video.style.width = '100%';
+      video.style.minHeight = '200px';
+
       g.classList.add('visible');
 
       var playPromise = video.play();
