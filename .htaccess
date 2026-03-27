@@ -1,11 +1,11 @@
-# ── No caching for HTML and PHP files ────────────────────────────
-<FilesMatch "\.(html|php)$">
+# ── No caching for HTML, PHP, CSS, and JS files ─────────────────
+<FilesMatch "\.(html|php|css|js)$">
     Header set Cache-Control "no-store, no-cache, must-revalidate"
     Header set Pragma "no-cache"
     Header set Expires "0"
 </FilesMatch>
 
-# ── Long-term caching for images, CSS, and JS ────────────────────
-<FilesMatch "\.(jpg|jpeg|png|gif|webp|svg|ico|css|js)$">
+# ── Long-term caching for images only ────────────────────────────
+<FilesMatch "\.(jpg|jpeg|png|gif|webp|svg|ico)$">
     Header set Cache-Control "public, max-age=2592000"
 </FilesMatch>

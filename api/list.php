@@ -8,6 +8,11 @@
 
 require __DIR__ . '/config.php';
 
+// Force OPcache to use the latest version of this file
+if (function_exists('opcache_invalidate')) {
+    opcache_invalidate(__FILE__, true);
+}
+
 // Prevent browser/proxy caching of campaign list
 header('Cache-Control: no-cache, no-store, must-revalidate');
 header('Pragma: no-cache');
@@ -54,12 +59,8 @@ usort($campaigns, fn($a, $b) =>
 );
 
 if (!empty($skipped)) {
-    error('Some campaign files could not be loaded: ' . implode(', ', $skipped), 500);
+    error_log('[list.php] Skipped files: ' . implode(', ', $skipped));
+    // Don't fail the entire response — return what we have
 }
 
-// Add debug info if ?debug=1 is passed
-if (isset($_GET['debug'])) {
-    respond(['campaigns' => $campaigns, '_debug' => $debug_dirs, '_count' => count($campaigns)]);
-} else {
-    respond($campaigns);
-}
+respond($campaigns);
