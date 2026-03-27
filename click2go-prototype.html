@@ -6,6 +6,7 @@
 <title>Click2Go Prototype</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+<script src="js/core/utils.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -805,30 +806,7 @@ const CARD_CONFIG = {
   carousel_square:   { trackId: 'card-track-cs', h: 200, gap: 2  },
 };
 
-const CTA_LABELS = {
-  IT: 'Trova lo store',
-  ES: 'Encuentra la tienda',
-  FR: 'Trouver le magasin',
-  DE: 'Store finden',
-  PT: 'Encontrar a loja'
-};
-
-// ─── HELPERS ──────────────────────────────────────────────────────────
-function isDark(hex) {
-  if (!hex || hex.startsWith('linear') || !hex.startsWith('#')) return false;
-  const c = hex.replace('#', '');
-  const r = parseInt(c.length === 3 ? c[0]+c[0] : c.slice(0,2), 16);
-  const g = parseInt(c.length === 3 ? c[1]+c[1] : c.slice(2,4), 16);
-  const b = parseInt(c.length === 3 ? c[2]+c[2] : c.slice(4,6), 16);
-  return (r*0.299 + g*0.587 + b*0.114) < 128;
-}
-
-function buildBg(d) {
-  if (d.globalBkgType === 'gradient' && d.globalBkgTop && d.globalBkgBottom) {
-    return `linear-gradient(to bottom, ${d.globalBkgTop}, ${d.globalBkgBottom})`;
-  }
-  return d.globalBkgColor || '#EBEBF5';
-}
+// CTA_LABELS, isDark, buildBg loaded from js/core/utils.js
 
 function showStep2() {
   document.getElementById('step2-overlay').classList.add('visible');
@@ -935,11 +913,7 @@ function initAutoScroll(products, d, cfg) {
 }
 
 // ─── RENDER ───────────────────────────────────────────────────────────
-function resolveURL(url) {
-  if (!url) return '';
-  if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  return url.replace(/^\/+/, '');
-}
+// resolveURL, isDark, buildBg, CTA_LABELS loaded from js/core/utils.js
 
 function render(d) {
   window._campaignData = d;
@@ -1319,45 +1293,7 @@ init();
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script src="click2go-store-flow.js"></script>
 
-<script>
-(function () {
-  var DESIGN_W = 390;
-  var DESIGN_H = 844;
-
-  function applyZoom() {
-    var el = document.getElementById('phone')
-      || document.getElementById('viewer-container')
-      || document.querySelector('.phone');
-    if (!el) return;
-
-    var vw = window.innerWidth;
-    var vh = window.innerHeight;
-    var isMobile = vw < 768;
-
-    if (isMobile) {
-      var z = vw / DESIGN_W;
-      el.style.zoom = z;
-      document.body.style.background = 'white';
-      document.body.style.minHeight = '100vh';
-      document.body.style.overflow = 'visible';
-      document.body.style.alignItems = 'flex-start';
-    } else {
-      var zx = vw / DESIGN_W;
-      var zy = vh / DESIGN_H;
-      var z = Math.min(zx, zy) * 0.92;
-      el.style.zoom = z;
-      document.body.style.background = '#e5e5e5';
-      document.body.style.minHeight = '100vh';
-      document.body.style.alignItems = zy < zx ? 'flex-start' : 'center';
-      document.body.style.overflow = 'hidden';
-    }
-  }
-
-  applyZoom();
-  window.addEventListener('resize', applyZoom);
-  window.addEventListener('orientationchange',
-    function () { setTimeout(applyZoom, 300); });
-})();
-</script>
+<script src="js/core/zoom.js"></script>
+<script>applyZoom({ designW: 390, designH: 844 });</script>
 </body>
 </html>

@@ -6,6 +6,7 @@
 <title>ShopperNetwork Prototype</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="js/core/utils.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -401,11 +402,7 @@ if (window.pdfjsLib) {
 }
 
 // ── Render a single PDF page to a canvas, return as an img element ──
-function resolveURL(url) {
-  if (!url) return '';
-  if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  return url.replace(/^\/+/, '');
-}
+// resolveURL loaded from js/core/utils.js
 
 function renderPdfPage(page, slideWidth) {
   var viewport = page.getViewport({ scale: 1 });
@@ -524,33 +521,7 @@ function isPdfUrl(url) {
 })();
 </script>
 
-<script>
-// ── CSS ZOOM SCALING ──────────────────────────────────────────────
-(function () {
-  var DESIGN_W = 375;
-
-  function applyZoom() {
-    var el = document.getElementById('phone');
-    if (!el) return;
-
-    var vw = window.innerWidth;
-    var isMobile = vw < 768;
-
-    if (isMobile) {
-      el.style.zoom = vw / DESIGN_W;
-      document.body.style.background = 'white';
-    } else {
-      el.style.zoom = Math.min(vw / DESIGN_W, 1);
-      document.body.style.background = '#e5e5e5';
-    }
-  }
-
-  applyZoom();
-  window.addEventListener('resize', applyZoom);
-  window.addEventListener('orientationchange', function () {
-    setTimeout(applyZoom, 300);
-  });
-})();
-</script>
+<script src="js/core/zoom.js"></script>
+<script>applyZoom({ designW: 375, scrollable: true });</script>
 </body>
 </html>

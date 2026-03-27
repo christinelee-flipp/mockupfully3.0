@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Domination Prototype</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;800&display=swap" rel="stylesheet">
+<script src="js/core/utils.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -955,13 +956,8 @@ async function init() {
   // Fallback to URL params
   if (!p) p = getParams();
 
-  // Resolve uploaded asset paths — strips leading slashes, passes http URLs through
-  function resolveAssetURL(url) {
-    if (!url) return '';
-    if (url.startsWith('http://') || url.startsWith('https://')) return url;
-    if (url.startsWith('/')) url = url.replace(/^\/+/, '');
-    return url;
-  }
+  // resolveAssetURL is an alias for the shared resolveURL from js/core/utils.js
+  var resolveAssetURL = resolveURL;
 
   const C = COUNTRIES[p.country] || COUNTRIES.IT;
   const phone = document.getElementById('phone');
@@ -1114,45 +1110,7 @@ async function init() {
 init();
 </script>
 
-<script>
-(function () {
-  var DESIGN_W = 390;
-  var DESIGN_H = 844;
-
-  function applyZoom() {
-    var el = document.getElementById('phone')
-      || document.getElementById('viewer-container')
-      || document.querySelector('.phone');
-    if (!el) return;
-
-    var vw = window.innerWidth;
-    var vh = window.innerHeight;
-    var isMobile = vw < 768;
-
-    if (isMobile) {
-      var z = vw / DESIGN_W;
-      el.style.zoom = z;
-      document.body.style.background = 'white';
-      document.body.style.minHeight = '100vh';
-      document.body.style.overflow = 'visible';
-      document.body.style.alignItems = 'flex-start';
-    } else {
-      var zx = vw / DESIGN_W;
-      var zy = vh / DESIGN_H;
-      var z = Math.min(zx, zy) * 0.92;
-      el.style.zoom = z;
-      document.body.style.background = '#e5e5e5';
-      document.body.style.minHeight = '100vh';
-      document.body.style.alignItems = zy < zx ? 'flex-start' : 'center';
-      document.body.style.overflow = 'hidden';
-    }
-  }
-
-  applyZoom();
-  window.addEventListener('resize', applyZoom);
-  window.addEventListener('orientationchange',
-    function () { setTimeout(applyZoom, 300); });
-})();
-</script>
+<script src="js/core/zoom.js"></script>
+<script>applyZoom({ designW: 390, designH: 844 });</script>
 </body>
 </html>

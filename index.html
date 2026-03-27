@@ -8,6 +8,7 @@
 <!-- cache-bust: v3 -->
 <link rel="stylesheet" href="brand.css">
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="js/core/utils.js"></script>
 <style>
   :root {
     --navy:     #000C52;
@@ -714,7 +715,7 @@ let urlModalQR = null;
 // ── LOAD ──────────────────────────────────────────────────────────
 async function loadCampaigns() {
   try {
-    const res = await fetch(WEBHOOKS.getAll);
+    const res = await fetch(WEBHOOKS.getAll + '?_t=' + Date.now());
     const text = await res.text();
 
     let data;
@@ -781,21 +782,7 @@ function buildC2GURL(c, viewerType) {
   return `click2go-prototype.html?id=${encodeURIComponent(c.campaignID)}&viewer=${encodeURIComponent(viewerType || c.viewer || 'marketplace')}`;
 }
 
-// ── FORMAT DATE ───────────────────────────────────────────────────
-function fmtDate(str) {
-  if (!str) return '-';
-  const d = new Date(str);
-  if (isNaN(d)) return str;
-  return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
-}
-
-// ── COUNTRY FLAG ─────────────────────────────────────────────────
-const FLAGS = {
-  AT:'🇦🇹', AU:'🇦🇺', BG:'🇧🇬', BR:'🇧🇷',
-  CA:'🇨🇦', DE:'🇩🇪', ES:'🇪🇸', FR:'🇫🇷',
-  HU:'🇭🇺', IT:'🇮🇹', NL:'🇳🇱', PL:'🇵🇱',
-  PT:'🇵🇹', RO:'🇷🇴', SE:'🇸🇪', US:'🇺🇸'
-};
+// fmtDate, FLAGS loaded from js/core/utils.js
 
 // ── FORMAT TYPE ──────────────────────────────────────────────────
 function formatType(type) {
@@ -1019,9 +1006,7 @@ function renderCards(campaigns) {
   }).join('');
 }
 
-function esc(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+// esc loaded from js/core/utils.js
 
 // ── FILTER ───────────────────────────────────────────────────────
 function filterTable() {
