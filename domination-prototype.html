@@ -1079,8 +1079,12 @@ async function init() {
   });
 
   // Ghostover — priority: 1) campaign JSON, 2) URL params
-  var ghostoverURL = resolveAssetURL(p.ghostoverURL || '');
-  console.log('ghostoverURL:', ghostoverURL);
+  var ghostoverURL = '';
+  if (campaignData && campaignData.ghostoverURL) {
+    ghostoverURL = campaignData.ghostoverURL;
+  } else if (p && p.ghostoverURL) {
+    ghostoverURL = p.ghostoverURL;
+  }
 
   if (ghostoverURL) {
     setTimeout(function() {
@@ -1088,21 +1092,26 @@ async function init() {
       var video = document.getElementById('ghostover-video');
       if (!g || !video) return;
 
-      video.src = ghostoverURL;
+      /* Set src and show overlay immediately
+         without waiting for canplay —
+         the video plays as soon as it can */
+      video.src = resolveURL(ghostoverURL);
       video.load();
 
-      video.addEventListener('canplay', function() {
-        g.classList.add('visible');
-        video.play().catch(function(){});
-      }, { once: true });
+      /* Show overlay immediately — video will
+         start playing once loaded */
+      g.classList.add('visible');
 
-      /* Fallback: show after 2s if canplay never fires */
-      setTimeout(function() {
-        if (!g.classList.contains('visible')) {
-          g.classList.add('visible');
-          video.play().catch(function(){});
-        }
-      }, 2000);
+      /* Try to play — catch any autoplay
+         policy rejections silently */
+      var playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(function(err) {
+          console.log('Autoplay blocked:', err.message);
+          /* Video is still visible, user can
+             tap to play if autoplay is blocked */
+        });
+      }
     }, 800);
   }
 }

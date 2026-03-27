@@ -31,6 +31,9 @@ jobs:
             **/.vscode/**
             **/.DS_Store
             **/*.log
+            **/*.md
+            **/CLAUDE.md
+            **/BRAND.md
             **/ffmpeg-test.php
             **/debug-log.php
             **/upload-check.php
