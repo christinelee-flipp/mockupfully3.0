@@ -10,20 +10,22 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
-  html, body {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
+  html {
+    height: auto;
+    overflow: auto;
   }
 
   body {
+    height: auto;
+    min-height: 100vh;
+    overflow: auto;
     background: #e5e5e5;
     display: flex;
     justify-content: center;
     align-items: flex-start;
     font-family: 'Plus Jakarta Sans', sans-serif;
-    min-height: 100vh;
+    margin: 0;
+    padding: 0;
   }
 
   /* ── PHONE FRAME ── */
@@ -34,39 +36,12 @@
     flex-direction: column;
     background: #fff;
     flex-shrink: 0;
-  }
-
-  /* ── STATUS BAR ── */
-  .status-bar {
-    width: 375px;
-    height: 38px;
-    background: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 16px 0;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    flex-shrink: 0;
-  }
-  .status-time {
-    font-family: 'SF Pro Text', 'Plus Jakarta Sans', sans-serif;
-    font-weight: 600;
-    font-size: 15px;
-    color: #000;
-  }
-  .status-icons {
-    display: flex;
-    align-items: center;
-    gap: 5px;
+    overflow: visible;
   }
 
   /* ── SCROLLABLE CONTENT ── */
   .article-content {
-    flex: 1;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow: visible;
     display: flex;
     flex-direction: column;
   }
@@ -245,93 +220,11 @@
     background: rgba(255,255,255,1);
   }
 
-  /* ── SAFARI FOOTER ── */
-  .safari-footer {
-    width: 375px;
-    height: 83px;
-    background: #f7f7f7;
-    border-top: 0.5px solid #c8c8c8;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-top: 8px;
-    gap: 8px;
-    position: sticky;
-    bottom: 0;
-    z-index: 10;
-  }
-  .safari-address-bar {
-    width: 321px;
-    height: 42px;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.12);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 12px;
-  }
-  .safari-aa {
-    font-size: 12px;
-    font-weight: 600;
-    color: #555;
-  }
-  .safari-url {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    flex: 1;
-    justify-content: center;
-    font-size: 13px;
-    color: #000;
-  }
-  .safari-nav {
-    width: 321px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .safari-nav svg {
-    width: 24px;
-    height: 24px;
-    display: block;
-  }
-  .safari-home-indicator {
-    width: 134px;
-    height: 5px;
-    background: #000;
-    border-radius: 100px;
-    margin: 0 auto;
-  }
 </style>
 </head>
 <body>
 
 <div class="phone" id="phone">
-
-  <!-- Status bar -->
-  <div class="status-bar">
-    <span class="status-time">10:10</span>
-    <div class="status-icons">
-      <svg width="17" height="12" viewBox="0 0 17 12" fill="none">
-        <rect x="0" y="7" width="3" height="5" rx="0.5" fill="#000"/>
-        <rect x="4.5" y="5" width="3" height="7" rx="0.5" fill="#000"/>
-        <rect x="9" y="2.5" width="3" height="9.5" rx="0.5" fill="#000"/>
-        <rect x="13.5" y="0" width="3" height="12" rx="0.5" fill="#000"/>
-      </svg>
-      <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
-        <path d="M8 9.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3z" fill="#000"/>
-        <path d="M4.1 7.1C5.1 6.1 6.5 5.5 8 5.5s2.9.6 3.9 1.6" stroke="#000" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-        <path d="M1.3 4.3C3 2.6 5.4 1.5 8 1.5s5 1.1 6.7 2.8" stroke="#000" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-      </svg>
-      <svg width="28" height="13" viewBox="0 0 28 13" fill="none">
-        <rect x="0.5" y="0.5" width="23" height="12" rx="2.5" stroke="#000" stroke-opacity="0.35"/>
-        <rect x="2" y="2" width="18" height="9" rx="1.5" fill="#000"/>
-        <path d="M24.5 4.5V8.5" stroke="#000" stroke-opacity="0.4" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-    </div>
-  </div>
 
   <!-- Scrollable article content -->
   <div class="article-content" id="article-content">
@@ -371,48 +264,6 @@
 
   </div>
 
-  <!-- Safari footer -->
-  <div class="safari-footer">
-    <div class="safari-address-bar">
-      <span class="safari-aa">AA</span>
-      <div class="safari-url">
-        <svg width="12" height="14" viewBox="0 0 12 14" fill="none">
-          <rect x="1" y="6" width="10" height="7" rx="1.5" stroke="#000" stroke-width="1.2"/>
-          <path d="M3 6V4a3 3 0 016 0v2" stroke="#000" stroke-width="1.2" stroke-linecap="round"/>
-        </svg>
-        <span id="safari-domain">kurier.at</span>
-      </div>
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M13.5 8A5.5 5.5 0 113.5 5" stroke="#555" stroke-width="1.3" stroke-linecap="round"/>
-        <path d="M1.5 5h3.5v3.5" stroke="#555" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </div>
-    <div class="safari-nav">
-      <!-- Back -->
-      <svg viewBox="0 0 24 24" fill="none">
-        <path d="M15 5l-7 7 7 7" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <!-- Forward (grey/disabled) -->
-      <svg viewBox="0 0 24 24" fill="none">
-        <path d="M9 5l7 7-7 7" stroke="#C7C7CC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <!-- Share -->
-      <svg viewBox="0 0 24 24" fill="none">
-        <path d="M12 3v12" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round"/>
-        <path d="M8 7l4-4 4 4" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M4 14v4a2 2 0 002 2h12a2 2 0 002-2v-4" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round"/>
-      </svg>
-      <!-- Bookmark -->
-      <svg viewBox="0 0 24 24" fill="none">
-        <path d="M6 4h12a1 1 0 011 1v15l-7-4-7 4V5a1 1 0 011-1z" stroke="#007AFF" stroke-width="1.8" stroke-linejoin="round"/>
-      </svg>
-      <!-- Tabs -->
-      <svg viewBox="0 0 24 24" fill="none">
-        <rect x="4" y="4" width="16" height="16" rx="2" stroke="#007AFF" stroke-width="1.8"/>
-        <rect x="7" y="7" width="10" height="10" rx="1.5" stroke="#007AFF" stroke-width="1.3"/>
-      </svg>
-    </div>
-  </div>
 
 </div>
 
@@ -691,9 +542,6 @@ function renderCarouselBox(imageUrls, experience) {
         document.getElementById('top-img').src = basePath + 'top.png';
         document.getElementById('bottom-img').src = basePath + 'bottom.png';
 
-        var domain = PUBLISHER_DOMAINS[pub] || (pub + '.com');
-        document.getElementById('safari-domain').textContent = domain;
-
         // Collect image/PDF URLs from image1..image9
         var urls = [];
         for (var i = 1; i <= 9; i++) {
@@ -774,6 +622,11 @@ function renderCarouselBox(imageUrls, experience) {
 </script>
 
 <script src="js/core/zoom.js"></script>
-<script>applyZoom({ designW: 375, scrollable: true });</script>
+<script>
+applyZoom({ designW: 375, scrollable: true });
+/* ShopperNetwork scrolls naturally — never lock overflow */
+document.body.style.overflow = 'visible';
+document.documentElement.style.overflow = 'auto';
+</script>
 </body>
 </html>
