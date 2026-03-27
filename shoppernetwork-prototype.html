@@ -61,10 +61,10 @@
   /* ── CAROUSEL BOX ── */
   .carousel-box {
     width: 375px;
-    height: 554px;
+    height: auto;
     flex-shrink: 0;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     padding: 12px 0;
     background: white;
@@ -73,7 +73,7 @@
 
   .carousel-rectangular {
     width: 375px;
-    height: 530px;
+    height: auto;
     overflow: hidden;
     position: relative;
     flex-shrink: 0;
@@ -82,34 +82,36 @@
   .carousel-track {
     display: flex;
     flex-direction: row;
-    height: 530px;
+    height: auto;
     transition: transform 0.35s ease;
     will-change: transform;
     cursor: grab;
   }
   .carousel-track:active { cursor: grabbing; }
 
-  .carousel-slide {
-    height: 530px;
+  .carousel-slide,
+  .carousel-slide:first-child,
+  .carousel-slide:not(:first-child) {
+    width: 375px;
+    height: auto;
+    min-height: 0;
     flex-shrink: 0;
     overflow: hidden;
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: flex-start;
   }
-  .carousel-slide:first-child { width: 388px; }
-  .carousel-slide:not(:first-child) { width: 351px; }
 
   .carousel-slide img {
     width: calc(100% - 32px);
     padding: 0 16px;
     height: auto;
-    max-height: 530px;
     object-fit: contain;
     object-position: center;
     display: block;
     pointer-events: none;
     user-select: none;
+    box-sizing: border-box;
   }
 
   /* Slider bar */
@@ -118,26 +120,29 @@
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 34px;
-    background: rgba(0, 0, 0, 0.32);
+    height: auto;
+    background: rgba(0,0,0,0.32);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 6px 16px;
+    padding: 6px 0;
     box-sizing: border-box;
+    transform: none;
   }
   .carousel-dot {
+    background-color: #ffffff;
+    border: none;
+    border-radius: 50%;
     width: 22px;
     height: 22px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.4);
-    flex-shrink: 0;
-    transition: background 0.2s;
-    padding: 0;
     margin: 0;
+    padding: 0;
+    flex-shrink: 0;
+    opacity: 0.4;
+    transition: opacity 0.2s;
   }
   .carousel-dot.active {
-    background: rgba(255,255,255,1);
+    opacity: 1;
   }
 
   /* Outbrain arrow overrides */
@@ -245,16 +250,23 @@ function initCarousel() {
 
   var SLIDE_OFFSETS = [0];
   for (var i = 1; i < totalSlides; i++) {
-    SLIDE_OFFSETS.push(SLIDE_OFFSETS[i - 1] + (i === 1 ? 388 : 351));
+    SLIDE_OFFSETS.push(i * 375);
   }
 
+  var isSmall = totalSlides < 8;
   slider.innerHTML = '';
-  for (var i = 0; i < totalSlides; i++) {
+  if (isSmall) {
+    slider.style.justifyContent = 'center';
+    slider.style.gap = '16px';
+  }
+
+  for (var i = 0; i < totalSlides && i < 10; i++) {
     var dot = document.createElement('div');
     dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
-    if (i === 0) dot.style.marginLeft = '16px';
-    if (i === totalSlides - 1) dot.style.marginRight = '16px';
-    if (i >= 10) dot.style.display = 'none';
+    if (!isSmall) {
+      if (i === 0) dot.style.marginLeft = '16px';
+      if (i === totalSlides - 1 || i === 9) dot.style.marginRight = '16px';
+    }
     slider.appendChild(dot);
   }
 
