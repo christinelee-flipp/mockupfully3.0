@@ -339,12 +339,12 @@ function buildOutbrainBox(images) {
   /* Prev arrow */
   var btnPrev = document.createElement('button');
   btnPrev.textContent = '\u2039';
-  btnPrev.style.cssText = arrowStyle + 'margin-left:4px;visibility:hidden;';
+  btnPrev.style.cssText = arrowStyle + 'margin-left:4px;opacity:0.35;';
 
   /* Next arrow */
   var btnNext = document.createElement('button');
   btnNext.textContent = '\u203A';
-  btnNext.style.cssText = arrowStyle + 'margin-right:4px;visibility:' + (images.length > 1 ? 'visible' : 'hidden') + ';';
+  btnNext.style.cssText = arrowStyle + 'margin-right:4px;opacity:' + (images.length > 1 ? '1' : '0.35') + ';';
 
   /* Dots wrapper */
   var dotsWrap = document.createElement('div');
@@ -353,7 +353,7 @@ function buildOutbrainBox(images) {
   images.forEach(function(_, i) {
     var dot = document.createElement('div');
     dot.dataset.obDot = i;
-    dot.style.cssText = 'width:18px;height:4px;border-radius:12px;background:' + (i === 0 ? '#000000' : '#c7c6ca') + ';flex-shrink:0;';
+    dot.style.cssText = 'width:18px;height:4px;border-radius:12px;background:' + (i === 0 ? '#ABAAAD' : '#E1E0E3') + ';flex-shrink:0;';
     dotsWrap.appendChild(dot);
   });
 
@@ -375,15 +375,15 @@ function buildOutbrainBox(images) {
     if (idx < 0 || idx >= total) return;
 
     slidesWrap.querySelector('[data-ob-slide="' + current + '"]').style.display = 'none';
-    dotsWrap.querySelector('[data-ob-dot="' + current + '"]').style.background = '#c7c6ca';
+    dotsWrap.querySelector('[data-ob-dot="' + current + '"]').style.background = '#E1E0E3';
 
     current = idx;
 
     slidesWrap.querySelector('[data-ob-slide="' + current + '"]').style.display = 'flex';
-    dotsWrap.querySelector('[data-ob-dot="' + current + '"]').style.background = '#000000';
+    dotsWrap.querySelector('[data-ob-dot="' + current + '"]').style.background = '#ABAAAD';
 
-    btnPrev.style.visibility = current === 0 ? 'hidden' : 'visible';
-    btnNext.style.visibility = current === total - 1 ? 'hidden' : 'visible';
+    btnPrev.style.opacity = current === 0 ? '0.35' : '1';
+    btnNext.style.opacity = current === total - 1 ? '0.35' : '1';
   }
 
   btnPrev.addEventListener('click', function() { goTo(current - 1); });
