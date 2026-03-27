@@ -529,7 +529,7 @@
     <div class="field-row cols-1">
       <div class="field">
         <div class="img-label-row">
-          <label>Ghostover URL <span class="hint">(optional interstitial image)</span></label>
+          <label>Ghostover <span class="hint">(optional full-screen overlay shown on load. Upload an image file — JPG, PNG, WebP — or paste a URL. Max 5MB.)</span></label>
           <div class="img-mode-toggle toggle-group">
             <button type="button" class="mode-btn toggle-btn" data-mode="url" data-field="ghostoverURL">URL</button>
             <button type="button" class="mode-btn active" data-mode="upload" data-field="ghostoverURL">Upload</button>
@@ -854,6 +854,12 @@ function switchImgMode(fieldId, mode, idx) {
 async function handleFileUpload(fileInput, fieldId, previewImg, previewIcon) {
   const file = fileInput.files[0];
   if (!file) return;
+
+  if (file.size > 5 * 1024 * 1024) {
+    alert('File too large. Max size is 5MB.');
+    fileInput.value = '';
+    return;
+  }
 
   const filenameEl  = document.getElementById(`upload-filename-${fieldId}`);
   const statusEl    = document.getElementById(`upload-status-${fieldId}`);
