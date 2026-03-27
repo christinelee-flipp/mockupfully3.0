@@ -306,68 +306,77 @@ function isPdfUrl(url) {
 
 // ── OUTBRAIN EXPERIENCE ───────────────────────────────────────────
 function buildOutbrainBox(images) {
-  /* Outer wrapper — same width as article, provides left/right margin */
+  var isSmall = images.length < 8;
+
+  /* Outer wrapper — full width of article */
   var wrapper = document.createElement('div');
-  wrapper.style.cssText = 'width:375px;padding:0 16px;box-sizing:border-box;background:transparent;';
+  wrapper.style.cssText = 'width:100%;box-sizing:border-box;';
 
-  /* Card */
-  var card = document.createElement('div');
-  card.style.cssText = 'width:100%;background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.15);';
+  /* Container card */
+  var container = document.createElement('div');
+  container.style.cssText = 'position:relative;width:94%;margin:0 auto;border-radius:18px;box-shadow:0px 0px 10px rgba(0,0,0,0.4);overflow:hidden;';
 
-  /* Slides area */
-  var slidesArea = document.createElement('div');
-  slidesArea.style.cssText = 'position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;background:#F5F5F5;';
+  /* Slides wrapper — margin-bottom creates space for the absolute pagination bar */
+  var slidesWrap = document.createElement('div');
+  slidesWrap.style.cssText = 'margin-bottom:44px;';
 
   images.forEach(function(src, i) {
     var slide = document.createElement('div');
-    slide.style.cssText = 'position:absolute;inset:0;display:' + (i === 0 ? 'flex' : 'none') + ';align-items:center;justify-content:center;background:white;';
     slide.dataset.obSlide = i;
+    slide.style.cssText = 'display:' + (i === 0 ? 'flex' : 'none') + ';justify-content:center;';
 
     var img = document.createElement('img');
     img.src = src;
     img.alt = 'Page ' + (i + 1);
     img.draggable = false;
-    img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;user-select:none;';
+    img.style.cssText = 'width:100%;max-width:100%;height:auto;object-fit:contain;object-position:center;display:block;pointer-events:none;user-select:none;';
 
     slide.appendChild(img);
-    slidesArea.appendChild(slide);
+    slidesWrap.appendChild(slide);
   });
-  card.appendChild(slidesArea);
+  container.appendChild(slidesWrap);
 
-  /* Bottom nav bar */
-  var navBar = document.createElement('div');
-  navBar.style.cssText = 'width:100%;height:56px;background:white;display:flex;align-items:center;justify-content:space-between;padding:0 16px;box-sizing:border-box;';
-
-  /* Prev arrow */
+  /* Left arrow */
   var btnPrev = document.createElement('button');
   btnPrev.textContent = '\u2039';
-  btnPrev.style.cssText = 'background:none;border:none;font-size:24px;color:#374151;cursor:pointer;padding:0;line-height:1;opacity:1;-webkit-tap-highlight-color:transparent;';
-  btnPrev.disabled = true;
+  btnPrev.dataset.obArrow = 'prev';
+  btnPrev.style.cssText = 'position:absolute;bottom:8px;top:inherit;left:4px;width:28px;height:28px;border-radius:50%;background:#ffffff;color:#000000;font-size:14px;font-weight:800;border:none;cursor:pointer;z-index:100;display:none;justify-content:center;align-items:center;-webkit-tap-highlight-color:transparent;';
+  container.appendChild(btnPrev);
 
-  /* Dots */
-  var dotsWrap = document.createElement('div');
-  dotsWrap.style.cssText = 'display:flex;align-items:center;gap:6px;flex:1;justify-content:center;';
+  /* Right arrow */
+  var btnNext = document.createElement('button');
+  btnNext.textContent = '\u203A';
+  btnNext.dataset.obArrow = 'next';
+  btnNext.style.cssText = 'position:absolute;bottom:8px;top:inherit;right:4px;width:28px;height:28px;border-radius:50%;background:#ffffff;color:#000000;font-size:14px;font-weight:800;border:none;cursor:pointer;z-index:100;display:' + (images.length > 1 ? 'flex' : 'none') + ';justify-content:center;align-items:center;-webkit-tap-highlight-color:transparent;';
+  container.appendChild(btnNext);
+
+  /* Pagination bar */
+  var paginationBar = document.createElement('div');
+  paginationBar.style.cssText = 'position:absolute;bottom:0;width:100%;height:32px;padding:6px 0;box-sizing:border-box;background:#efeef1;display:flex;align-items:center;' + (isSmall ? 'justify-content:center;gap:8px;' : 'justify-content:space-between;');
 
   images.forEach(function(_, i) {
     var dot = document.createElement('div');
     dot.dataset.obDot = i;
-    dot.style.cssText = i === 0
-      ? 'width:32px;height:4px;border-radius:2px;background:#000C52;transition:all 0.2s;flex-shrink:0;'
-      : 'width:16px;height:4px;border-radius:2px;background:#D1D5DB;transition:all 0.2s;flex-shrink:0;';
-    dotsWrap.appendChild(dot);
+
+    var marginStyle = '';
+    if (!isSmall) {
+      if (i === 0) {
+        marginStyle = 'margin-left:48px;';
+      } else if (i === images.length - 1) {
+        marginStyle = 'margin-right:48px;';
+      }
+    } else {
+      if (i === images.length - 1) {
+        marginStyle = 'margin-right:56px;';
+      }
+    }
+
+    dot.style.cssText = 'width:18px;height:4px;border-radius:12px;background:' + (i === 0 ? '#000000' : '#abaaad') + ';flex-shrink:0;' + marginStyle;
+
+    paginationBar.appendChild(dot);
   });
-
-  /* Next arrow */
-  var btnNext = document.createElement('button');
-  btnNext.textContent = '\u203A';
-  btnNext.style.cssText = 'background:none;border:none;font-size:24px;color:#374151;cursor:pointer;padding:0;line-height:1;opacity:1;-webkit-tap-highlight-color:transparent;';
-  if (images.length <= 1) btnNext.disabled = true;
-
-  navBar.appendChild(btnPrev);
-  navBar.appendChild(dotsWrap);
-  navBar.appendChild(btnNext);
-  card.appendChild(navBar);
-  wrapper.appendChild(card);
+  container.appendChild(paginationBar);
+  wrapper.appendChild(container);
 
   /* Navigation logic */
   var current = 0;
@@ -376,23 +385,16 @@ function buildOutbrainBox(images) {
   function goTo(idx) {
     if (idx < 0 || idx >= total) return;
 
-    slidesArea.querySelector('[data-ob-slide="' + current + '"]').style.display = 'none';
-    slidesArea.querySelector('[data-ob-slide="' + idx + '"]').style.display = 'flex';
-
-    var prevDot = dotsWrap.querySelector('[data-ob-dot="' + current + '"]');
-    prevDot.style.width = '16px';
-    prevDot.style.background = '#D1D5DB';
-
-    var nextDot = dotsWrap.querySelector('[data-ob-dot="' + idx + '"]');
-    nextDot.style.width = '32px';
-    nextDot.style.background = '#000C52';
+    slidesWrap.querySelector('[data-ob-slide="' + current + '"]').style.display = 'none';
+    paginationBar.querySelector('[data-ob-dot="' + current + '"]').style.background = '#abaaad';
 
     current = idx;
 
-    btnPrev.disabled = current === 0;
-    btnNext.disabled = current === total - 1;
-    btnPrev.style.opacity = current === 0 ? '0.3' : '1';
-    btnNext.style.opacity = current === total - 1 ? '0.3' : '1';
+    slidesWrap.querySelector('[data-ob-slide="' + current + '"]').style.display = 'flex';
+    paginationBar.querySelector('[data-ob-dot="' + current + '"]').style.background = '#000000';
+
+    btnPrev.style.display = current === 0 ? 'none' : 'flex';
+    btnNext.style.display = current === total - 1 ? 'none' : 'flex';
   }
 
   btnPrev.addEventListener('click', function() { goTo(current - 1); });
@@ -400,10 +402,10 @@ function buildOutbrainBox(images) {
 
   /* Touch swipe */
   var txStart = 0;
-  slidesArea.addEventListener('touchstart', function(e) {
+  slidesWrap.addEventListener('touchstart', function(e) {
     txStart = e.touches[0].clientX;
   }, { passive: true });
-  slidesArea.addEventListener('touchend', function(e) {
+  slidesWrap.addEventListener('touchend', function(e) {
     var diff = txStart - e.changedTouches[0].clientX;
     if (Math.abs(diff) > 40) {
       if (diff > 0) goTo(current + 1);
@@ -411,10 +413,10 @@ function buildOutbrainBox(images) {
     }
   }, { passive: true });
 
-  /* Mouse drag for desktop */
+  /* Mouse drag */
   var mxStart = 0;
   var dragging = false;
-  slidesArea.addEventListener('mousedown', function(e) {
+  slidesWrap.addEventListener('mousedown', function(e) {
     mxStart = e.clientX;
     dragging = true;
   });
