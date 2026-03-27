@@ -485,36 +485,52 @@
   .ghostover {
     position: absolute;
     inset: 0;
-    z-index: 100;
+    z-index: 9999;
     display: none;
     flex-direction: column;
     align-items: center;
     justify-content: center;
   }
-  .ghostover.visible { display: flex; }
+  .ghostover.visible {
+    display: flex;
+  }
   .ghostover-bg {
-    position: absolute; inset: 0;
+    position: absolute;
+    inset: 0;
     background: rgba(0,0,0,0.75);
+    z-index: 1;
   }
   .ghostover-content {
-    position: relative; z-index: 1;
+    position: relative;
+    z-index: 2;
     width: 327px;
     border-radius: 12px;
     overflow: hidden;
   }
   .ghostover-close {
     position: absolute;
-    top: 8px; right: 8px;
-    width: 32px; height: 32px;
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
     background: rgba(0,0,0,0.55);
     border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; z-index: 2;
-    color: white; font-size: 18px; line-height: 1;
-    border: none; outline: none;
-    font-family: sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 3;
+    color: white;
+    font-size: 18px;
+    border: none;
+    outline: none;
   }
-  .ghostover-img { width: 100%; display: block; }
+  .ghostover-img {
+    width: 100%;
+    display: block;
+    max-height: 80vh;
+    object-fit: contain;
+  }
 </style>
 </head>
 <body>
@@ -1081,50 +1097,23 @@ async function init() {
   // Ghostover — uses p which is already set from either fetch or URL params
   var ghostoverURL = p.ghostoverURL || '';
 
-  console.log('ghostover check:',
-    'ghostoverURL=', ghostoverURL,
-    'p.ghostoverURL=', p.ghostoverURL);
-
   if (ghostoverURL) {
-    console.log('ghostover: starting 800ms timer');
     setTimeout(function() {
-      console.log('ghostover: timer fired');
-
       var g = document.getElementById('ghostover');
       var video = document.getElementById('ghostover-video');
+      if (!g || !video) return;
 
-      console.log('ghostover: g=', g, 'video=', video);
-
-      if (!g || !video) {
-        console.log('ghostover: MISSING ELEMENTS');
-        return;
-      }
-
-      var resolvedURL = resolveURL(ghostoverURL);
-      console.log('ghostover: resolvedURL=', resolvedURL);
-
-      video.src = resolvedURL;
+      video.src = resolveURL(ghostoverURL);
       video.load();
-
-      console.log('ghostover: adding visible class');
       g.classList.add('visible');
-      console.log('ghostover: g classes=', g.className);
-      console.log('ghostover: g display=',
-        window.getComputedStyle(g).display);
 
       var playPromise = video.play();
       if (playPromise !== undefined) {
-        playPromise
-          .then(function() {
-            console.log('ghostover: video playing');
-          })
-          .catch(function(err) {
-            console.log('ghostover: play blocked:', err.message);
-          });
+        playPromise.catch(function(err) {
+          console.warn('Ghostover autoplay blocked:', err.message);
+        });
       }
     }, 800);
-  } else {
-    console.log('ghostover: no URL set, skipping');
   }
 }
 
