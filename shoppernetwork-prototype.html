@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>ShopperNetwork Prototype</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="js/core/utils.js"></script>
 <style>
@@ -132,6 +133,33 @@
     background: rgba(255,255,255,1);
   }
 
+  /* Outbrain arrow overrides */
+  .ob-arrow {
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    margin: 0 !important;
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 50% !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    flex-shrink: 0;
+    cursor: pointer;
+    --swiper-navigation-size: 14px;
+  }
+  .ob-arrow::after {
+    font-size: 14px !important;
+    font-weight: 800 !important;
+    color: #000000 !important;
+  }
+  .ob-arrow.swiper-button-prev {
+    margin-left: 4px !important;
+  }
+  .ob-arrow.swiper-button-next {
+    margin-right: 4px !important;
+  }
 
 </style>
 </head>
@@ -333,18 +361,17 @@ function buildOutbrainBox(images) {
   });
   container.appendChild(slidesWrap);
 
-  /* Arrow shared style */
-  var arrowStyle = 'background:#ffffff;border:none;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#000000;cursor:pointer;flex-shrink:0;z-index:2;-webkit-tap-highlight-color:transparent;';
-
   /* Prev arrow */
-  var btnPrev = document.createElement('button');
-  btnPrev.textContent = '\u2039';
-  btnPrev.style.cssText = arrowStyle + 'margin-left:4px;opacity:0.35;';
+  var btnPrev = document.createElement('div');
+  btnPrev.className = 'swiper-button-prev ob-arrow';
+  btnPrev.dataset.obArrow = 'prev';
+  btnPrev.style.opacity = '0.35';
 
   /* Next arrow */
-  var btnNext = document.createElement('button');
-  btnNext.textContent = '\u203A';
-  btnNext.style.cssText = arrowStyle + 'margin-right:4px;opacity:' + (images.length > 1 ? '1' : '0.35') + ';';
+  var btnNext = document.createElement('div');
+  btnNext.className = 'swiper-button-next ob-arrow';
+  btnNext.dataset.obArrow = 'next';
+  btnNext.style.opacity = images.length > 1 ? '1' : '0.35';
 
   /* Dots wrapper */
   var dotsWrap = document.createElement('div');
