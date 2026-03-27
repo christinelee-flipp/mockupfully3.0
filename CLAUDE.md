@@ -69,6 +69,25 @@ The prototype URL is the data contract between `domination-form.html` and `domin
 - **Carousel:** Touch/mouse drag with 50px snap threshold, CSS transition disabled during drag for smooth feel.
 - **Ghostover:** Optional interstitial modal triggered 800ms after prototype load.
 
+## Deployment
+
+### Current workflow (temporary)
+Files are manually uploaded via FTP using the VS Code SFTP extension. Always deploy to staging first and test before touching production.
+
+### Planned workflow (GitHub Actions -- to be set up after JS refactor is complete)
+- Branch: staging -> auto-deploys to Staging-Mockupfully3.0/
+- Branch: main -> auto-deploys to Mockupfully3.0/
+- Trigger: every git push
+- Claude Code always works on staging branch
+- Merge to main only after staging is verified
+
+When setting up GitHub Actions, the workflow file will live at: .github/workflows/deploy.yml
+
+FTP credentials will be stored as GitHub Secrets:
+  FTP_SERVER, FTP_USERNAME, FTP_PASSWORD, FTP_STAGING_PATH, FTP_PRODUCTION_PATH
+
+Do not set this up yet -- complete the JS refactor first.
+
 ## Architecture Rules
 
 These rules apply to ALL new code in this project.

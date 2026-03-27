@@ -24,7 +24,8 @@
     var h = opts.designH || DEFAULT_H;
     var scrollable = opts.scrollable || false;
 
-    var el = document.getElementById('phone')
+    var el = opts.el
+      || document.getElementById('phone')
       || document.getElementById('viewer-container')
       || document.querySelector('.phone');
     if (!el) return;
