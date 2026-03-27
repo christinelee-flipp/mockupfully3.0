@@ -1075,6 +1075,13 @@ async function init() {
 
   // Ghostover — priority: 1) campaign JSON, 2) URL params
   var ghostoverURL = p.ghostoverURL || '';
+  console.log('ghostoverURL:', ghostoverURL);
+
+  // Fix relative paths from legacy uploads
+  if (ghostoverURL && !ghostoverURL.startsWith('http') && !ghostoverURL.startsWith('/')) {
+    ghostoverURL = '/' + ghostoverURL;
+  }
+
   if (ghostoverURL) {
     setTimeout(function() {
       var g = document.getElementById('ghostover');
@@ -1086,15 +1093,16 @@ async function init() {
 
       video.addEventListener('canplay', function() {
         g.classList.add('visible');
-        video.play();
+        video.play().catch(function(){});
       }, { once: true });
 
-      /* Fallback: show after 1.5s even if canplay never fires */
+      /* Fallback: show after 2s if canplay never fires */
       setTimeout(function() {
         if (!g.classList.contains('visible')) {
           g.classList.add('visible');
+          video.play().catch(function(){});
         }
-      }, 1500);
+      }, 2000);
     }, 800);
   }
 }

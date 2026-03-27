@@ -138,7 +138,7 @@ if ($isImage) {
     }
 
     http_response_code(200);
-    echo json_encode(['success' => true, 'url' => 'uploads/' . $folder . '/' . $filename]);
+    echo json_encode(['success' => true, 'url' => '/Mockupfully3.0/uploads/' . $folder . '/' . $filename]);
     exit;
 }
 
@@ -154,7 +154,7 @@ if ($alreadyMp4) {
     }
 
     http_response_code(200);
-    echo json_encode(['success' => true, 'url' => 'uploads/' . $folder . '/' . $filename]);
+    echo json_encode(['success' => true, 'url' => '/Mockupfully3.0/uploads/' . $folder . '/' . $filename]);
     exit;
 }
 
@@ -206,7 +206,7 @@ if (file_exists($mp4Path) && filesize($mp4Path) > 0) {
     unlink($tempPath);
     echo json_encode([
         'success'   => true,
-        'url'       => 'uploads/' . $folder . '/' . $mp4Name,
+        'url'       => '/Mockupfully3.0/uploads/' . $folder . '/' . $mp4Name,
         'converted' => true
     ]);
 } else {
