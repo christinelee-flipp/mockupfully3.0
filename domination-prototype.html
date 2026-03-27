@@ -488,48 +488,59 @@
     z-index: 9999;
     display: none;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    align-items: stretch;
+    justify-content: flex-start;
+    background: transparent;
   }
   .ghostover.visible {
     display: flex;
   }
   .ghostover-bg {
-    position: absolute;
-    inset: 0;
-    background: rgba(0,0,0,0.75);
-    z-index: 1;
+    display: none;
   }
   .ghostover-content {
     position: relative;
-    z-index: 2;
-    width: 327px;
-    border-radius: 12px;
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
     overflow: hidden;
+    background: transparent;
+    display: flex;
+    align-items: stretch;
+  }
+  .ghostover-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    background: transparent;
   }
   .ghostover-close {
     position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 32px;
-    height: 32px;
-    background: rgba(0,0,0,0.55);
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    background: rgba(0, 0, 0, 0.55);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 3;
+    z-index: 10000;
     color: white;
     font-size: 18px;
     border: none;
     outline: none;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
   }
-  .ghostover-img {
-    width: 100%;
-    display: block;
-    max-height: 80vh;
-    object-fit: contain;
+  #ghostover,
+  .ghostover-content,
+  .ghostover-img,
+  #ghostover-video {
+    background: transparent !important;
+    background-color: transparent !important;
   }
 </style>
 </head>
@@ -670,10 +681,20 @@
 
   <!-- GHOSTOVER -->
   <div class="ghostover" id="ghostover">
-    <div class="ghostover-bg" onclick="closeGhostover()"></div>
+    <!-- Close button at top level, not inside content -->
+    <button class="ghostover-close" onclick="closeGhostover()">✕</button>
+
+    <!-- Content fills full screen -->
     <div class="ghostover-content">
-      <button class="ghostover-close" onclick="closeGhostover()">✕</button>
-      <video id="ghostover-video" class="ghostover-img" playsinline muted autoplay loop style="width:100%;height:auto;display:block;border-radius:12px;min-height:100px;"></video>
+      <video
+        id="ghostover-video"
+        class="ghostover-img"
+        playsinline
+        muted
+        autoplay
+        loop
+        style="width:100%;height:100%;object-fit:cover;display:block;background:transparent;">
+      </video>
     </div>
   </div>
 
@@ -1104,19 +1125,14 @@ async function init() {
       if (!g || !video) return;
 
       video.setAttribute('src', resolveURL(ghostoverURL));
+      video.style.cssText = '';  /* clear inline styles, let CSS handle sizing */
       video.load();
-
-      /* Force display */
-      video.style.display = 'block';
-      video.style.width = '100%';
-      video.style.minHeight = '200px';
-
       g.classList.add('visible');
 
       var playPromise = video.play();
       if (playPromise !== undefined) {
         playPromise.catch(function(err) {
-          console.warn('Ghostover autoplay blocked:', err.message);
+          console.warn('Ghostover autoplay:', err.message);
         });
       }
     }, 800);
