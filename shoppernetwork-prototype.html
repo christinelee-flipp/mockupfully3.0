@@ -306,19 +306,16 @@ function isPdfUrl(url) {
 
 // ── OUTBRAIN EXPERIENCE ───────────────────────────────────────────
 function buildOutbrainBox(images) {
-  var isSmall = images.length < 8;
-
-  /* Outer wrapper — full width of article */
+  /* Outer wrapper — full width, white bg */
   var wrapper = document.createElement('div');
   wrapper.style.cssText = 'width:100%;box-sizing:border-box;';
 
-  /* Container card */
+  /* Container card — NO overflow:hidden */
   var container = document.createElement('div');
-  container.style.cssText = 'position:relative;width:94%;margin:0 auto;border-radius:18px;box-shadow:0px 0px 10px rgba(0,0,0,0.4);overflow:hidden;';
+  container.style.cssText = 'position:relative;width:94%;margin:0 auto;border-radius:18px;box-shadow:0px 0px 10px rgba(0,0,0,0.4);';
 
-  /* Slides wrapper — margin-bottom creates space for the absolute pagination bar */
+  /* Slides wrapper — normal flow, no margin */
   var slidesWrap = document.createElement('div');
-  slidesWrap.style.cssText = 'margin-bottom:44px;';
 
   images.forEach(function(src, i) {
     var slide = document.createElement('div');
@@ -329,52 +326,44 @@ function buildOutbrainBox(images) {
     img.src = src;
     img.alt = 'Page ' + (i + 1);
     img.draggable = false;
-    img.style.cssText = 'width:100%;max-width:100%;height:auto;object-fit:contain;object-position:center;display:block;pointer-events:none;user-select:none;';
+    img.style.cssText = 'width:100%;max-width:100%;height:auto;object-fit:contain;object-position:center;display:block;pointer-events:none;user-select:none;border-radius:18px 18px 0 0;';
 
     slide.appendChild(img);
     slidesWrap.appendChild(slide);
   });
   container.appendChild(slidesWrap);
 
-  /* Left arrow */
+  /* Arrow shared style */
+  var arrowStyle = 'background:#ffffff;border:none;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#000000;cursor:pointer;flex-shrink:0;z-index:2;-webkit-tap-highlight-color:transparent;';
+
+  /* Prev arrow */
   var btnPrev = document.createElement('button');
   btnPrev.textContent = '\u2039';
-  btnPrev.dataset.obArrow = 'prev';
-  btnPrev.style.cssText = 'position:absolute;bottom:8px;top:inherit;left:4px;width:28px;height:28px;border-radius:50%;background:#ffffff;color:#000000;font-size:14px;font-weight:800;border:none;cursor:pointer;z-index:100;display:none;justify-content:center;align-items:center;-webkit-tap-highlight-color:transparent;';
-  container.appendChild(btnPrev);
+  btnPrev.style.cssText = arrowStyle + 'margin-left:4px;visibility:hidden;';
 
-  /* Right arrow */
+  /* Next arrow */
   var btnNext = document.createElement('button');
   btnNext.textContent = '\u203A';
-  btnNext.dataset.obArrow = 'next';
-  btnNext.style.cssText = 'position:absolute;bottom:8px;top:inherit;right:4px;width:28px;height:28px;border-radius:50%;background:#ffffff;color:#000000;font-size:14px;font-weight:800;border:none;cursor:pointer;z-index:100;display:' + (images.length > 1 ? 'flex' : 'none') + ';justify-content:center;align-items:center;-webkit-tap-highlight-color:transparent;';
-  container.appendChild(btnNext);
+  btnNext.style.cssText = arrowStyle + 'margin-right:4px;visibility:' + (images.length > 1 ? 'visible' : 'hidden') + ';';
 
-  /* Pagination bar */
-  var paginationBar = document.createElement('div');
-  paginationBar.style.cssText = 'position:absolute;bottom:0;width:100%;height:32px;padding:6px 0;box-sizing:border-box;background:#efeef1;display:flex;align-items:center;' + (isSmall ? 'justify-content:center;gap:8px;' : 'justify-content:space-between;');
+  /* Dots wrapper */
+  var dotsWrap = document.createElement('div');
+  dotsWrap.style.cssText = 'flex:1;display:flex;align-items:center;justify-content:center;gap:6px;';
 
   images.forEach(function(_, i) {
     var dot = document.createElement('div');
     dot.dataset.obDot = i;
-
-    var marginStyle = '';
-    if (!isSmall) {
-      if (i === 0) {
-        marginStyle = 'margin-left:48px;';
-      } else if (i === images.length - 1) {
-        marginStyle = 'margin-right:48px;';
-      }
-    } else {
-      if (i === images.length - 1) {
-        marginStyle = 'margin-right:56px;';
-      }
-    }
-
-    dot.style.cssText = 'width:18px;height:4px;border-radius:12px;background:' + (i === 0 ? '#000000' : '#abaaad') + ';flex-shrink:0;' + marginStyle;
-
-    paginationBar.appendChild(dot);
+    dot.style.cssText = 'width:18px;height:4px;border-radius:12px;background:' + (i === 0 ? '#000000' : '#c7c6ca') + ';flex-shrink:0;';
+    dotsWrap.appendChild(dot);
   });
+
+  /* Pagination bar — flex row: [prev] [dots] [next] */
+  var paginationBar = document.createElement('div');
+  paginationBar.style.cssText = 'width:100%;height:44px;background:#efeef1;display:flex;align-items:center;justify-content:space-between;border-radius:0 0 18px 18px;';
+
+  paginationBar.appendChild(btnPrev);
+  paginationBar.appendChild(dotsWrap);
+  paginationBar.appendChild(btnNext);
   container.appendChild(paginationBar);
   wrapper.appendChild(container);
 
@@ -386,15 +375,15 @@ function buildOutbrainBox(images) {
     if (idx < 0 || idx >= total) return;
 
     slidesWrap.querySelector('[data-ob-slide="' + current + '"]').style.display = 'none';
-    paginationBar.querySelector('[data-ob-dot="' + current + '"]').style.background = '#abaaad';
+    dotsWrap.querySelector('[data-ob-dot="' + current + '"]').style.background = '#c7c6ca';
 
     current = idx;
 
     slidesWrap.querySelector('[data-ob-slide="' + current + '"]').style.display = 'flex';
-    paginationBar.querySelector('[data-ob-dot="' + current + '"]').style.background = '#000000';
+    dotsWrap.querySelector('[data-ob-dot="' + current + '"]').style.background = '#000000';
 
-    btnPrev.style.display = current === 0 ? 'none' : 'flex';
-    btnNext.style.display = current === total - 1 ? 'none' : 'flex';
+    btnPrev.style.visibility = current === 0 ? 'hidden' : 'visible';
+    btnNext.style.visibility = current === total - 1 ? 'hidden' : 'visible';
   }
 
   btnPrev.addEventListener('click', function() { goTo(current - 1); });
@@ -439,7 +428,10 @@ function renderCarouselBox(imageUrls, experience) {
   if (!box) return;
 
   if (experience === 'outbrain') {
-    // Clear existing YOC content
+    box.style.background = 'white';
+    box.style.padding = '16px 0';
+    box.style.height = 'auto';
+    box.style.display = 'block';
     box.innerHTML = '';
     var obBox = buildOutbrainBox(imageUrls);
     box.appendChild(obBox);
