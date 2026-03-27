@@ -132,93 +132,6 @@
     background: rgba(255,255,255,1);
   }
 
-  /* ── OUTBRAIN EXPERIENCE ── */
-  .ob-container {
-    width: 375px;
-    height: 554px;
-    display: flex;
-    flex-direction: column;
-    background: white;
-    overflow: hidden;
-  }
-  .ob-slides-area {
-    width: 375px;
-    height: 530px;
-    flex-shrink: 0;
-    position: relative;
-    background: white;
-    overflow: hidden;
-  }
-  .ob-slide {
-    position: absolute;
-    inset: 0;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    background: white;
-  }
-  .ob-slide.active { display: flex; }
-  .ob-slide img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    display: block;
-    user-select: none;
-    pointer-events: none;
-  }
-  .ob-nav {
-    width: 375px;
-    height: 34px;
-    flex-shrink: 0;
-    background: rgba(0,0,0,0.24);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 16px;
-  }
-  .ob-arrow {
-    width: 22px;
-    height: 22px;
-    border: none;
-    background: transparent;
-    color: white;
-    font-size: 18px;
-    font-weight: 600;
-    line-height: 1;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    flex-shrink: 0;
-    -webkit-tap-highlight-color: transparent;
-    opacity: 1;
-  }
-  .ob-arrow:disabled { opacity: 0.3; }
-  .ob-dots {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex: 1;
-    padding: 0 8px;
-  }
-  .ob-dot {
-    width: 22px;
-    height: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .ob-dot-inner {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.4);
-    transition: background 0.2s;
-  }
-  .ob-dot.active .ob-dot-inner {
-    background: rgba(255,255,255,1);
-  }
 
 </style>
 </head>
@@ -393,72 +306,99 @@ function isPdfUrl(url) {
 
 // ── OUTBRAIN EXPERIENCE ───────────────────────────────────────────
 function buildOutbrainBox(images) {
-  var container = document.createElement('div');
-  container.className = 'ob-container';
+  /* Outer wrapper — same width as article, provides left/right margin */
+  var wrapper = document.createElement('div');
+  wrapper.style.cssText = 'width:375px;padding:0 16px;box-sizing:border-box;background:transparent;';
 
+  /* Card */
+  var card = document.createElement('div');
+  card.style.cssText = 'width:100%;background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.15);';
+
+  /* Slides area */
   var slidesArea = document.createElement('div');
-  slidesArea.className = 'ob-slides-area';
+  slidesArea.style.cssText = 'position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;background:#F5F5F5;';
 
   images.forEach(function(src, i) {
     var slide = document.createElement('div');
-    slide.className = 'ob-slide' + (i === 0 ? ' active' : '');
+    slide.style.cssText = 'position:absolute;inset:0;display:' + (i === 0 ? 'flex' : 'none') + ';align-items:center;justify-content:center;background:white;';
+    slide.dataset.obSlide = i;
+
     var img = document.createElement('img');
     img.src = src;
     img.alt = 'Page ' + (i + 1);
     img.draggable = false;
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;user-select:none;';
+
     slide.appendChild(img);
     slidesArea.appendChild(slide);
   });
-  container.appendChild(slidesArea);
+  card.appendChild(slidesArea);
 
-  var nav = document.createElement('div');
-  nav.className = 'ob-nav';
+  /* Bottom nav bar */
+  var navBar = document.createElement('div');
+  navBar.style.cssText = 'width:100%;height:56px;background:white;display:flex;align-items:center;justify-content:space-between;padding:0 16px;box-sizing:border-box;';
 
+  /* Prev arrow */
   var btnPrev = document.createElement('button');
-  btnPrev.className = 'ob-arrow';
   btnPrev.textContent = '\u2039';
+  btnPrev.style.cssText = 'background:none;border:none;font-size:24px;color:#374151;cursor:pointer;padding:0;line-height:1;opacity:1;-webkit-tap-highlight-color:transparent;';
   btnPrev.disabled = true;
 
+  /* Dots */
   var dotsWrap = document.createElement('div');
-  dotsWrap.className = 'ob-dots';
+  dotsWrap.style.cssText = 'display:flex;align-items:center;gap:6px;flex:1;justify-content:center;';
+
   images.forEach(function(_, i) {
     var dot = document.createElement('div');
-    dot.className = 'ob-dot' + (i === 0 ? ' active' : '');
-    var inner = document.createElement('div');
-    inner.className = 'ob-dot-inner';
-    dot.appendChild(inner);
+    dot.dataset.obDot = i;
+    dot.style.cssText = i === 0
+      ? 'width:32px;height:4px;border-radius:2px;background:#000C52;transition:all 0.2s;flex-shrink:0;'
+      : 'width:16px;height:4px;border-radius:2px;background:#D1D5DB;transition:all 0.2s;flex-shrink:0;';
     dotsWrap.appendChild(dot);
   });
 
+  /* Next arrow */
   var btnNext = document.createElement('button');
-  btnNext.className = 'ob-arrow';
   btnNext.textContent = '\u203A';
+  btnNext.style.cssText = 'background:none;border:none;font-size:24px;color:#374151;cursor:pointer;padding:0;line-height:1;opacity:1;-webkit-tap-highlight-color:transparent;';
   if (images.length <= 1) btnNext.disabled = true;
 
-  nav.appendChild(btnPrev);
-  nav.appendChild(dotsWrap);
-  nav.appendChild(btnNext);
-  container.appendChild(nav);
+  navBar.appendChild(btnPrev);
+  navBar.appendChild(dotsWrap);
+  navBar.appendChild(btnNext);
+  card.appendChild(navBar);
+  wrapper.appendChild(card);
 
+  /* Navigation logic */
   var current = 0;
   var total = images.length;
-  var slides = slidesArea.querySelectorAll('.ob-slide');
-  var dots = dotsWrap.querySelectorAll('.ob-dot');
 
   function goTo(idx) {
     if (idx < 0 || idx >= total) return;
-    slides[current].classList.remove('active');
-    dots[current].classList.remove('active');
+
+    slidesArea.querySelector('[data-ob-slide="' + current + '"]').style.display = 'none';
+    slidesArea.querySelector('[data-ob-slide="' + idx + '"]').style.display = 'flex';
+
+    var prevDot = dotsWrap.querySelector('[data-ob-dot="' + current + '"]');
+    prevDot.style.width = '16px';
+    prevDot.style.background = '#D1D5DB';
+
+    var nextDot = dotsWrap.querySelector('[data-ob-dot="' + idx + '"]');
+    nextDot.style.width = '32px';
+    nextDot.style.background = '#000C52';
+
     current = idx;
-    slides[current].classList.add('active');
-    dots[current].classList.add('active');
+
     btnPrev.disabled = current === 0;
     btnNext.disabled = current === total - 1;
+    btnPrev.style.opacity = current === 0 ? '0.3' : '1';
+    btnNext.style.opacity = current === total - 1 ? '0.3' : '1';
   }
 
   btnPrev.addEventListener('click', function() { goTo(current - 1); });
   btnNext.addEventListener('click', function() { goTo(current + 1); });
 
+  /* Touch swipe */
   var txStart = 0;
   slidesArea.addEventListener('touchstart', function(e) {
     txStart = e.touches[0].clientX;
@@ -471,6 +411,7 @@ function buildOutbrainBox(images) {
     }
   }, { passive: true });
 
+  /* Mouse drag for desktop */
   var mxStart = 0;
   var dragging = false;
   slidesArea.addEventListener('mousedown', function(e) {
@@ -487,7 +428,7 @@ function buildOutbrainBox(images) {
     }
   });
 
-  return container;
+  return wrapper;
 }
 
 // ── RENDER CAROUSEL BOX BY EXPERIENCE ────────────────────────────
