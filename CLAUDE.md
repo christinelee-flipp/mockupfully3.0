@@ -200,3 +200,76 @@ Mockupfully3.0/
 - save.php, list.php, get.php, delete.php must all support every productType
 - When adding a new productType, update all four files
 - upload.php handles all file types for all products -- use productType + campaignID params
+
+## Field Name Standards
+
+These are the canonical field names for all campaign JSON files. Never use aliases or variants -- use exactly these names.
+
+### Domination
+```
+campaignID        — "domination-YYYYMMDDHHMMSS"
+productType       — "Domination"
+campaignName      — string
+location          — country code e.g. "IT"
+clientName        — string
+clientLogoURL     — string (path or URL)
+claimText         — string (optional)
+templateType      — "Single" or "Carousel"
+buttonText        — string
+globalBkgType     — "color" or "gradient"
+globalBkgColor    — hex string
+globalBkgTop      — hex string (gradient only)
+globalBkgBottom   — hex string (gradient only)
+globalTextColor   — hex string
+buttonBkgColor    — hex string
+buttonTextColor   — hex string
+paginationBkgColor    — hex string
+paginationActiveColor — hex string
+ghostoverURL      — string (optional)
+Img01URL–Img10URL — string (image paths)
+submittedAt       — ISO 8601 timestamp
+```
+
+### Click2Go
+```
+campaignID        — "click2go-YYYYMMDDHHMMSS"
+productType       — "Click2Go"
+campaignName, location, clientName,
+clientLogoURL, clientURL, clientType,
+websiteURL, viewer, marketplace, website,
+templateType, claimText,
+globalBkgType, globalBkgColor,
+globalBkgTop, globalBkgBottom,
+globalTextColor, buttonBkgColor,
+buttonTextColor, locationBkgColor,
+locationTextColor, productBkgType,
+productBkgColor, productBkgTop,
+productBkgBottom, productTextColor,
+productCardBtnBkgColor,
+productCardBtnTextColor, bannerURL,
+Prod01Name, Prod01ImageURL, Prod01LinkURL,
+Prod02Name, Prod02ImageURL, Prod02LinkURL,
+Prod03Name, Prod03ImageURL, Prod03LinkURL,
+Store01Name, Store01LogoURL,
+Store02Name–Store05Name,
+Store02LogoURL–Store05LogoURL,
+submittedAt
+```
+
+### ShopperNetwork
+```
+campaignID        — "shoppernetwork-YYYYMMDDHHMMSS"
+productType       — "ShopperNetwork"
+campaignName, location, clientName,
+publisher,
+image1–image9,
+submittedAt
+```
+
+### Rules
+- Never create new field name variants
+- camelCase only -- no underscores, no hyphens
+- Boolean fields: true/false not "yes"/"no"
+- Hex colours always include # prefix
+- Paths are always root-relative (no leading /) e.g. "uploads/domination/campaign-id/file.png"
+- Timestamps always ISO 8601: new Date().toISOString()

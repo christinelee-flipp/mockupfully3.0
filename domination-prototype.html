@@ -605,7 +605,7 @@
       </div>
 
       <!-- Claim -->
-      <div class="claim-text" id="claim-text">presenta</div>
+      <div class="claim-text" id="claim-text"></div>
 
       <!-- Single image mode -->
       <div class="single-image-wrap" id="single-image-wrap" style="display:none">
@@ -823,7 +823,7 @@ function getParams() {
   return {
     country:               (p.get('country') || 'IT').toUpperCase(),
     templateType:          p.get('templateType') || 'Single',
-    claimText:             p.get('claimText') || 'presenta',
+    claimText:             p.get('claimText') || '',
     buttonText:            p.get('buttonText') || 'Click Here',
     globalBkgColor:        p.get('globalBkgColor') || '#EBEBF5',
     globalTextColor:       p.get('globalTextColor') || '#282832',
@@ -966,7 +966,7 @@ async function init() {
           p = {
             country:               (data.location || 'IT').toUpperCase(),
             templateType:          data.templateType || 'Single',
-            claimText:             data.claimText || 'presenta',
+            claimText:             data.claimText || '',
             buttonText:            data.buttonText || 'Click Here',
             globalBkgColor:        data.globalBkgColor || '#EBEBF5',
             globalTextColor:       data.globalTextColor || '#282832',
@@ -1029,8 +1029,17 @@ async function init() {
     if (el) el.textContent = label;
   });
 
-  // Claim text
-  document.getElementById('claim-text').textContent = p.claimText;
+  // Claim text — hide when empty
+  var claimEl = document.getElementById('claim-text');
+  if (claimEl) {
+    if (p.claimText.trim()) {
+      claimEl.textContent = p.claimText;
+      claimEl.style.display = 'block';
+    } else {
+      claimEl.textContent = '';
+      claimEl.style.display = 'none';
+    }
+  }
 
   // Button text
   document.getElementById('btn-text-single').textContent = p.buttonText;
