@@ -931,7 +931,7 @@ function renderTable(campaigns) {
         <td><span class="badge">${flag} ${c.location || '\u2014'}</span></td>
         <td>${esc(c.clientName || '\u2014')}</td>
         <td>${sn ? esc(c.publisher || '\u2014') : c2g ? esc((c.marketplace || '\u2014') + ' / ' + (c.website || '\u2014')) : '\u2014'}</td>
-        <td>${sn ? '\u2014' : formatType(c.templateType)}</td>
+        <td>${sn ? ((c.experience && c.experience.toLowerCase() === 'outbrain') ? 'Outbrain' : 'YOC') : formatType(c.templateType)}</td>
         <td class="date-cell">${fmtDate(c.submittedAt)}</td>
         <td><div class="actions">${actions}</div></td>
       </tr>`;
@@ -988,7 +988,7 @@ function renderCards(campaigns) {
         <div class="m-card-meta">
           <span class="m-card-meta-item">${flag} ${c.location || '\u2014'}</span>
           ${c.clientName ? `<span class="m-card-meta-item">${esc(c.clientName)}</span>` : ''}
-          <span class="m-card-meta-item">${sn ? (c.publisher || '\u2014') : formatType(c.templateType)}</span>
+          <span class="m-card-meta-item">${sn ? ((c.experience && c.experience.toLowerCase() === 'outbrain') ? 'Outbrain' : 'YOC') : formatType(c.templateType)}</span>
           ${c2g && c.viewer ? `<span class="m-card-meta-item">${esc(c.viewer)}</span>` : ''}
           <span class="m-card-meta-item">${date}</span>
         </div>
