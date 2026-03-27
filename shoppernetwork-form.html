@@ -500,6 +500,8 @@ async function handleFileUpload(fileInput, fieldId, previewImg, previewIcon) {
 
   const formData = new FormData();
   formData.append('image', file);
+  formData.append('productType', 'shoppernetwork');
+  formData.append('campaignID', getCurrentCampaignID());
 
   try {
     const res  = await fetch('api/upload.php', { method: 'POST', body: formData });
@@ -543,6 +545,8 @@ async function handlePdfUpload(fileInput, fieldId, previewImg, previewIcon) {
 
   const formData = new FormData();
   formData.append('image', file);
+  formData.append('productType', 'shoppernetwork');
+  formData.append('campaignID', getCurrentCampaignID());
 
   try {
     const res  = await fetch('api/upload.php', { method: 'POST', body: formData });
@@ -596,6 +600,13 @@ function generateCampaignID() {
   const now = new Date();
   const pad = n => String(n).padStart(2, '0');
   return 'shoppernetwork-' + now.getFullYear() + pad(now.getMonth()+1) + pad(now.getDate()) + pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds());
+}
+
+function getCurrentCampaignID() {
+  var params = new URLSearchParams(window.location.search);
+  var existingID = params.get('id');
+  if (existingID) return existingID;
+  return generateCampaignID();
 }
 
 // ─── COLLECT DATA ───────────────────────────────────────────────

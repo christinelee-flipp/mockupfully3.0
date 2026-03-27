@@ -511,7 +511,9 @@
   ════════════════════════════════════════════ */
   #viewer-layer {
     position: absolute;
-    inset: 0;
+    top: 0; left: 0;
+    width: 390px;
+    height: 844px;
     background: #fff;
     z-index: 60;
     display: none;
@@ -521,7 +523,7 @@
 
   /* ── WEBSITE VIEW ── */
   #website-view {
-    position: absolute; inset: 0;
+    width: 390px; height: 844px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     display: none;
@@ -530,7 +532,8 @@
 
   /* ── MARKETPLACE: HOME ── */
   #market-home {
-    position: absolute; inset: 0;
+    position: absolute; top: 0; left: 0;
+    width: 390px; height: 844px;
     flex-direction: column;
     background: #fff;
     overflow: hidden;
@@ -565,7 +568,8 @@
 
   /* ── MARKETPLACE: VIEWER ── */
   #market-viewer {
-    position: absolute; inset: 0;
+    position: absolute; top: 0; left: 0;
+    width: 390px; height: 844px;
     flex-direction: column;
     background: #282832;
     overflow: hidden;
@@ -853,7 +857,7 @@ function buildCard(prod, d) {
   imgWrap.className = 'card-img-wrap';
   if (prod.imageURL) {
     const img = document.createElement('img');
-    img.src = prod.imageURL;
+    img.src = resolveURL(prod.imageURL);
     img.alt = prod.name || '';
     img.onerror = () => { imgWrap.style.background = 'rgba(0,0,0,0.06)'; };
     imgWrap.appendChild(img);
@@ -931,6 +935,12 @@ function initAutoScroll(products, d, cfg) {
 }
 
 // ─── RENDER ───────────────────────────────────────────────────────────
+function resolveURL(url) {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  return url.replace(/^\/+/, '');
+}
+
 function render(d) {
   window._campaignData = d;
   document.getElementById('state-loading').style.display = 'none';
@@ -969,13 +979,13 @@ function render(d) {
 
     if (d.clientLogoURL) {
       const logoEl = document.getElementById('banner-logo');
-      logoEl.src = d.clientLogoURL;
+      logoEl.src = resolveURL(d.clientLogoURL);
       logoEl.style.display = 'block';
       logoEl.onerror = () => { logoEl.style.display = 'none'; };
     }
     if (d.bannerURL) {
       const img = document.getElementById('banner-img');
-      img.src = d.bannerURL;
+      img.src = resolveURL(d.bannerURL);
       img.onerror = () => { img.style.opacity = '0'; };
     }
 
@@ -991,7 +1001,7 @@ function render(d) {
 
     if (d.clientLogoURL) {
       const colLogo = document.getElementById('col-logo');
-      colLogo.src = d.clientLogoURL;
+      colLogo.src = resolveURL(d.clientLogoURL);
       colLogo.style.display = 'block';
       colLogo.onerror = () => { colLogo.style.display = 'none'; };
     }
@@ -1024,7 +1034,7 @@ function render(d) {
 
     if (d.clientLogoURL) {
       const contentLogo = document.getElementById('content-logo');
-      contentLogo.src = d.clientLogoURL;
+      contentLogo.src = resolveURL(d.clientLogoURL);
       contentLogo.style.display = 'block';
       contentLogo.onerror = () => { contentLogo.style.display = 'none'; };
     }
@@ -1078,22 +1088,28 @@ function initWebsite(d) {
   var loc = (d.location || 'IT').toUpperCase();
   var pub = d.website || 'ansa';
   var base = assetBase() + 'website/' + loc + '/' + pub + '/';
+  console.log('[viewer] initWebsite: loc=' + loc + ' pub=' + pub + ' base=' + base);
 
   var container = document.getElementById('website-view');
   var topImg = document.createElement('img');
   topImg.src = base + 'top.png';
   topImg.alt = '';
+  topImg.onerror = function() { console.error('[viewer] FAILED to load: ' + topImg.src); };
+  topImg.onload = function() { console.log('[viewer] Loaded: ' + topImg.src); };
   container.appendChild(topImg);
 
   var bottomImg = document.createElement('img');
   bottomImg.src = base + 'bottom.png';
   bottomImg.alt = '';
+  bottomImg.onerror = function() { console.error('[viewer] FAILED to load: ' + bottomImg.src); };
+  bottomImg.onload = function() { console.log('[viewer] Loaded: ' + bottomImg.src); };
   container.appendChild(bottomImg);
 
   document.getElementById('state-loading').style.display = 'none';
   var layer = document.getElementById('viewer-layer');
   layer.classList.add('active');
   document.getElementById('website-view').style.display = 'block';
+  console.log('[viewer] website-view displayed, viewer-layer active');
 
   setTimeout(function () { showAd(); }, 9000);
 }
@@ -1107,12 +1123,17 @@ function initMarketplace(d) {
   var cat = d.marketplace || 'coles';
   var appBase = assetBase() + 'app/' + loc + '/';
   var catBase = assetBase() + 'catalogs/' + loc + '/' + cat + '/';
+  console.log('[viewer] initMarketplace: loc=' + loc + ' cat=' + cat);
+  console.log('[viewer] appBase=' + appBase + ' catBase=' + catBase);
 
   buildScreen1(appBase, catBase);
   document.getElementById('state-loading').style.display = 'none';
   var layer = document.getElementById('viewer-layer');
   layer.classList.add('active');
   document.getElementById('market-home').style.display = 'flex';
+  console.log('[viewer] market-home displayed, viewer-layer active');
+  console.log('[viewer] market-home children: ' + document.getElementById('market-home').children.length);
+  console.log('[viewer] market-home size: ' + document.getElementById('market-home').offsetWidth + 'x' + document.getElementById('market-home').offsetHeight);
 }
 
 function buildScreen1(appBase, catBase) {

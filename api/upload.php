@@ -4,7 +4,7 @@
  *
  * POST /api/upload.php
  * Body: multipart/form-data, field name "image"
- * Response (success): { "success": true,  "url": "uploads/YYYY-MM/filename.ext" }
+ * Response (success): { "success": true,  "url": "uploads/{productType}/{campaignID}/filename.ext" }
  * Response (error):   { "success": false, "error": "reason" }
  *
  * Videos (.mov, .webm) are converted to .mp4 via ffmpeg.
@@ -103,11 +103,15 @@ if ($isImage) {
 }
 // else $ext already set from filename
 
-$folder    = date('Y-m');
-$uploadDir = __DIR__ . '/../uploads/' . $folder . '/';
+// Read product/campaign context from POST fields
+$productType = strtolower(preg_replace('/[^a-zA-Z0-9_-]/', '', $_POST['productType'] ?? 'general'));
+$campaignID  = preg_replace('/[^a-zA-Z0-9_-]/', '', $_POST['campaignID'] ?? 'unknown');
+
+$uploadDir = __DIR__ . '/../uploads/' . $productType . '/' . $campaignID . '/';
+$urlPrefix = 'uploads/' . $productType . '/' . $campaignID . '/';
 
 if (!is_dir($uploadDir)) {
-    mkdir($uploadDir, 0755, true);
+    mkdir($uploadDir, 0777, true);
 }
 
 // Debug log
@@ -138,7 +142,7 @@ if ($isImage) {
     }
 
     http_response_code(200);
-    echo json_encode(['success' => true, 'url' => 'uploads/' . $folder . '/' . $filename]);
+    echo json_encode(['success' => true, 'url' => $urlPrefix . $filename]);
     exit;
 }
 
@@ -154,7 +158,7 @@ if ($alreadyMp4) {
     }
 
     http_response_code(200);
-    echo json_encode(['success' => true, 'url' => 'uploads/' . $folder . '/' . $filename]);
+    echo json_encode(['success' => true, 'url' => $urlPrefix . $filename]);
     exit;
 }
 
@@ -206,7 +210,7 @@ if (file_exists($mp4Path) && filesize($mp4Path) > 0) {
     unlink($tempPath);
     echo json_encode([
         'success'   => true,
-        'url'       => 'uploads/' . $folder . '/' . $mp4Name,
+        'url'       => $urlPrefix . $mp4Name,
         'converted' => true
     ]);
 } else {
