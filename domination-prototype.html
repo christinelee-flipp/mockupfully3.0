@@ -1111,6 +1111,7 @@ async function init() {
       var video = document.getElementById('ghostover-video');
       if (!g || !video) return;
 
+      console.log('ghostover src:', resolveURL(ghostoverURL), 'exists check: will attempt load');
       video.setAttribute('src', resolveURL(ghostoverURL));
       video.loop = false;   /* play once only */
       video.muted = true;   /* required for autoplay */
