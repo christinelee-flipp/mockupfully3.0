@@ -529,28 +529,40 @@
     <div class="field-row cols-1">
       <div class="field">
         <div class="img-label-row">
-          <label>Ghostover <span class="hint">(Optional video overlay shown on load. Upload MP4 or WebM for instant upload. MOV files are automatically converted to WebM. Max 50MB.)</span></label>
+          <label>Ghostover <span class="hint">(Optional video overlay shown on load. Choose a sample, upload your own (MP4/WebM, max 50MB), or paste a URL. MOV files are automatically converted to WebM.)</span></label>
           <div class="img-mode-toggle toggle-group">
-            <button type="button" class="mode-btn toggle-btn" data-mode="url" data-field="ghostoverURL">URL</button>
-            <button type="button" class="mode-btn active" data-mode="upload" data-field="ghostoverURL">Upload</button>
+            <button type="button" class="ghostover-toggle-btn mode-btn active" data-mode="sample" onclick="setGhostoverMode('sample')">Sample</button>
+            <button type="button" class="ghostover-toggle-btn mode-btn" data-mode="upload" onclick="setGhostoverMode('upload')">Upload</button>
+            <button type="button" class="ghostover-toggle-btn mode-btn" data-mode="url" onclick="setGhostoverMode('url')">URL</button>
           </div>
         </div>
-        <div class="url-with-preview">
-          <div class="url-mode-wrap" id="url-wrap-ghostoverURL" style="display:none">
-            <input type="url" id="ghostoverURL" placeholder="https://...">
+        <input type="hidden" id="ghostoverURL" name="ghostoverURL" value="">
+        <div id="ghostover-sample-section">
+          <select class="form-select" id="ghostoverSample" onchange="onGhostoverSampleChange()">
+            <option value="">Select a sample ghostover...</option>
+            <optgroup label="Spain (ES)">
+              <option value="assets/domination-assets/ghostovers/ES/ES-HP-Ghostover.webm">HP (ES)</option>
+            </optgroup>
+            <optgroup label="Italy (IT)">
+              <option value="assets/domination-assets/ghostovers/IT/IT-Barilla-Ghostover.webm">Barilla (IT)</option>
+              <option value="assets/domination-assets/ghostovers/IT/IT-Gocciole-Ghostover.webm">Gocciole (IT)</option>
+            </optgroup>
+          </select>
+        </div>
+        <div id="ghostover-upload-section" style="display:none">
+          <div class="upload-area" id="upload-area-ghostoverURL">
+            <input type="file" id="file-ghostoverURL" accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov" style="display:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke="#777794" stroke-width="1.8" stroke-linecap="round"/><polyline points="17 8 12 3 7 8" stroke="#777794" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="3" x2="12" y2="15" stroke="#777794" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <span class="upload-filename" id="upload-filename-ghostoverURL">Choose file…</span>
+            <span class="upload-status" id="upload-status-ghostoverURL"></span>
           </div>
-          <div class="upload-mode-wrap" id="upload-wrap-ghostoverURL">
-            <div class="upload-area" id="upload-area-ghostoverURL">
-              <input type="file" id="file-ghostoverURL" accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov" style="display:none">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke="#777794" stroke-width="1.8" stroke-linecap="round"/><polyline points="17 8 12 3 7 8" stroke="#777794" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="3" x2="12" y2="15" stroke="#777794" stroke-width="1.8" stroke-linecap="round"/></svg>
-              <span class="upload-filename" id="upload-filename-ghostoverURL">Choose file…</span>
-              <span class="upload-status" id="upload-status-ghostoverURL"></span>
-            </div>
-          </div>
-          <div id="ghostover-preview-wrap" style="display:none">
-            <video id="ghostover-video-preview" style="width:100%;max-height:160px;border-radius:8px;margin-top:8px" controls muted playsinline></video>
-            <button type="button" class="btn btn-sm btn-danger" id="ghostover-remove-btn" style="margin-top:8px" onclick="removeGhostover()">Remove</button>
-          </div>
+        </div>
+        <div id="ghostover-url-section" style="display:none">
+          <input type="url" id="ghostoverURLInput" placeholder="https://..." oninput="onGhostoverURLInput()">
+        </div>
+        <div id="ghostover-preview-wrap" style="display:none">
+          <video id="ghostover-video-preview" style="width:100%;max-height:160px;border-radius:8px;margin-top:8px" controls muted playsinline></video>
+          <button type="button" class="btn btn-sm btn-danger" id="ghostover-remove-btn" style="margin-top:8px" onclick="removeGhostover()">Remove</button>
         </div>
       </div>
     </div>
@@ -676,10 +688,8 @@ function prefillForm(c) {
   set('buttonText', c.buttonText);
   set('claimText', c.claimText);
   set('clientLogoURL', c.clientLogoURL);
-  set('ghostoverURL', c.ghostoverURL);
   if (c.ghostoverURL) {
-    applyValueMode('ghostoverURL', c.ghostoverURL);
-    showGhostoverPreview(c.ghostoverURL);
+    prefillGhostover(c.ghostoverURL);
   }
 
   // Build image fields (always 6), fill values, then auto-detect type
@@ -718,10 +728,8 @@ function prefillForm(c) {
     updateImgPreview(logoInput, document.getElementById('img-logo'), document.querySelector('#preview-logo .placeholder-icon'));
   }
   // Trigger ghostover preview + mode
-  const ghostoverInput = document.getElementById('ghostoverURL');
-  if (ghostoverInput && c.ghostoverURL) {
-    applyValueMode('ghostoverURL', c.ghostoverURL);
-    updateImgPreview(ghostoverInput, document.getElementById('img-ghostover'), document.querySelector('#preview-ghostover .placeholder-icon'));
+  if (c.ghostoverURL) {
+    prefillGhostover(c.ghostoverURL);
   }
 }
 
@@ -1019,12 +1027,29 @@ function updateImgPreview(input, imgEl, iconEl) {
 document.getElementById('clientLogoURL').addEventListener('input', function() {
   updateImgPreview(this, document.getElementById('img-logo'), document.querySelector('#preview-logo .placeholder-icon'));
 });
-document.getElementById('ghostoverURL').addEventListener('input', function() {
-  const url = this.value.trim();
-  showGhostoverPreview(url);
-});
+// ─── GHOSTOVER THREE-WAY TOGGLE ──────────────────────────────────
+function setGhostoverMode(mode) {
+  document.getElementById('ghostover-sample-section').style.display = 'none';
+  document.getElementById('ghostover-upload-section').style.display = 'none';
+  document.getElementById('ghostover-url-section').style.display = 'none';
 
-// ─── GHOSTOVER VIDEO UPLOAD ──────────────────────────────────────
+  document.getElementById('ghostover-' + mode + '-section').style.display = 'block';
+
+  document.querySelectorAll('.ghostover-toggle-btn').forEach(function(btn) {
+    btn.classList.toggle('active', btn.dataset.mode === mode);
+  });
+
+  document.getElementById('ghostoverURL').value = '';
+  clearGhostoverPreview();
+}
+
+function clearGhostoverPreview() {
+  var preview = document.getElementById('ghostover-video-preview');
+  var wrap = document.getElementById('ghostover-preview-wrap');
+  if (preview) { preview.src = ''; }
+  if (wrap) { wrap.style.display = 'none'; }
+}
+
 function showGhostoverPreview(url) {
   const wrap = document.getElementById('ghostover-preview-wrap');
   const video = document.getElementById('ghostover-video-preview');
@@ -1037,31 +1062,66 @@ function showGhostoverPreview(url) {
   }
 }
 
+function onGhostoverSampleChange() {
+  var select = document.getElementById('ghostoverSample');
+  var val = select.value;
+  document.getElementById('ghostoverURL').value = val;
+  if (val) {
+    showGhostoverPreview(val);
+  } else {
+    clearGhostoverPreview();
+  }
+}
+
+function onGhostoverURLInput() {
+  var url = document.getElementById('ghostoverURLInput').value.trim();
+  document.getElementById('ghostoverURL').value = url;
+  showGhostoverPreview(url);
+}
+
 function removeGhostover() {
   document.getElementById('ghostoverURL').value = '';
+  document.getElementById('ghostoverURLInput').value = '';
+  document.getElementById('ghostoverSample').value = '';
   const fileInput = document.getElementById('file-ghostoverURL');
   if (fileInput) fileInput.value = '';
   const filenameEl = document.getElementById('upload-filename-ghostoverURL');
   if (filenameEl) filenameEl.textContent = 'Choose file…';
   const statusEl = document.getElementById('upload-status-ghostoverURL');
   if (statusEl) { statusEl.textContent = ''; statusEl.className = 'upload-status'; }
-  showGhostoverPreview('');
+  clearGhostoverPreview();
+}
+
+function prefillGhostover(url) {
+  if (!url) return;
+  if (url.startsWith('assets/domination-assets/ghostovers/')) {
+    setGhostoverMode('sample');
+    document.getElementById('ghostoverSample').value = url;
+    document.getElementById('ghostoverURL').value = url;
+    showGhostoverPreview(url);
+  } else if (url.startsWith('uploads/')) {
+    setGhostoverMode('upload');
+    document.getElementById('ghostoverURL').value = url;
+    var filename = url.split('/').pop();
+    var filenameEl = document.getElementById('upload-filename-ghostoverURL');
+    var statusEl = document.getElementById('upload-status-ghostoverURL');
+    if (filenameEl) filenameEl.textContent = filename;
+    if (statusEl) { statusEl.textContent = '✓'; statusEl.className = 'upload-status done'; }
+    showGhostoverPreview(url);
+  } else {
+    setGhostoverMode('url');
+    document.getElementById('ghostoverURLInput').value = url;
+    document.getElementById('ghostoverURL').value = url;
+    showGhostoverPreview(url);
+  }
 }
 
 (function setupGhostoverUpload() {
   const uploadArea = document.getElementById('upload-area-ghostoverURL');
   const fileInput  = document.getElementById('file-ghostoverURL');
-  const urlInput   = document.getElementById('ghostoverURL');
 
-  // Mode toggle
-  document.querySelectorAll('.mode-btn[data-field="ghostoverURL"]').forEach(btn =>
-    btn.addEventListener('click', () => switchImgMode('ghostoverURL', btn.dataset.mode))
-  );
-
-  // Upload click
   uploadArea.addEventListener('click', () => fileInput.click());
 
-  // File selected → upload
   fileInput.addEventListener('change', async () => {
     const file = fileInput.files[0];
     if (!file) return;
@@ -1088,17 +1148,17 @@ function removeGhostover() {
       const res  = await fetch('api/upload.php', { method: 'POST', body: formData });
       const json = await res.json();
       if (json.success) {
-        urlInput.value = json.url;
+        document.getElementById('ghostoverURL').value = json.url;
         statusEl.textContent = '✓';
         statusEl.className = 'upload-status done';
         showGhostoverPreview(json.url);
       } else {
-        urlInput.value = '';
+        document.getElementById('ghostoverURL').value = '';
         statusEl.textContent = json.error || 'Upload failed';
         statusEl.className = 'upload-status error';
       }
     } catch {
-      urlInput.value = '';
+      document.getElementById('ghostoverURL').value = '';
       statusEl.textContent = 'Upload failed';
       statusEl.className = 'upload-status error';
     }
