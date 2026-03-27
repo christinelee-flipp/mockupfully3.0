@@ -910,8 +910,48 @@ function closeGhostover() {
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────
-function init() {
-  const p = getParams();
+async function init() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const campaignId = urlParams.get('id');
+
+  let p;
+  if (campaignId) {
+    // Load from campaign JSON via API
+    try {
+      const res = await fetch('api/get.php?id=' + encodeURIComponent(campaignId));
+      if (res.ok) {
+        const data = await res.json();
+        if (data && !data.error) {
+          p = {
+            country:               (data.location || 'IT').toUpperCase(),
+            templateType:          data.templateType || 'Single',
+            claimText:             data.claimText || 'presenta',
+            buttonText:            data.buttonText || 'Click Here',
+            globalBkgColor:        data.globalBkgColor || '#EBEBF5',
+            globalTextColor:       data.globalTextColor || '#282832',
+            buttonBkgColor:        data.buttonBkgColor || '#000000',
+            buttonTextColor:       data.buttonTextColor || '#FFFFFF',
+            paginationBkgColor:    data.paginationBkgColor || '#777794',
+            paginationActiveColor: data.paginationActiveColor || '#D1233E',
+            clientLogoURL:         data.clientLogoURL || '',
+            ghostoverURL:          data.ghostoverURL || '',
+            Img01URL:              data.Img01URL || '',
+            Img02URL:              data.Img02URL || '',
+            Img03URL:              data.Img03URL || '',
+            Img04URL:              data.Img04URL || '',
+            Img05URL:              data.Img05URL || '',
+            Img06URL:              data.Img06URL || '',
+          };
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load campaign:', err);
+    }
+  }
+
+  // Fallback to URL params
+  if (!p) p = getParams();
+
   const C = COUNTRIES[p.country] || COUNTRIES.IT;
   const phone = document.getElementById('phone');
 
@@ -1031,12 +1071,20 @@ function init() {
   });
 
   // Ghostover
-  if (p.ghostoverURL) {
-    setTimeout(() => {
-      const g = document.getElementById('ghostover');
-      const img = document.getElementById('ghostover-img');
-      img.src = p.ghostoverURL;
-      g.classList.add('visible');
+  var ghostoverURL = p.ghostoverURL || '';
+  if (ghostoverURL) {
+    setTimeout(function() {
+      var g = document.getElementById('ghostover');
+      var img = document.getElementById('ghostover-img');
+      if (g && img) {
+        img.src = ghostoverURL;
+        img.onload = function() {
+          g.classList.add('visible');
+        };
+        img.onerror = function() {
+          /* silently fail if image missing */
+        };
+      }
     }, 800);
   }
 }
