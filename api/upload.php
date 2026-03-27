@@ -1,10 +1,10 @@
 <?php
 /**
- * upload.php — Accept image or video uploads and return a served URL.
+ * upload.php — Accept image, PDF, SVG, or video uploads and return a served URL.
  *
  * POST /api/upload.php
  * Body: multipart/form-data, field name "image"
- * Response (success): { "success": true,  "url": "uploads/YYYY-MM/img_xxx.jpg" }
+ * Response (success): { "success": true,  "url": "uploads/YYYY-MM/filename.ext" }
  * Response (error):   { "success": false, "error": "reason" }
  *
  * Videos (.mov, .webm) are converted to .mp4 via ffmpeg.
@@ -54,11 +54,20 @@ if ($file['error'] !== UPLOAD_ERR_OK) {
 $finfo = new finfo(FILEINFO_MIME_TYPE);
 $mime  = $finfo->file($file['tmp_name']);
 
+// Get file extension as fallback for MIME detection
+$ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+
+// SVG files may come through as text/xml or text/plain — fix MIME by extension
+if ($ext === 'svg' && !str_starts_with($mime, 'image/svg')) {
+    $mime = 'image/svg+xml';
+}
+
 $allowedImages = [
     'image/jpeg'      => 'jpg',
     'image/png'       => 'png',
     'image/gif'       => 'gif',
     'image/webp'      => 'webp',
+    'image/svg+xml'   => 'svg',
     'application/pdf' => 'pdf',
 ];
 
@@ -68,14 +77,16 @@ $allowedVideos = [
     'video/quicktime' => 'mov',
 ];
 
-$isVideo = strstr($mime, 'video/') !== false;
+$videoExtensions = ['mp4', 'webm', 'mov'];
+
 $isImage = isset($allowedImages[$mime]);
+$isVideo = strstr($mime, 'video/') !== false || in_array($ext, $videoExtensions);
 
 if (!$isImage && !$isVideo) {
-    fail('Only JPG, PNG, GIF, WEBP, PDF, MP4, MOV, and WEBM files are allowed');
+    fail('Only JPG, PNG, GIF, WEBP, SVG, PDF, MP4, MOV, and WEBM files are allowed');
 }
 
-// Size limits: images 5MB, videos 50MB
+// Size limits: images/SVG/PDF 5MB, videos 50MB
 if ($isImage && $file['size'] > 5 * 1024 * 1024) {
     fail('Image files must be under 5 MB');
 }
@@ -83,7 +94,14 @@ if ($isVideo && $file['size'] > 50 * 1024 * 1024) {
     fail('Video files must be under 50 MB');
 }
 
-$ext       = $isImage ? $allowedImages[$mime] : $allowedVideos[$mime];
+// Determine extension for saving
+if ($isImage) {
+    $ext = $allowedImages[$mime];
+} elseif (isset($allowedVideos[$mime])) {
+    $ext = $allowedVideos[$mime];
+}
+// else $ext already set from filename
+
 $folder    = date('Y-m');
 $uploadDir = __DIR__ . '/../uploads/' . $folder . '/';
 
@@ -91,9 +109,26 @@ if (!is_dir($uploadDir)) {
     mkdir($uploadDir, 0755, true);
 }
 
-// ── IMAGE / PDF UPLOAD ──────────────────────────────────────────────
+// Debug log
+$debugLog = sys_get_temp_dir() . '/upload_debug.log';
+file_put_contents($debugLog,
+    date('Y-m-d H:i:s') . "\n"
+    . "MIME: $mime\n"
+    . "EXT: $ext\n"
+    . "SIZE: " . $file['size'] . "\n"
+    . "isVideo: " . ($isVideo ? 'true' : 'false') . "\n"
+    . "isImage: " . ($isImage ? 'true' : 'false') . "\n"
+    . "---\n",
+    FILE_APPEND
+);
+
+// ── IMAGE / PDF / SVG UPLOAD ────────────────────────────────────────
 if ($isImage) {
-    $prefix   = $ext === 'pdf' ? 'pdf_' : 'img_';
+    $prefix   = match($ext) {
+        'pdf' => 'pdf_',
+        'svg' => 'svg_',
+        default => 'img_',
+    };
     $filename = uniqid($prefix, true) . '.' . $ext;
     $dest     = $uploadDir . $filename;
 
@@ -109,7 +144,7 @@ if ($isImage) {
 // ── VIDEO UPLOAD ────────────────────────────────────────────────────
 
 // If already MP4, save directly without conversion
-if ($mime === 'video/mp4') {
+if ($mime === 'video/mp4' || $ext === 'mp4') {
     $filename = uniqid('video_', true) . '.mp4';
     $dest     = $uploadDir . $filename;
 
@@ -132,24 +167,62 @@ $mp4Name = uniqid('video_', true) . '.mp4';
 $mp4Path = $uploadDir . $mp4Name;
 
 $ffmpeg = '/usr/local/bin/ffmpeg';
-$cmd = escapeshellcmd($ffmpeg)
-    . ' -i ' . escapeshellarg($tempPath)
-    . ' -vcodec h264'
-    . ' -acodec aac'
+
+/* Build a robust conversion command that handles
+   VP8, VP9, H.264 input and Opus/AAC/MP3 audio.
+   -y         = overwrite output without asking
+   -i         = input file
+   -c:v libx264 = encode video as H.264
+   -preset fast = fast encoding, good quality
+   -crf 23    = quality (18=high, 28=low, 23=default)
+   -c:a aac   = encode audio as AAC
+   -b:a 128k  = audio bitrate
+   -movflags +faststart = web-optimised MP4
+   -pix_fmt yuv420p = maximum compatibility
+   2>&1       = capture stderr for debugging */
+
+$cmd = $ffmpeg
+    . ' -y -i ' . escapeshellarg($tempPath)
+    . ' -c:v libx264'
+    . ' -preset fast'
+    . ' -crf 23'
+    . ' -c:a aac'
+    . ' -b:a 128k'
     . ' -movflags +faststart'
+    . ' -pix_fmt yuv420p'
     . ' ' . escapeshellarg($mp4Path)
     . ' 2>&1';
+
 $output = shell_exec($cmd);
 
-// Clean up temp file
-if (file_exists($tempPath)) {
-    unlink($tempPath);
-}
+// Log ffmpeg output for debugging
+file_put_contents($debugLog,
+    date('Y-m-d H:i:s') . " FFMPEG\n"
+    . "CMD: $cmd\n"
+    . "OUTPUT: $output\n"
+    . "---\n",
+    FILE_APPEND
+);
 
-// Check conversion result
+/* Check if output file was created and has content */
 if (file_exists($mp4Path) && filesize($mp4Path) > 0) {
-    http_response_code(200);
-    echo json_encode(['success' => true, 'url' => 'uploads/' . $folder . '/' . $mp4Name, 'converted' => true]);
+    unlink($tempPath);
+    echo json_encode([
+        'success'   => true,
+        'url'       => 'uploads/' . $folder . '/' . $mp4Name,
+        'converted' => true
+    ]);
 } else {
-    fail('Video conversion failed', 500, ['ffmpeg_output' => $output]);
+    /* Conversion failed — return the ffmpeg output
+       so we can debug exactly what went wrong */
+    if (file_exists($mp4Path)) unlink($mp4Path);
+    if (file_exists($tempPath)) unlink($tempPath);
+    echo json_encode([
+        'success'       => false,
+        'error'         => 'Video conversion failed',
+        'ffmpeg_output' => $output,
+        'input_file'    => $tempPath,
+        'output_file'   => $mp4Path
+    ]);
 }
+exit;
