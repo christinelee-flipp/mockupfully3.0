@@ -483,10 +483,15 @@
         <input type="text" id="buttonText" placeholder="e.g. Shop Now" value="Click Here">
       </div>
     </div>
-    <select id="templateType" style="display:none">
-      <option value="Single">Single Image</option>
-      <option value="Carousel">Carousel</option>
-    </select>
+    <div class="field-row cols-1">
+      <div class="field">
+        <label>Template Type <span class="required">*</span></label>
+        <select id="templateType" class="form-select" onchange="onTemplateTypeChange()">
+          <option value="Single">Banner</option>
+          <option value="Carousel">Carousel</option>
+        </select>
+      </div>
+    </div>
     <div class="field-row cols-1">
       <div class="field">
         <label>Claim Text <span class="hint">(shown below logo)</span></label>
@@ -623,8 +628,8 @@
 
   <!-- 4. Images -->
   <div class="form-section">
-    <div class="section-title form-section-label">Images <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--mid)">— 1:1 ratio recommended</span></div>
-    <div id="template-label" style="font-size:12px;font-weight:700;color:var(--mid);margin-top:-8px;margin-bottom:20px;">Template: Carousel</div>
+    <div class="section-title form-section-label" id="images-section-title">Banner Image</div>
+    <div id="template-label" style="font-size:12px;font-weight:400;color:var(--mid);margin-top:-8px;margin-bottom:20px;">One full-size image displayed in the ad.</div>
     <div class="field-row cols-1" id="img-fields">
       <!-- populated by JS -->
     </div>
@@ -672,7 +677,6 @@ const WEBHOOKS = {
 };
 let editMode = false;
 let editCampaignID = null;
-let carouselUnlocked = false; // true once user has had 2+ images (prevents first upload from hiding fields 2-6)
 const PROTOTYPE = 'domination-prototype.html';
 
 function prefillForm(c) {
@@ -692,8 +696,12 @@ function prefillForm(c) {
     prefillGhostover(c.ghostoverURL);
   }
 
-  // Build image fields (always 6), fill values, then auto-detect type
+  // Set template type from saved data, then build fields
+  const savedType = c.templateType || 'Single';
+  document.getElementById('templateType').value = savedType;
   buildImageFields();
+  onTemplateTypeChange();
+
   ['Img01URL','Img02URL','Img03URL','Img04URL','Img05URL','Img06URL'].forEach((key, i) => {
     if (c[key]) {
       const input = document.getElementById(key);
@@ -706,8 +714,6 @@ function prefillForm(c) {
       }
     }
   });
-  carouselUnlocked = true; // edit mode: treat detection as strict (1 image → Single)
-  detectTemplateType();
 
   // Colours
   const colourKeys = ['globalBkgColor','globalTextColor','buttonBkgColor',
@@ -738,7 +744,6 @@ const PLACEHOLDER_SVG = `<svg class="placeholder-icon" viewBox="0 0 24 24" fill=
 const UPLOAD_ICON = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke="#777794" stroke-width="1.8" stroke-linecap="round"/><polyline points="17 8 12 3 7 8" stroke="#777794" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="3" x2="12" y2="15" stroke="#777794" stroke-width="1.8" stroke-linecap="round"/></svg>`;
 
 function buildImageFields() {
-  carouselUnlocked = false; // reset so first upload on new form never hides fields 2-6
   const container = document.getElementById('img-fields');
   container.innerHTML = '';
 
@@ -778,13 +783,12 @@ function buildImageFields() {
     `;
     container.appendChild(field);
 
-    // URL input → live preview + auto-detect
+    // URL input → live preview
     const urlInput    = field.querySelector(`#${fieldId}`);
     const previewImg  = field.querySelector(`#img-img${i}`);
     const previewIcon = field.querySelector('.placeholder-icon');
     urlInput.addEventListener('input', () => {
       updateImgPreview(urlInput, previewImg, previewIcon);
-      detectTemplateType();
     });
 
     // Mode toggle buttons
@@ -799,38 +803,40 @@ function buildImageFields() {
     fileInput.addEventListener('change', () => handleFileUpload(fileInput, fieldId, previewImg, previewIcon));
   }
 
-  // Initial state: always show all 6 fields as Carousel — no auto-detection on load
-  document.getElementById('templateType').value = 'Carousel';
-  document.getElementById('template-label').textContent = 'Template: Carousel';
-  for (let i = 2; i <= 6; i++) {
-    document.getElementById(`img-field-${i}`).style.display = '';
-  }
+  // Apply initial template type state
+  onTemplateTypeChange();
 }
 
-// ─── TEMPLATE AUTO-DETECTION ──────────────────────────────────────
-// Carousel if: 2+ images filled, OR 0 images (cleared back to empty),
-// OR carouselUnlocked is false (user hasn't yet reached 2 images —
-// prevents the first upload on a fresh form from hiding fields 2-6).
-// Single only when exactly 1 image AND carouselUnlocked (was Carousel before).
-// In edit mode, prefillForm sets carouselUnlocked=true before calling this
-// so that a 1-image saved campaign correctly shows Single.
-function detectTemplateType() {
-  let filled = 0;
-  for (let i = 1; i <= 6; i++) {
-    const input = document.getElementById(`Img${String(i).padStart(2, '0')}URL`);
-    if (input && input.value.trim()) filled++;
+// ─── TEMPLATE TYPE CHANGE ────────────────────────────────────────
+function onTemplateTypeChange() {
+  const type = document.getElementById('templateType').value;
+  const isCarousel = type === 'Carousel';
+  const titleEl = document.getElementById('images-section-title');
+  const labelEl = document.getElementById('template-label');
+
+  if (isCarousel) {
+    titleEl.textContent = 'Carousel Images';
+    labelEl.textContent = 'Add between 2 and 6 images. Empty slots are ignored.';
+  } else {
+    titleEl.textContent = 'Banner Image';
+    labelEl.textContent = 'One full-size image displayed in the ad.';
   }
-
-  if (filled >= 2) carouselUnlocked = true;
-
-  const isCarousel = filled >= 2 || filled === 0 || !carouselUnlocked;
-
-  document.getElementById('templateType').value = isCarousel ? 'Carousel' : 'Single';
-  document.getElementById('template-label').textContent = isCarousel ? 'Template: Carousel' : 'Template: Single Image';
 
   for (let i = 2; i <= 6; i++) {
     const field = document.getElementById(`img-field-${i}`);
     if (field) field.style.display = isCarousel ? '' : 'none';
+  }
+
+  // Update required labels: Carousel needs Image 1 + 2, Banner needs Image 1
+  for (let i = 1; i <= 6; i++) {
+    const field = document.getElementById(`img-field-${i}`);
+    if (!field) continue;
+    const label = field.querySelector('label');
+    if (!label) continue;
+    const isRequired = i === 1 || (isCarousel && i === 2);
+    label.innerHTML = 'Image ' + i + (isRequired
+      ? ' <span class="required">*</span>'
+      : ' <span class="hint">(optional)</span>');
   }
 }
 
