@@ -7,8 +7,8 @@
  * Response (success): { "success": true,  "url": "uploads/{productType}/{campaignID}/filename.ext" }
  * Response (error):   { "success": false, "error": "reason" }
  *
- * Videos (.mov, .webm) are converted to .mp4 via ffmpeg.
- * Already-.mp4 files are saved directly without conversion.
+ * Videos: .mp4 and .webm are stored directly without conversion.
+ * .mov files are converted to .webm via libvpx (VP8).
  */
 
 header('Content-Type: application/json; charset=utf-8');
@@ -148,148 +148,76 @@ if ($isImage) {
 
 // ── VIDEO UPLOAD ────────────────────────────────────────────────────
 
-// If already MP4, save directly without conversion
-if ($alreadyMp4) {
-    $filename = uniqid('video_', true) . '.mp4';
-    $dest     = $uploadDir . $filename;
+if ($isVideo) {
+    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
 
-    if (!move_uploaded_file($file['tmp_name'], $dest)) {
-        fail('Could not save the uploaded file', 500);
+    /* .webm and .mp4 — store directly, no conversion needed */
+    if ($ext === 'webm' || $ext === 'mp4') {
+        $filename = uniqid('video_') . '.' . $ext;
+        $destPath = $uploadDir . $filename;
+
+        if (move_uploaded_file($file['tmp_name'], $destPath)) {
+            echo json_encode([
+                'success'   => true,
+                'url'       => 'uploads/' . $productType . '/' . $campaignID . '/' . $filename,
+                'converted' => false,
+                'format'    => $ext
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'error'   => 'Failed to save video file'
+            ]);
+        }
+        exit;
     }
 
-    http_response_code(200);
-    echo json_encode(['success' => true, 'url' => $urlPrefix . $filename]);
+    /* .mov — convert to .webm via libvpx
+       libvpx (VP8) is confirmed available on this server */
+    if ($ext === 'mov') {
+        $tempPath = $uploadDir . uniqid('tmp_') . '.mov';
+        move_uploaded_file($file['tmp_name'], $tempPath);
+
+        $webmName = uniqid('video_') . '.webm';
+        $webmPath = $uploadDir . $webmName;
+
+        $ffmpeg = '/usr/local/bin/ffmpeg';
+        $cmd = $ffmpeg
+            . ' -y'
+            . ' -i ' . escapeshellarg($tempPath)
+            . ' -c:v libvpx'
+            . ' -crf 10'
+            . ' -b:v 1M'
+            . ' -c:a libvorbis'
+            . ' -deadline realtime'
+            . ' ' . escapeshellarg($webmPath)
+            . ' 2>&1';
+
+        $output = shell_exec($cmd);
+        unlink($tempPath);
+
+        if (file_exists($webmPath) && filesize($webmPath) > 0) {
+            echo json_encode([
+                'success'   => true,
+                'url'       => 'uploads/' . $productType . '/' . $campaignID . '/' . $webmName,
+                'converted' => true,
+                'format'    => 'webm',
+                'original'  => 'mov'
+            ]);
+        } else {
+            echo json_encode([
+                'success'        => false,
+                'error'          => 'MOV conversion failed',
+                'ffmpeg_output'  => $output
+            ]);
+        }
+        exit;
+    }
+
+    /* Any other video format — reject cleanly */
+    echo json_encode([
+        'success' => false,
+        'error'   => 'Unsupported video format: ' . $ext . '. Please use MP4, WebM, or MOV.'
+    ]);
     exit;
 }
-
-// Non-MP4 video — convert with ffmpeg
-$tempPath = $uploadDir . uniqid('tmp_', true) . '.' . $ext;
-if (!move_uploaded_file($file['tmp_name'], $tempPath)) {
-    fail('Could not save the uploaded file', 500);
-}
-
-$ffmpeg = '/usr/local/bin/ffmpeg';
-
-/* Check available encoders */
-$encoders = shell_exec($ffmpeg . ' -encoders 2>&1');
-$hasVP8  = strpos($encoders, 'libvpx ') !== false;
-$hasVP9  = strpos($encoders, 'libvpx-vp9') !== false;
-
-$converted = false;
-$output    = '';
-$outName   = '';
-$outPath   = '';
-$codec     = '';
-
-/* Try VP8 → .webm first (best Chrome support) */
-if ($hasVP8) {
-    $outName = uniqid('video_') . '.webm';
-    $outPath = $uploadDir . $outName;
-    $codec   = 'vp8';
-
-    $cmd = $ffmpeg
-        . ' -y'
-        . ' -i ' . escapeshellarg($tempPath)
-        . ' -c:v libvpx'
-        . ' -crf 10'
-        . ' -b:v 1M'
-        . ' -c:a libvorbis'
-        . ' ' . escapeshellarg($outPath)
-        . ' 2>&1';
-
-    $output = shell_exec($cmd);
-
-    if (file_exists($outPath) && filesize($outPath) > 0) {
-        $converted = true;
-    } else {
-        if (file_exists($outPath)) unlink($outPath);
-    }
-}
-
-/* Try VP9 → .webm if VP8 failed or unavailable */
-if (!$converted && $hasVP9) {
-    $outName = uniqid('video_') . '.webm';
-    $outPath = $uploadDir . $outName;
-    $codec   = 'vp9';
-
-    $cmd = $ffmpeg
-        . ' -y'
-        . ' -i ' . escapeshellarg($tempPath)
-        . ' -c:v libvpx-vp9'
-        . ' -crf 30'
-        . ' -b:v 1M'
-        . ' -c:a libvorbis'
-        . ' ' . escapeshellarg($outPath)
-        . ' 2>&1';
-
-    $output = shell_exec($cmd);
-
-    if (file_exists($outPath) && filesize($outPath) > 0) {
-        $converted = true;
-    } else {
-        if (file_exists($outPath)) unlink($outPath);
-    }
-}
-
-/* Fall back to mpeg4 → .mp4 */
-if (!$converted) {
-    $outName = uniqid('video_', true) . '.mp4';
-    $outPath = $uploadDir . $outName;
-    $codec   = 'mpeg4';
-
-    $cmd = $ffmpeg
-        . ' -y'
-        . ' -i ' . escapeshellarg($tempPath)
-        . ' -c:v mpeg4'
-        . ' -q:v 5'
-        . ' -c:a aac'
-        . ' -b:a 128k'
-        . ' -movflags +faststart'
-        . ' ' . escapeshellarg($outPath)
-        . ' 2>&1';
-
-    $output = shell_exec($cmd);
-
-    if (file_exists($outPath) && filesize($outPath) > 0) {
-        $converted = true;
-    }
-}
-
-// Log ffmpeg output for debugging
-file_put_contents($debugLog,
-    date('Y-m-d H:i:s') . " FFMPEG\n"
-    . "CODEC: $codec\n"
-    . "CMD: $cmd\n"
-    . "OUTPUT: $output\n"
-    . "HAS_VP8: " . ($hasVP8 ? 'true' : 'false') . "\n"
-    . "HAS_VP9: " . ($hasVP9 ? 'true' : 'false') . "\n"
-    . "---\n",
-    FILE_APPEND
-);
-
-if ($converted) {
-    unlink($tempPath);
-    echo json_encode([
-        'success'   => true,
-        'url'       => $urlPrefix . $outName,
-        'converted' => true,
-        'codec'     => $codec
-    ]);
-} else {
-    /* Conversion failed — return detailed error info */
-    if (file_exists($outPath)) unlink($outPath);
-    if (file_exists($tempPath)) unlink($tempPath);
-    echo json_encode([
-        'success'        => false,
-        'error'          => 'Video conversion failed',
-        'ffmpeg_cmd'     => $cmd,
-        'ffmpeg_output'  => $output,
-        'input_exists'   => file_exists($tempPath),
-        'output_exists'  => file_exists($outPath),
-        'php_user'       => get_current_user(),
-        'upload_dir'     => $uploadDir,
-        'has_vp8'        => $hasVP8,
-        'has_vp9'        => $hasVP9
-    ]);
-}
-exit;
