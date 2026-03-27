@@ -656,7 +656,7 @@
     <div class="ghostover-bg" onclick="closeGhostover()"></div>
     <div class="ghostover-content">
       <button class="ghostover-close" onclick="closeGhostover()">✕</button>
-      <img class="ghostover-img" id="ghostover-img" src="" alt="">
+      <video id="ghostover-video" class="ghostover-img" playsinline muted autoplay loop style="width:100%;display:block;border-radius:12px;"></video>
     </div>
   </div>
 
@@ -906,7 +906,10 @@ function initCarouselDrag() {
 
 // ─── GHOSTOVER ───────────────────────────────────────────────────────
 function closeGhostover() {
-  document.getElementById('ghostover').classList.remove('visible');
+  var g = document.getElementById('ghostover');
+  var v = document.getElementById('ghostover-video');
+  if (v) { v.pause(); v.currentTime = 0; }
+  if (g) g.classList.remove('visible');
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────
@@ -1070,21 +1073,28 @@ async function init() {
     strip.appendChild(card);
   });
 
-  // Ghostover
+  // Ghostover — priority: 1) campaign JSON, 2) URL params
   var ghostoverURL = p.ghostoverURL || '';
   if (ghostoverURL) {
     setTimeout(function() {
       var g = document.getElementById('ghostover');
-      var img = document.getElementById('ghostover-img');
-      if (g && img) {
-        img.src = ghostoverURL;
-        img.onload = function() {
+      var video = document.getElementById('ghostover-video');
+      if (!g || !video) return;
+
+      video.src = ghostoverURL;
+      video.load();
+
+      video.addEventListener('canplay', function() {
+        g.classList.add('visible');
+        video.play();
+      }, { once: true });
+
+      /* Fallback: show after 1.5s even if canplay never fires */
+      setTimeout(function() {
+        if (!g.classList.contains('visible')) {
           g.classList.add('visible');
-        };
-        img.onerror = function() {
-          /* silently fail if image missing */
-        };
-      }
+        }
+      }, 1500);
     }, 800);
   }
 }
