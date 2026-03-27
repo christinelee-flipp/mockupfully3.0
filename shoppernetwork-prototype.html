@@ -236,6 +236,7 @@ var PUBLISHER_DOMAINS = {
 function initCarousel() {
   var track = document.getElementById('carousel-track');
   var slider = document.getElementById('carousel-slider');
+  var rect = document.getElementById('carousel-rect');
   if (!track) return;
   var slides = track.querySelectorAll('.carousel-slide');
   var totalSlides = slides.length;
@@ -251,6 +252,9 @@ function initCarousel() {
   for (var i = 0; i < totalSlides; i++) {
     var dot = document.createElement('div');
     dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+    if (i === 0) dot.style.marginLeft = '16px';
+    if (i === totalSlides - 1) dot.style.marginRight = '16px';
+    if (i >= 10) dot.style.display = 'none';
     slider.appendChild(dot);
   }
 
@@ -261,10 +265,47 @@ function initCarousel() {
     }
   }
 
+  function updateArrows() {
+    var prev = rect.querySelector('.yoc-arrow-prev');
+    var next = rect.querySelector('.yoc-arrow-next');
+    if (!prev || !next) return;
+    prev.style.display = currentSlide === 0 ? 'none' : 'flex';
+    next.style.display = currentSlide === totalSlides - 1 ? 'none' : 'flex';
+  }
+
   function snapToSlide() {
     track.style.transition = 'transform 0.35s ease';
     track.style.transform = 'translateX(-' + SLIDE_OFFSETS[currentSlide] + 'px)';
     updateDots();
+    updateArrows();
+  }
+
+  /* Overlay arrows */
+  if (totalSlides > 1 && rect) {
+    var existingArrows = rect.querySelectorAll('.yoc-arrow');
+    existingArrows.forEach(function(a) { a.remove(); });
+
+    var arrowStyle = 'position:absolute;top:50%;transform:translateY(-50%);z-index:10;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.4);border:4px solid #ffffff;color:#ffffff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;font-weight:800;-webkit-tap-highlight-color:transparent;box-sizing:border-box;';
+
+    var prevArrow = document.createElement('div');
+    prevArrow.className = 'yoc-arrow yoc-arrow-prev';
+    prevArrow.innerHTML = '&#8249;';
+    prevArrow.style.cssText = arrowStyle + 'left:16px;display:none;';
+
+    var nextArrow = document.createElement('div');
+    nextArrow.className = 'yoc-arrow yoc-arrow-next';
+    nextArrow.innerHTML = '&#8250;';
+    nextArrow.style.cssText = arrowStyle + 'right:16px;';
+
+    rect.appendChild(prevArrow);
+    rect.appendChild(nextArrow);
+
+    prevArrow.addEventListener('click', function() {
+      if (currentSlide > 0) { currentSlide--; snapToSlide(); }
+    });
+    nextArrow.addEventListener('click', function() {
+      if (currentSlide < totalSlides - 1) { currentSlide++; snapToSlide(); }
+    });
   }
 
   var isDragging = false, startX = 0, dragOffset = 0;
