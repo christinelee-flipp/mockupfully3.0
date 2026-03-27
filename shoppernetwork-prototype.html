@@ -157,6 +157,94 @@
     background: rgba(255,255,255,1);
   }
 
+  /* ── OUTBRAIN EXPERIENCE ── */
+  .ob-container {
+    width: 375px;
+    height: 554px;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    overflow: hidden;
+  }
+  .ob-slides-area {
+    width: 375px;
+    height: 530px;
+    flex-shrink: 0;
+    position: relative;
+    background: white;
+    overflow: hidden;
+  }
+  .ob-slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: white;
+  }
+  .ob-slide.active { display: flex; }
+  .ob-slide img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+    user-select: none;
+    pointer-events: none;
+  }
+  .ob-nav {
+    width: 375px;
+    height: 34px;
+    flex-shrink: 0;
+    background: rgba(0,0,0,0.24);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+  }
+  .ob-arrow {
+    width: 22px;
+    height: 22px;
+    border: none;
+    background: transparent;
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+    opacity: 1;
+  }
+  .ob-arrow:disabled { opacity: 0.3; }
+  .ob-dots {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+    padding: 0 8px;
+  }
+  .ob-dot {
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ob-dot-inner {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.4);
+    transition: background 0.2s;
+  }
+  .ob-dot.active .ob-dot-inner {
+    background: rgba(255,255,255,1);
+  }
+
   /* ── SAFARI FOOTER ── */
   .safari-footer {
     width: 375px;
@@ -452,16 +540,149 @@ function isPdfUrl(url) {
   return url.toLowerCase().endsWith('.pdf');
 }
 
+// ── OUTBRAIN EXPERIENCE ───────────────────────────────────────────
+function buildOutbrainBox(images) {
+  var container = document.createElement('div');
+  container.className = 'ob-container';
+
+  var slidesArea = document.createElement('div');
+  slidesArea.className = 'ob-slides-area';
+
+  images.forEach(function(src, i) {
+    var slide = document.createElement('div');
+    slide.className = 'ob-slide' + (i === 0 ? ' active' : '');
+    var img = document.createElement('img');
+    img.src = src;
+    img.alt = 'Page ' + (i + 1);
+    img.draggable = false;
+    slide.appendChild(img);
+    slidesArea.appendChild(slide);
+  });
+  container.appendChild(slidesArea);
+
+  var nav = document.createElement('div');
+  nav.className = 'ob-nav';
+
+  var btnPrev = document.createElement('button');
+  btnPrev.className = 'ob-arrow';
+  btnPrev.textContent = '\u2039';
+  btnPrev.disabled = true;
+
+  var dotsWrap = document.createElement('div');
+  dotsWrap.className = 'ob-dots';
+  images.forEach(function(_, i) {
+    var dot = document.createElement('div');
+    dot.className = 'ob-dot' + (i === 0 ? ' active' : '');
+    var inner = document.createElement('div');
+    inner.className = 'ob-dot-inner';
+    dot.appendChild(inner);
+    dotsWrap.appendChild(dot);
+  });
+
+  var btnNext = document.createElement('button');
+  btnNext.className = 'ob-arrow';
+  btnNext.textContent = '\u203A';
+  if (images.length <= 1) btnNext.disabled = true;
+
+  nav.appendChild(btnPrev);
+  nav.appendChild(dotsWrap);
+  nav.appendChild(btnNext);
+  container.appendChild(nav);
+
+  var current = 0;
+  var total = images.length;
+  var slides = slidesArea.querySelectorAll('.ob-slide');
+  var dots = dotsWrap.querySelectorAll('.ob-dot');
+
+  function goTo(idx) {
+    if (idx < 0 || idx >= total) return;
+    slides[current].classList.remove('active');
+    dots[current].classList.remove('active');
+    current = idx;
+    slides[current].classList.add('active');
+    dots[current].classList.add('active');
+    btnPrev.disabled = current === 0;
+    btnNext.disabled = current === total - 1;
+  }
+
+  btnPrev.addEventListener('click', function() { goTo(current - 1); });
+  btnNext.addEventListener('click', function() { goTo(current + 1); });
+
+  var txStart = 0;
+  slidesArea.addEventListener('touchstart', function(e) {
+    txStart = e.touches[0].clientX;
+  }, { passive: true });
+  slidesArea.addEventListener('touchend', function(e) {
+    var diff = txStart - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) goTo(current + 1);
+      else goTo(current - 1);
+    }
+  }, { passive: true });
+
+  var mxStart = 0;
+  var dragging = false;
+  slidesArea.addEventListener('mousedown', function(e) {
+    mxStart = e.clientX;
+    dragging = true;
+  });
+  window.addEventListener('mouseup', function(e) {
+    if (!dragging) return;
+    dragging = false;
+    var diff = mxStart - e.clientX;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) goTo(current + 1);
+      else goTo(current - 1);
+    }
+  });
+
+  return container;
+}
+
+// ── RENDER CAROUSEL BOX BY EXPERIENCE ────────────────────────────
+function renderCarouselBox(imageUrls, experience) {
+  var box = document.querySelector('.carousel-box');
+  if (!box) return;
+
+  if (experience === 'outbrain') {
+    // Clear existing YOC content
+    box.innerHTML = '';
+    var obBox = buildOutbrainBox(imageUrls);
+    box.appendChild(obBox);
+  } else {
+    // YOC: build slides in existing track, then init carousel
+    var track = document.getElementById('carousel-track');
+    track.innerHTML = '';
+    imageUrls.forEach(function(src) {
+      var slide = document.createElement('div');
+      slide.className = 'carousel-slide';
+      var img = document.createElement('img');
+      img.src = src;
+      img.alt = 'Flyer page';
+      img.draggable = false;
+      slide.appendChild(img);
+      track.appendChild(slide);
+    });
+    initCarousel();
+  }
+}
+
 // ── DYNAMIC LOADING ───────────────────────────────────────────────
 (function () {
   var params = new URLSearchParams(window.location.search);
   var id = params.get('id');
+  var experience = (params.get('experience') || 'yoc').toLowerCase();
 
   if (id) {
     fetch('api/get.php?id=' + encodeURIComponent(id))
       .then(function (res) { return res.json(); })
       .then(function (data) {
         if (!data) return initCarousel();
+
+        // Use experience from data if not in URL, fallback to 'yoc'
+        if (!params.get('experience') && data.experience) {
+          experience = data.experience.toLowerCase();
+        }
 
         var loc = data.location || 'AT';
         var pub = data.publisher || 'kurier';
@@ -481,33 +702,64 @@ function isPdfUrl(url) {
         }
 
         if (urls.length > 0) {
-          var track = document.getElementById('carousel-track');
-          track.innerHTML = '';
-          var slideWidth = 375; // match phone design width
-
-          // Process each URL sequentially — PDFs expand to multiple slides
-          var chain = Promise.resolve();
-          urls.forEach(function (url) {
-            chain = chain.then(function () {
-              if (isPdfUrl(url) && window.pdfjsLib) {
-                return renderPdfSlides(url, track, slideWidth);
-              } else {
-                var slide = document.createElement('div');
-                slide.className = 'carousel-slide';
-                var img = document.createElement('img');
-                img.src = url;
-                img.alt = 'Flyer page';
-                img.draggable = false;
-                slide.appendChild(img);
-                track.appendChild(slide);
-                return Promise.resolve();
-              }
+          if (experience === 'outbrain') {
+            // Outbrain: expand PDFs first, then render
+            var allImages = [];
+            var chain = Promise.resolve();
+            urls.forEach(function(url) {
+              chain = chain.then(function() {
+                if (isPdfUrl(url) && window.pdfjsLib) {
+                  return pdfjsLib.getDocument(url).promise.then(function(pdf) {
+                    var pages = [];
+                    for (var p = 1; p <= pdf.numPages; p++) pages.push(p);
+                    return pages.reduce(function(c, pageNum) {
+                      return c.then(function() {
+                        return pdf.getPage(pageNum).then(function(page) {
+                          return renderPdfPage(page, 375).then(function(img) {
+                            allImages.push(img.src);
+                          });
+                        });
+                      });
+                    }, Promise.resolve());
+                  });
+                } else {
+                  allImages.push(url);
+                  return Promise.resolve();
+                }
+              });
             });
-          });
+            chain.then(function() {
+              renderCarouselBox(allImages, 'outbrain');
+            });
+          } else {
+            // YOC: process PDFs into track slides, then init
+            var track = document.getElementById('carousel-track');
+            track.innerHTML = '';
+            var slideWidth = 375;
 
-          chain.then(function () {
-            initCarousel();
-          });
+            var chain = Promise.resolve();
+            urls.forEach(function (url) {
+              chain = chain.then(function () {
+                if (isPdfUrl(url) && window.pdfjsLib) {
+                  return renderPdfSlides(url, track, slideWidth);
+                } else {
+                  var slide = document.createElement('div');
+                  slide.className = 'carousel-slide';
+                  var img = document.createElement('img');
+                  img.src = url;
+                  img.alt = 'Flyer page';
+                  img.draggable = false;
+                  slide.appendChild(img);
+                  track.appendChild(slide);
+                  return Promise.resolve();
+                }
+              });
+            });
+
+            chain.then(function () {
+              initCarousel();
+            });
+          }
         } else {
           initCarousel();
         }

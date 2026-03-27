@@ -898,7 +898,8 @@ function renderTable(campaigns) {
 
     let actions = '';
     if (sn) {
-      const urlPath = 'shoppernetwork-prototype.html?id=' + encodeURIComponent(c.campaignID);
+      const snExp = c.experience || 'yoc';
+      const urlPath = 'shoppernetwork-prototype.html?id=' + encodeURIComponent(c.campaignID) + '&experience=' + encodeURIComponent(snExp);
       actions = `
         <button class="btn-action btn-open" onclick="window.open('${esc(urlPath)}','_blank')">Preview</button>
         <button class="btn-action btn-copy" onclick="openURLModal('${esc(urlPath)}','${esc(c.campaignName)}')">URL</button>
@@ -962,7 +963,8 @@ function renderCards(campaigns) {
 
     let primaryActions;
     if (sn) {
-      primaryActions = `<button class="btn-action btn-open" onclick="window.open('shoppernetwork-prototype.html?id=${esc(c.campaignID)}','_blank')">Preview</button>
+      const snExp2 = c.experience || 'yoc';
+      primaryActions = `<button class="btn-action btn-open" onclick="window.open('shoppernetwork-prototype.html?id=${esc(c.campaignID)}&experience=${esc(snExp2)}','_blank')">Preview</button>
          <button class="btn-action btn-edit" onclick="window.location.href='shoppernetwork-form.html?id=${esc(c.campaignID)}'">Edit</button>`;
     } else if (c2g) {
       primaryActions = `<button class="btn-action btn-open" onclick="openPreviewDialog('${esc(c.campaignID)}','${esc(c.campaignName)}')">Preview</button>
@@ -973,7 +975,7 @@ function renderCards(campaigns) {
     }
 
     let urlPath;
-    if (sn) urlPath = 'shoppernetwork-prototype.html?id=' + esc(c.campaignID);
+    if (sn) urlPath = 'shoppernetwork-prototype.html?id=' + esc(c.campaignID) + '&experience=' + esc(c.experience || 'yoc');
     else if (c2g) urlPath = 'click2go-prototype.html?id=' + esc(c.campaignID) + '&viewer=marketplace';
     else urlPath = 'domination-prototype.html?id=' + esc(c.campaignID);
 

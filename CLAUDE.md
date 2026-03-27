@@ -261,6 +261,7 @@ submittedAt
 campaignID        — "shoppernetwork-YYYYMMDDHHMMSS"
 productType       — "ShopperNetwork"
 campaignName, location, clientName,
+experience — "yoc" or "outbrain",
 publisher,
 image1–image9,
 submittedAt

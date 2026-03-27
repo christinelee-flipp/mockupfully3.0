@@ -289,7 +289,18 @@
     </div>
   </div>
 
-  <!-- 2. Publisher -->
+  <!-- 2. Experience -->
+  <div class="form-section">
+    <div class="section-title form-section-label">Experience</div>
+    <div class="toggle-group" style="display:flex;border:1.5px solid var(--light);border-radius:6px;overflow:hidden;width:fit-content;margin-bottom:8px">
+      <button type="button" class="toggle-btn mode-btn active" data-value="yoc" onclick="setExperience('yoc')">YOC</button>
+      <button type="button" class="toggle-btn mode-btn" data-value="outbrain" onclick="setExperience('outbrain')">Outbrain</button>
+    </div>
+    <p style="font-size:12px;color:var(--mid);margin-top:8px">YOC: horizontal scrolling carousel embedded in article.<br>Outbrain: full-page flyer with prev/next navigation.</p>
+    <input type="hidden" id="experience" name="experience" value="yoc">
+  </div>
+
+  <!-- 3. Publisher -->
   <div class="form-section">
     <div class="section-title form-section-label">Publisher</div>
     <p style="font-size:12px;color:var(--mid);margin-bottom:16px;">Choose the news site where the flyer carousel will appear.</p>
@@ -346,6 +357,13 @@ const PLACEHOLDER_SVG = '<svg class="placeholder-icon" viewBox="0 0 24 24" fill=
 let editMode = false;
 let editCampaignID = null;
 let generatedURL = '';
+
+function setExperience(val) {
+  document.getElementById('experience').value = val;
+  document.querySelectorAll('.toggle-btn[data-value]').forEach(function(btn) {
+    btn.classList.toggle('active', btn.dataset.value === val);
+  });
+}
 
 // ─── PUBLISHERS ──────────────────────────────────────────────────
 const PUBLISHERS = {
@@ -619,6 +637,7 @@ function collectData() {
     campaignName: get('campaignName'),
     location: get('location'),
     clientName: get('clientName'),
+    experience: get('experience') || 'yoc',
     publisher: get('publisher'),
     image1: get('image1'),
     image2: get('image2'),
@@ -665,7 +684,7 @@ async function submitForm() {
     });
     if (!res.ok) throw new Error('Server returned ' + res.status);
 
-    generatedURL = 'shoppernetwork-prototype.html?id=' + encodeURIComponent(data.campaignID);
+    generatedURL = 'shoppernetwork-prototype.html?id=' + encodeURIComponent(data.campaignID) + '&experience=' + encodeURIComponent(data.experience || 'yoc');
 
     document.getElementById('form-card').style.display = 'none';
     const panel = document.getElementById('success-panel');
@@ -710,6 +729,10 @@ function prefillForm(c) {
   set('campaignName', c.campaignName);
   set('location', c.location);
   set('clientName', c.clientName);
+
+  if (c.experience) {
+    setExperience(c.experience);
+  }
 
   // Update publisher dropdown then set value
   updatePublishers(c.location);
