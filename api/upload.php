@@ -77,10 +77,11 @@ $allowedVideos = [
     'video/quicktime' => 'mov',
 ];
 
-$videoExtensions = ['mp4', 'webm', 'mov'];
+$videoExtensions = ['mp4', 'webm', 'mov', 'm4v'];
 
 $isImage = isset($allowedImages[$mime]);
 $isVideo = strstr($mime, 'video/') !== false || in_array($ext, $videoExtensions);
+$alreadyMp4 = ($ext === 'mp4' || $mime === 'video/mp4');
 
 if (!$isImage && !$isVideo) {
     fail('Only JPG, PNG, GIF, WEBP, SVG, PDF, MP4, MOV, and WEBM files are allowed');
@@ -144,7 +145,7 @@ if ($isImage) {
 // ── VIDEO UPLOAD ────────────────────────────────────────────────────
 
 // If already MP4, save directly without conversion
-if ($mime === 'video/mp4' || $ext === 'mp4') {
+if ($alreadyMp4) {
     $filename = uniqid('video_', true) . '.mp4';
     $dest     = $uploadDir . $filename;
 
@@ -168,28 +169,24 @@ $mp4Path = $uploadDir . $mp4Name;
 
 $ffmpeg = '/usr/local/bin/ffmpeg';
 
-/* Build a robust conversion command that handles
-   VP8, VP9, H.264 input and Opus/AAC/MP3 audio.
-   -y         = overwrite output without asking
-   -i         = input file
-   -c:v libx264 = encode video as H.264
-   -preset fast = fast encoding, good quality
-   -crf 23    = quality (18=high, 28=low, 23=default)
-   -c:a aac   = encode audio as AAC
-   -b:a 128k  = audio bitrate
-   -movflags +faststart = web-optimised MP4
-   -pix_fmt yuv420p = maximum compatibility
-   2>&1       = capture stderr for debugging */
+/* Convert to MP4 using mpeg4 encoder (MPEG-4 Part 2).
+   libx264 is NOT available on this server.
+   -y              = overwrite output without asking
+   -c:v mpeg4      = use MPEG-4 Part 2 encoder (available)
+   -q:v 5          = quality 1-31, lower=better, 5=good balance
+   -c:a aac        = AAC audio (confirmed available)
+   -b:a 128k       = 128kbps audio bitrate
+   -movflags +faststart = web-optimised, starts playing
+                    before fully downloaded */
 
 $cmd = $ffmpeg
-    . ' -y -i ' . escapeshellarg($tempPath)
-    . ' -c:v libx264'
-    . ' -preset fast'
-    . ' -crf 23'
+    . ' -y'
+    . ' -i ' . escapeshellarg($tempPath)
+    . ' -c:v mpeg4'
+    . ' -q:v 5'
     . ' -c:a aac'
     . ' -b:a 128k'
     . ' -movflags +faststart'
-    . ' -pix_fmt yuv420p'
     . ' ' . escapeshellarg($mp4Path)
     . ' 2>&1';
 
@@ -213,16 +210,18 @@ if (file_exists($mp4Path) && filesize($mp4Path) > 0) {
         'converted' => true
     ]);
 } else {
-    /* Conversion failed — return the ffmpeg output
-       so we can debug exactly what went wrong */
+    /* Conversion failed — return detailed error info */
     if (file_exists($mp4Path)) unlink($mp4Path);
     if (file_exists($tempPath)) unlink($tempPath);
     echo json_encode([
-        'success'       => false,
-        'error'         => 'Video conversion failed',
-        'ffmpeg_output' => $output,
-        'input_file'    => $tempPath,
-        'output_file'   => $mp4Path
+        'success'        => false,
+        'error'          => 'Video conversion failed',
+        'ffmpeg_cmd'     => $cmd,
+        'ffmpeg_output'  => $output,
+        'input_exists'   => file_exists($tempPath),
+        'output_exists'  => file_exists($mp4Path),
+        'php_user'       => get_current_user(),
+        'upload_dir'     => $uploadDir
     ]);
 }
 exit;
