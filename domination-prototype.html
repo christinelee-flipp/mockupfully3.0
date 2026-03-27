@@ -955,6 +955,14 @@ async function init() {
   // Fallback to URL params
   if (!p) p = getParams();
 
+  // Resolve uploaded asset paths — strips leading slashes, passes http URLs through
+  function resolveAssetURL(url) {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    if (url.startsWith('/')) url = url.replace(/^\/+/, '');
+    return url;
+  }
+
   const C = COUNTRIES[p.country] || COUNTRIES.IT;
   const phone = document.getElementById('phone');
 
@@ -1001,7 +1009,7 @@ async function init() {
   if (p.clientLogoURL) {
     logoPlaceholder.style.display = 'none';
     const img = document.createElement('img');
-    img.src = p.clientLogoURL;
+    img.src = resolveAssetURL(p.clientLogoURL);
     img.alt = 'Logo';
     img.onerror = () => {
       img.style.display = 'none';
@@ -1012,6 +1020,7 @@ async function init() {
 
   // Images
   const imgs = [p.Img01URL, p.Img02URL, p.Img03URL, p.Img04URL, p.Img05URL, p.Img06URL]
+    .map(u => resolveAssetURL(u))
     .filter(u => u && u.trim().length > 0);
 
   const isCarousel = p.templateType.toLowerCase() === 'carousel' && imgs.length > 1;
@@ -1074,13 +1083,8 @@ async function init() {
   });
 
   // Ghostover — priority: 1) campaign JSON, 2) URL params
-  var ghostoverURL = p.ghostoverURL || '';
+  var ghostoverURL = resolveAssetURL(p.ghostoverURL || '');
   console.log('ghostoverURL:', ghostoverURL);
-
-  // Fix relative paths from legacy uploads
-  if (ghostoverURL && !ghostoverURL.startsWith('http') && !ghostoverURL.startsWith('/')) {
-    ghostoverURL = '/' + ghostoverURL;
-  }
 
   if (ghostoverURL) {
     setTimeout(function() {
