@@ -1,14 +1,20 @@
-# SFTP credentials — never commit
+# SFTP config — contains credentials
 .vscode/sftp.json
 
-# Temporary debug files
+# GitHub Actions secrets are in GitHub UI
+# never store credentials in files
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temp debug files
 ffmpeg-test.php
 debug-log.php
 upload-check.php
 encoder-test.php
 ffmpeg-direct-test.php
 /tmp/
-
-# OS files
-.DS_Store
-Thumbs.db

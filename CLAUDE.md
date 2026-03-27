@@ -71,35 +71,49 @@ The prototype URL is the data contract between `domination-form.html` and `domin
 
 ## Deployment
 
-### Auto-sync (staging)
-The VS Code SFTP extension (Natizyskunk) is configured to auto-upload to staging on every file save. No manual FTP needed.
+### Staging (automatic)
+Push to the staging branch → GitHub Actions
+automatically deploys to Staging-Mockupfully3.0
 
-Config: .vscode/sftp.json (gitignored -- contains credentials. See .vscode/sftp.json.example for the structure.)
+  git add .
+  git commit -m "your message"
+  git push origin staging
 
-Active profile: staging (uploadOnSave: true)
+GitHub Actions workflow:
+  .github/workflows/deploy-staging.yml
 
-Staging URL: https://designlab.shopfully.com/Staging-Mockupfully3.0/
+Staging URL:
+  https://designlab.shopfully.com/Staging-Mockupfully3.0/
 
-### Manual deploy (production)
-Production deployment is intentionally manual. To deploy to production:
-1. Open VS Code Command Palette (Cmd+Shift+P)
-2. Type: SFTP: Switch Profile -> select Production
-3. Right-click the file or folder -> Upload
-4. Switch back to Staging profile when done
+### Production (manual — intentional)
+Production deploys are done manually by merging
+staging into main and pushing:
 
-Production URL: https://designlab.shopfully.com/Mockupfully3.0/
+  git checkout main
+  git merge staging
+  git push origin main
 
-### Ignored files (never uploaded)
-These files are excluded from FTP sync:
-  .vscode/, .git/, .gitignore, node_modules/,
-  *.md files, .DS_Store, *.log,
+Production URL:
+  https://designlab.shopfully.com/Mockupfully3.0/
+
+Note: Production auto-deploy via GitHub Actions
+can be added later by creating
+.github/workflows/deploy-production.yml
+
+### GitHub Secrets required
+These must be set in the GitHub repository
+Settings → Secrets → Actions:
+
+  FTP_SERVER      = it31.siteground.eu
+  FTP_USERNAME    = c.lee@designlab.shopfully.com
+  FTP_PASSWORD    = [FTP password]
+  FTP_STAGING_PATH = /designlab.shopfully.com/public_html/Staging-Mockupfully3.0/
+
+### Files excluded from deploy
+  .git/, .vscode/, node_modules/
+  .DS_Store, *.log
   Any temporary PHP debug files
-
-### Planned: GitHub Actions (after JS refactor)
-- Branch: staging -> auto-deploys to Staging-Mockupfully3.0/
-- Branch: main -> auto-deploys to Mockupfully3.0/
-- Config will live at: .github/workflows/deploy.yml
-- FTP credentials stored as GitHub Secrets
+  .gitkeep files
 
 ## Architecture Rules
 
