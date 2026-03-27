@@ -1081,23 +1081,50 @@ async function init() {
   // Ghostover — uses p which is already set from either fetch or URL params
   var ghostoverURL = p.ghostoverURL || '';
 
+  console.log('ghostover check:',
+    'ghostoverURL=', ghostoverURL,
+    'p.ghostoverURL=', p.ghostoverURL);
+
   if (ghostoverURL) {
+    console.log('ghostover: starting 800ms timer');
     setTimeout(function() {
+      console.log('ghostover: timer fired');
+
       var g = document.getElementById('ghostover');
       var video = document.getElementById('ghostover-video');
-      if (!g || !video) return;
 
-      video.src = resolveURL(ghostoverURL);
+      console.log('ghostover: g=', g, 'video=', video);
+
+      if (!g || !video) {
+        console.log('ghostover: MISSING ELEMENTS');
+        return;
+      }
+
+      var resolvedURL = resolveURL(ghostoverURL);
+      console.log('ghostover: resolvedURL=', resolvedURL);
+
+      video.src = resolvedURL;
       video.load();
+
+      console.log('ghostover: adding visible class');
       g.classList.add('visible');
+      console.log('ghostover: g classes=', g.className);
+      console.log('ghostover: g display=',
+        window.getComputedStyle(g).display);
 
       var playPromise = video.play();
       if (playPromise !== undefined) {
-        playPromise.catch(function(err) {
-          console.log('Autoplay blocked:', err.message);
-        });
+        playPromise
+          .then(function() {
+            console.log('ghostover: video playing');
+          })
+          .catch(function(err) {
+            console.log('ghostover: play blocked:', err.message);
+          });
       }
     }, 800);
+  } else {
+    console.log('ghostover: no URL set, skipping');
   }
 }
 
