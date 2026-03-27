@@ -71,22 +71,35 @@ The prototype URL is the data contract between `domination-form.html` and `domin
 
 ## Deployment
 
-### Current workflow (temporary)
-Files are manually uploaded via FTP using the VS Code SFTP extension. Always deploy to staging first and test before touching production.
+### Auto-sync (staging)
+The VS Code SFTP extension (Natizyskunk) is configured to auto-upload to staging on every file save. No manual FTP needed.
 
-### Planned workflow (GitHub Actions -- to be set up after JS refactor is complete)
+Config: .vscode/sftp.json (gitignored -- contains credentials. See .vscode/sftp.json.example for the structure.)
+
+Active profile: staging (uploadOnSave: true)
+
+Staging URL: https://designlab.shopfully.com/Staging-Mockupfully3.0/
+
+### Manual deploy (production)
+Production deployment is intentionally manual. To deploy to production:
+1. Open VS Code Command Palette (Cmd+Shift+P)
+2. Type: SFTP: Switch Profile -> select Production
+3. Right-click the file or folder -> Upload
+4. Switch back to Staging profile when done
+
+Production URL: https://designlab.shopfully.com/Mockupfully3.0/
+
+### Ignored files (never uploaded)
+These files are excluded from FTP sync:
+  .vscode/, .git/, .gitignore, node_modules/,
+  *.md files, .DS_Store, *.log,
+  Any temporary PHP debug files
+
+### Planned: GitHub Actions (after JS refactor)
 - Branch: staging -> auto-deploys to Staging-Mockupfully3.0/
 - Branch: main -> auto-deploys to Mockupfully3.0/
-- Trigger: every git push
-- Claude Code always works on staging branch
-- Merge to main only after staging is verified
-
-When setting up GitHub Actions, the workflow file will live at: .github/workflows/deploy.yml
-
-FTP credentials will be stored as GitHub Secrets:
-  FTP_SERVER, FTP_USERNAME, FTP_PASSWORD, FTP_STAGING_PATH, FTP_PRODUCTION_PATH
-
-Do not set this up yet -- complete the JS refactor first.
+- Config will live at: .github/workflows/deploy.yml
+- FTP credentials stored as GitHub Secrets
 
 ## Architecture Rules
 

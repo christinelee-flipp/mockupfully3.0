@@ -1,0 +1,14 @@
+# SFTP credentials — never commit
+.vscode/sftp.json
+
+# Temporary debug files
+ffmpeg-test.php
+debug-log.php
+upload-check.php
+encoder-test.php
+ffmpeg-direct-test.php
+/tmp/
+
+# OS files
+.DS_Store
+Thumbs.db

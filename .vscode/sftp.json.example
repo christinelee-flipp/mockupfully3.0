@@ -1,0 +1,22 @@
+{
+  "profiles": {
+    "staging": {
+      "host": "designlab.shopfully.com",
+      "protocol": "ftp",
+      "port": 21,
+      "username": "YOUR_FTP_USERNAME",
+      "password": "YOUR_FTP_PASSWORD",
+      "remotePath": "/Staging-Mockupfully3.0",
+      "uploadOnSave": true
+    },
+    "production": {
+      "host": "designlab.shopfully.com",
+      "protocol": "ftp",
+      "port": 21,
+      "username": "YOUR_FTP_USERNAME",
+      "password": "YOUR_FTP_PASSWORD",
+      "remotePath": "/Mockupfully3.0",
+      "uploadOnSave": false
+    }
+  }
+}
