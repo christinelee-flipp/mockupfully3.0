@@ -1078,13 +1078,8 @@ async function init() {
     strip.appendChild(card);
   });
 
-  // Ghostover — priority: 1) campaign JSON, 2) URL params
-  var ghostoverURL = '';
-  if (campaignData && campaignData.ghostoverURL) {
-    ghostoverURL = campaignData.ghostoverURL;
-  } else if (p && p.ghostoverURL) {
-    ghostoverURL = p.ghostoverURL;
-  }
+  // Ghostover — uses p which is already set from either fetch or URL params
+  var ghostoverURL = p.ghostoverURL || '';
 
   if (ghostoverURL) {
     setTimeout(function() {
@@ -1092,24 +1087,14 @@ async function init() {
       var video = document.getElementById('ghostover-video');
       if (!g || !video) return;
 
-      /* Set src and show overlay immediately
-         without waiting for canplay —
-         the video plays as soon as it can */
       video.src = resolveURL(ghostoverURL);
       video.load();
-
-      /* Show overlay immediately — video will
-         start playing once loaded */
       g.classList.add('visible');
 
-      /* Try to play — catch any autoplay
-         policy rejections silently */
       var playPromise = video.play();
       if (playPromise !== undefined) {
         playPromise.catch(function(err) {
           console.log('Autoplay blocked:', err.message);
-          /* Video is still visible, user can
-             tap to play if autoplay is blocked */
         });
       }
     }, 800);
