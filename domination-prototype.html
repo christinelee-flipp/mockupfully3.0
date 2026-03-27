@@ -215,12 +215,17 @@
   }
   .ad-inner {
     position: absolute;
-    top: 24px; left: 24px;
-    width: 327px;
+    top: 24px;
+    left: 0;
+    right: 0;
+    width: 100%;
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 6px;
-    overflow: visible; /* carousel bleeds past this — ad-unit clips at 375px edge */
+    padding: 0 24px;
+    box-sizing: border-box;
+    overflow: visible; /* carousel bleeds past this — ad-unit clips at phone edge */
   }
 
   /* Logo area — 30px tall, full 327px wide */
@@ -262,6 +267,8 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
+    margin-left: auto;
+    margin-right: auto;
   }
   .single-image-wrap .cta-button {
     width: 327px;
@@ -273,10 +280,15 @@
     border-radius: 8px;
     overflow: hidden;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .single-image-area img {
-    width: 100%; height: 100%;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
+    display: block;
   }
 
   /* Carousel — Figma: slides 328px wide, 8px gap, track starts at left:24px.
@@ -288,6 +300,7 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+    align-self: flex-start; /* override center — carousel must left-align for bleed effect */
   }
   .carousel-viewport {
     width: 328px;
